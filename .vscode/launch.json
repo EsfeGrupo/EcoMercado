@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-EcoMercadoApplication<EcoMercado>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "org.esfe.EcoMercadoApplication",
+            "projectName": "EcoMercado",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
