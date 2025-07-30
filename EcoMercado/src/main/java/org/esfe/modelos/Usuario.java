@@ -37,6 +37,12 @@ public class Usuario {
     )
     private List<TarjetaCredito> tarjetas = new ArrayList<>();
 
+    @OneToMany(mappedBy = "usuario", // "usuario" es el nombre del campo en la entidad tarjeta que mapea esta relación
+            fetch = FetchType.LAZY // Cuando cargues un Rol, los Usuarios no se cargarán hasta que los pidas.
+            // LAZY es el valor por defecto para OneToMany y es recomendado para rendimiento.
+    )
+    private List<Blog> blogs = new ArrayList<>();
+
     public Integer getId() {
         return id;
     }
@@ -92,4 +98,13 @@ public class Usuario {
     public void setTarjetas(List<TarjetaCredito> tarjetas) {
         this.tarjetas = tarjetas;
     }
+
+    public List<Blog> getBlogs() {
+        return blogs;
+    }
+
+    public void setBlogs(List<Blog> blogs) {
+        this.blogs = blogs;
+    }
+    
 }
