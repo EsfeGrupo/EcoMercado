@@ -2,7 +2,9 @@ package org.esfe.modelos;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Email;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -15,6 +17,8 @@ public class Usuario {
     @NotBlank(message = "El nombre de usuario es requerido")
     private String nombre;
 
+    @Email
+    @Column(name = "correo", unique = true, nullable = false)
     @NotBlank(message = "El correo de usuario es requerido")
     private String correo;
 
@@ -26,6 +30,12 @@ public class Usuario {
     @ManyToOne(fetch = FetchType.EAGER) // El rol se carga inmediatamente con el usuario
     @JoinColumn(name = "idRol", nullable = false)
     private Rol rol;
+
+    @OneToMany(mappedBy = "usuario", // "usuario" es el nombre del campo en la entidad tarjeta que mapea esta relación
+            fetch = FetchType.LAZY // Cuando cargues un Rol, los Usuarios no se cargarán hasta que los pidas.
+            // LAZY es el valor por defecto para OneToMany y es recomendado para rendimiento.
+    )
+    private List<TarjetaCredito> tarjetas = new ArrayList<>();
 
     public Integer getId() {
         return id;
@@ -73,5 +83,13 @@ public class Usuario {
 
     public void setRol(Rol rol) {
         this.rol = rol;
+    }
+
+    public List<TarjetaCredito> getTarjetas() {
+        return tarjetas;
+    }
+
+    public void setTarjetas(List<TarjetaCredito> tarjetas) {
+        this.tarjetas = tarjetas;
     }
 }
