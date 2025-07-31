@@ -6,5 +6,5 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ITipoPagoRepository extends JpaRepository<TipoPago, Integer> {
-    Page<TipoPago> findByNombreContainingAndDescripcionContaining(String metodopago, String descripcion, Pageable pageable);
+    Page<TipoPago> findBymetodoPagoContainingAndDescripcionContaining(String metodoPago, String descripcion, Pageable pageable);
 }
