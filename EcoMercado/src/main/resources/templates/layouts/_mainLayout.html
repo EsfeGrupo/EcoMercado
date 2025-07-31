@@ -6,106 +6,132 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <title>Sistema de Asistencia</title>
+    <title>Tienda Local</title>
     <link th:href="@{/css/styles.css}" rel="stylesheet" />
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
-    <!-- Navbar Brand-->
-    <a class="navbar-brand ps-3" href="#">ESFE</a>
-    <!-- Sidebar Toggle-->
-    <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
-    <!-- Navbar Search-->
-    <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
-        <div class="input-group">
-            <input class="form-control" type="text" placeholder="Search for..." aria-label="Search for..." aria-describedby="btnNavbarSearch" />
-            <button class="btn btn-primary" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i></button>
-        </div>
-    </form>
-    <!-- Navbar-->
+    <a class="navbar-brand ps-3" href="#">Tienda Local</a>
+    <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+
     <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
         <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
+            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-user fa-fw"></i>
+            </a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                 <div sec:authorize="isAnonymous()">
-                    <li><a class="dropdown-item" th:href="@{/login}">Login</a></li>
+                    <li><a class="dropdown-item" th:href="@{/login}">Iniciar Sesión</a></li>
                 </div>
                 <li><hr class="dropdown-divider" /></li>
                 <div sec:authorize="isAuthenticated()">
-                    <li><a class="dropdown-item" th:href="@{/logout}">Logout</a></li>
+                    <li><a class="dropdown-item" th:href="@{/logout}">Cerrar Sesión</a></li>
                 </div>
             </ul>
         </li>
     </ul>
 </nav>
+
 <div id="layoutSidenav">
     <div id="layoutSidenav_nav">
         <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
             <div class="sb-sidenav-menu">
                 <div class="nav">
-                    <div class="sb-sidenav-menu-heading">Mantenimientos</div>
-                    <div sec:authorize="hasAnyAuthority('admin')">
+                    <div class="sb-sidenav-menu-heading">Gestión</div>
 
+                    <!------------------------------- ADMIN ---------------------------->
+                    <div sec:authorize="hasAuthority('admin')">
                         <a class="nav-link" th:href="@{/usuarios}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                            <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
                             Usuarios
                         </a>
+                        <a class="nav-link" th:href="@{/productos}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-box"></i></div>
+                            Productos
+                        </a>
+                        <a class="nav-link" th:href="@{/categorias}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
+                            Categorías
+                        </a>
+                        <a class="nav-link" th:href="@{/marcas}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-trademark"></i></div>
+                            Marcas
+                        </a>
+                        <a class="nav-link" th:href="@{/ventas}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-shopping-cart"></i></div>
+                            Ventas
+                        </a>
+                        <a class="nav-link" th:href="@{/blog}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-blog"></i></div>
+                            Blog
+                        </a>
+                    </div>
 
-                        <a class="nav-link" th:href="@{/grupos}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-                            Grupos
+                    <!-------------------------------------- VENDEDOR-------------------------------------->
+                    <div sec:authorize="hasAuthority('vendedor')">
+                        <a class="nav-link" th:href="@{/productos}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-box"></i></div>
+                            Mis Productos
                         </a>
-                        <a class="nav-link" th:href="@{/docentes}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-                            Docentes
-                        </a>
-                        <a class="nav-link" th:href="@{/asignaciones}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-                            Docentes-Grupos
+                        <a class="nav-link" th:href="@{/ventas}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+                            Mis Ventas
                         </a>
                     </div>
-                    <div sec:authorize="hasAnyAuthority('admin', 'docente')">
-                        <a class="nav-link" th:href="@{/alumnos}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-                            Alumnos
+
+                    <!-----------------------------------USUARIO (CLIENTE) ----------------------------->
+                    <div sec:authorize="hasAuthority('usuario')">
+                        <a class="nav-link" th:href="@{/catalogo}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-store"></i></div>
+                            Catálogo
+                        </a>
+                        <a class="nav-link" th:href="@{/carrito}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-shopping-basket"></i></div>
+                            Carrito
+                        </a>
+                        <a class="nav-link" th:href="@{/mis-compras}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-receipt"></i></div>
+                            Mis Compras
                         </a>
                     </div>
+
                 </div>
             </div>
             <div class="sb-sidenav-footer">
                 <div sec:authorize="isAuthenticated()" class="small">
-                    Has iniciado como:
-                    <span class="text-light" sec:authentication="name"></span>
+                    Has iniciado como: <span class="text-light" sec:authentication="name"></span>
                 </div>
-                Sistema de Asistencia
+                Tienda Local
             </div>
         </nav>
     </div>
+
     <div id="layoutSidenav_content">
         <main>
             <div class="container-fluid px-4">
-                <!-- Aquí se renderizan las vistas de contenido -->
+                <!-- Aquí se inyectan las vistas -->
                 <div layout:fragment="content">
-                    <p>Changing contents...</p>
+                    <p>Contenido de la tienda...</p>
                 </div>
             </div>
         </main>
         <footer class="py-4 bg-light mt-auto">
             <div class="container-fluid px-4">
                 <div class="d-flex align-items-center justify-content-between small">
-                    <div class="text-muted">Copyright &copy; ESFE - Sistema de Asistencia 2024</div>
+                    <div class="text-muted">© Tienda Local 2025</div>
                     <div>
-                        <a href="#">Privacy Policy</a>
+                        <a href="#">Política de Privacidad</a>
                         &middot;
-                        <a href="#">Terms &amp; Conditions</a>
+                        <a href="#">Términos y Condiciones</a>
                     </div>
                 </div>
             </div>
         </footer>
     </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 <script th:src="@{/js/scripts.js}"></script>
 </body>
