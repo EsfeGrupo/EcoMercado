@@ -1,3 +1,6 @@
+# EcoMercado
+
+## Configuración de la Base de Datos
 --nota ejecutar parte por parte en dbeaver
 CREATE DATABASE IF NOT EXISTS EcoMercadobd;
 
