@@ -11,6 +11,10 @@ public class DetalleVenta {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @ManyToOne
+    @JoinColumn (name = "idVenta", nullable = false)
+    private Venta venta;
+
     @NotNull
     private Integer idProducto;
 
@@ -20,8 +24,8 @@ public class DetalleVenta {
     @NotNull
     private Float precioUnitario;
 
-    @OneToMany(mappedBy = "detalleVenta")
-    private List<Venta> ventas;
+    /*@OneToMany(mappedBy = "detalleVenta")
+    private List<Venta> ventas;*/
 
     // Getters y setters
 
@@ -57,12 +61,12 @@ public class DetalleVenta {
         this.precioUnitario = precioUnitario;
     }
 
-    public List<Venta> getVentas() {
+    /*public List<Venta> getVentas() {
         return ventas;
     }
 
     public void setVentas(List<Venta> ventas) {
         this.ventas = ventas;
-    }
+    }*/
 
 }

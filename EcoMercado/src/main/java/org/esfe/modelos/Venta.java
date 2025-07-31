@@ -3,6 +3,7 @@ package org.esfe.modelos;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 public class Venta {
@@ -16,9 +17,9 @@ public class Venta {
     @JoinColumn(name = "idUsuario", nullable = false)
     private Usuario usuario;
 
-    @ManyToOne
-    @JoinColumn(name = "idDetalleVenta", nullable = false)
-    private DetalleVenta detalleVenta;
+    @OneToMany(mappedBy = "venta")
+    private List<DetalleVenta> detalleventas;
+
 
     private String correlativo;
 
@@ -54,14 +55,6 @@ public class Venta {
 
     public void setIdUsuario(Usuario usuario) {
         this.usuario = usuario;
-    }
-
-    public DetalleVenta getDetalleVenta() {
-        return detalleVenta;
-    }
-
-    public void setDetalleVenta(DetalleVenta detalleVenta) {
-        this.detalleVenta = detalleVenta;
     }
 
     public String getCorrelativo() {
