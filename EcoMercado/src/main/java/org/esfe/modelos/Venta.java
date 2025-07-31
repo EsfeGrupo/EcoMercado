@@ -12,7 +12,9 @@ public class Venta {
     private Integer id;
 
     @NotNull
-    private Integer idUsuario;
+    @ManyToOne
+    @JoinColumn(name = "idUsuario", nullable = false)
+    private Usuario usuario;
 
     @ManyToOne
     @JoinColumn(name = "idDetalleVenta", nullable = false)
@@ -29,11 +31,13 @@ public class Venta {
     private TipoPago tipoPago;
 
     private Byte estado;
-
-    private Integer idTarjeta;
+    
 
     private LocalDateTime fechaEmision;
 
+    @ManyToOne(fetch = FetchType.EAGER) // El rol se carga inmediatamente con el usuario
+    @JoinColumn(name = "idTarjeta", nullable = false)
+    private TarjetaCredito tarjetaCredito;
     // Getters y setters
 
     public Integer getId() {
@@ -44,12 +48,12 @@ public class Venta {
         this.id = id;
     }
 
-    public Integer getIdUsuario() {
-        return idUsuario;
+    public Usuario getIdUsuario() {
+        return usuario;
     }
 
-    public void setIdUsuario(Integer idUsuario) {
-        this.idUsuario = idUsuario;
+    public void setIdUsuario(Usuario usuario) {
+        this.usuario = usuario;
     }
 
     public DetalleVenta getDetalleVenta() {
@@ -100,12 +104,12 @@ public class Venta {
         this.estado = estado;
     }
 
-    public Integer getIdTarjeta() {
-        return idTarjeta;
+    public TarjetaCredito getIdTarjeta() {
+        return tarjetaCredito;
     }
 
-    public void setIdTarjeta(Integer idTarjeta) {
-        this.idTarjeta = idTarjeta;
+    public void setIdTarjeta(TarjetaCredito tarjetaCredito) {
+        this.tarjetaCredito = tarjetaCredito;
     }
 
     public LocalDateTime getFechaEmision() {
