@@ -8,7 +8,7 @@ import java.util.Set;
 @Entity
 public class Vendedor extends Usuario {
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String idVendedor;
 
     @NotBlank(message = "La dirección es requerida")
