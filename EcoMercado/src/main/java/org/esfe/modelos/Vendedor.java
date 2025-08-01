@@ -6,13 +6,22 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-public class Vendedor {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+public class Vendedor extends Usuario {
 
-    @NotBlank(message = "El nombre del vendedor es requerido")
-    private String nombre;
+    @Column(nullable = false, unique = true)
+    private String idVendedor;
+
+    @NotBlank(message = "La dirección es requerida")
+    private String direccion;
+
+    @NotBlank(message = "El teléfono es requerido")
+    private String telefono;
+
+    @NotBlank(message = "El DUI es requerido")
+    private String dui;
+
+    @NotBlank(message = "La ubicación es requerida")
+    private String ubicacion;
 
     @ManyToMany
     @JoinTable(
@@ -22,20 +31,44 @@ public class Vendedor {
     )
     private Set<Producto> productos = new HashSet<>();
 
-    public Integer getId() {
-        return id;
+    public String getIdVendedor() {
+        return idVendedor;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setIdVendedor(String idVendedor) {
+        this.idVendedor = idVendedor;
     }
 
-    public String getNombre() {
-        return nombre;
+    public String getDireccion() {
+        return direccion;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public void setDireccion(String direccion) {
+        this.direccion = direccion;
+    }
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
+    public String getDui() {
+        return dui;
+    }
+
+    public void setDui(String dui) {
+        this.dui = dui;
+    }
+
+    public String getUbicacion() {
+        return ubicacion;
+    }
+
+    public void setUbicacion(String ubicacion) {
+        this.ubicacion = ubicacion;
     }
 
     public Set<Producto> getProductos() {
