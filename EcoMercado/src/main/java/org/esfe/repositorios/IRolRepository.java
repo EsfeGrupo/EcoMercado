@@ -6,5 +6,5 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface IRolRepository extends JpaRepository<Rol, Integer> {
-    Page<Rol> findByNombreContainingAndDescripcionContaining(String nombre,String descripcion,Pageable pageable);
+    Page<Rol> findByNombreContainingIgnoreCaseAndDescripcionContainingIgnoreCase(String nombre, String descripcion, Pageable pageable);
 }
