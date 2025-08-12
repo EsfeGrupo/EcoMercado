@@ -11,6 +11,8 @@ public interface IUsuarioService {
 
     List<Usuario> obtenerTodos();
 
+    Page<Usuario> findByNombreContainingIgnoreCaseAndCorreoContainingIgnoreCaseAndRol_IdOrderByIdDesc(String nombre, String correo, Integer idRol, Pageable pageable);
+
     Usuario obtenerPorId(Integer id);
 
     Usuario crearOEditar(Usuario usuario);
