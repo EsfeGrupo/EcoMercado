@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 public interface IProductoRepository extends JpaRepository <Producto, Integer> {
 
     // Filtrar por nombre
-    Page<Producto> findByNombreContainingIgnoreCase(
+    Page<Producto> findByNombreContainingIgnoreCaseOrderByNombreDesc(
             String nombre,
             Pageable pageable
     );
