@@ -8,11 +8,12 @@ import org.springframework.data.domain.Pageable;
 public interface IProductoRepository extends JpaRepository <Producto, Integer> {
 
     // Filtrar por nombre
-    Page<Producto> findByNombreContainingIgnoreCaseOrderByNombreDesc(
+    Page<Producto> findByNombreContainingIgnoreCaseAndPrecio(
             String nombre,
+            Float precio,
             Pageable pageable
     );
-
+/*
     // Filtrar por nombre que contenga y precio mayor que
     Page<Producto> findByPrecioGreaterThan(
             Float precio,
@@ -22,5 +23,5 @@ public interface IProductoRepository extends JpaRepository <Producto, Integer> {
     Page<Producto> findByPrecioLessThan(
             Float precio,
             Pageable pageable
-    );
+    );*/
 }
