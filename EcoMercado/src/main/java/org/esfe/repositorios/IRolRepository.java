@@ -7,5 +7,5 @@ import org.springframework.data.domain.Page;
 
 
 public interface IRolRepository extends JpaRepository<Rol, Integer> {
-    Page<Rol> findByNombreContainingIgnoreCaseAndDescripcionContainingIgnoreCase(String nombre, String descripcion, Pageable pageable);
+    Page<Rol> findByNombreContainingIgnoreCaseAndDescripcionContainingIgnoreCaseOrderByIdDesc(String nombre, String descripcion, Pageable pageable);
 }
