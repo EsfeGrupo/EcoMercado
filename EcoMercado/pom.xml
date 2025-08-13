@@ -77,7 +77,12 @@
 			<artifactId>spring-boot-starter-validation</artifactId>
 			<version>3.3.1</version>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>org.esfe</groupId>
+            <artifactId>EcoMercado</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 
 	<build>
 		<plugins>
