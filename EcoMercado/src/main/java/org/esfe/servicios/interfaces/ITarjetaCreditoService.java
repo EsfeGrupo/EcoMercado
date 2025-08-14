@@ -5,6 +5,7 @@ import org.esfe.modelos.Usuario;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface ITarjetaCreditoService {
@@ -19,4 +20,6 @@ public interface ITarjetaCreditoService {
     TarjetaCredito crearOEditar(TarjetaCredito tarjetaCredito);
 
     void eliminarPorId(Integer id);
+
+    List<TarjetaCredito> findByFechaExpiracionBefore(LocalDate fechaActual);
 }
