@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.List;
 
 @Service
@@ -32,7 +33,8 @@ public class RolService implements IRolService {
 
     @Override
     public Rol obtenerPorId(Integer id) {
-        return rolRepository.findById(id).get();
+        Optional<Rol> rolOptional = rolRepository.findById(id);
+        return rolOptional.orElse(null);
     }
 
     @Override
