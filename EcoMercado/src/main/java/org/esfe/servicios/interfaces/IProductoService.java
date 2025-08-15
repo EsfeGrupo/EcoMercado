@@ -4,21 +4,23 @@ import org.esfe.modelos.Producto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.math.BigDecimal;
-import java.util.Optional;
+import java.util.List;
 
 public interface IProductoService {
 
-    Page<Producto> obtenerTodos(Pageable pageable);
+    Page<Producto> obtenerTodosPaginados(Pageable pageable);
 
-    Optional<Producto> obtenerPorId(Integer id);
+    List<Producto> obtenerTodos();
 
-    Producto guardar(Producto producto);
+    Page<Producto> findByNombreContainingIgnoreCaseAndPrecio(
+            String nombre,
+            Double precio,
+            Pageable pageable
+    );
+
+    Producto obtenerPorId(Integer id);
+
+    Producto crearOEditar(Producto producto);
 
     void eliminarPorId(Integer id);
-
-    Page<Producto> buscarPorNombre(String nombre, Pageable pageable);
-
-    Page<Producto> buscarPorPrecio(BigDecimal precio, Pageable pageable);
-
 }
