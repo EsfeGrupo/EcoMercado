@@ -8,8 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.util.Optional;
+import java.util.List;
 
 @Service
 public class ProductoService implements IProductoService {
@@ -18,17 +17,31 @@ public class ProductoService implements IProductoService {
     private IProductoRepository productoRepository;
 
     @Override
-    public Page<Producto> obtenerTodos(Pageable pageable) {
+    public Page<Producto> obtenerTodosPaginados(Pageable pageable) {
         return productoRepository.findAll(pageable);
     }
 
     @Override
-    public Optional<Producto> obtenerPorId(Integer id) {
-        return productoRepository.findById(id);
+    public List<Producto> obtenerTodos() {
+        return productoRepository.findAll();
     }
 
     @Override
-    public Producto guardar(Producto producto) {
+    public Page<Producto> findByNombreContainingIgnoreCaseAndPrecio(
+            String nombre,
+            Double precio,
+            Pageable pageable
+    ) {
+        return productoRepository.findByNombreContainingIgnoreCaseAndPrecio(nombre, precio, pageable);
+    }
+
+    @Override
+    public Producto obtenerPorId(Integer id) {
+        return productoRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public Producto crearOEditar(Producto producto) {
         return productoRepository.save(producto);
     }
 
@@ -36,15 +49,4 @@ public class ProductoService implements IProductoService {
     public void eliminarPorId(Integer id) {
         productoRepository.deleteById(id);
     }
-
-    @Override
-    public Page<Producto> buscarPorNombre(String nombre, Pageable pageable) {
-        return productoRepository.findByNombreContainingIgnoreCase(nombre, pageable);
-    }
-
-    @Override
-    public Page<Producto> buscarPorPrecio(BigDecimal precio, Pageable pageable) {
-        return productoRepository.findByPrecio(precio, pageable);
-    }
-
 }

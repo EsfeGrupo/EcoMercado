@@ -9,9 +9,11 @@ import java.util.List;
 
 public interface IProductoRepository extends JpaRepository<Producto, Integer> {
 
-    // Buscar por nombre (ignora mayúsculas/minúsculas)
-    Page<Producto> findByNombreContainingIgnoreCase(String nombre, Pageable pageable);
+    // Buscar por nombre y precio
+    Page<Producto> findByNombreContainingIgnoreCaseAndPrecio(
+            String nombre,
+            Double precio,
+            Pageable pageable
+    );
 
-    // Buscar por precio exacto
-    Page<Producto> findByPrecio(BigDecimal precio, Pageable pageable);
 }
