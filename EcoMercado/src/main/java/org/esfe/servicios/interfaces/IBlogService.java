@@ -6,13 +6,14 @@ import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface IBlogService {
     Page<Blog> obtenerTodosPaginados(Pageable pageable);
 
     List<Blog> obtenerTodos();
 
-    Blog obtenerPorId(Integer id);
+    Optional<Blog> obtenerPorId(Integer id);
 
     Blog crearOEditar(Blog blog);
 
