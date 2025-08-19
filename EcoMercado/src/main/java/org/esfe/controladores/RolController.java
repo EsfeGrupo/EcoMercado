@@ -48,4 +48,22 @@ public class RolController {
 
         return "rol/index";
     }
+
+    @GetMapping("/create")
+    public String create(Rol rol){
+        return "rol/create";
+    }
+
+    @PostMapping("/save")
+    public String save(Rol rol, BindingResult result, Model model, RedirectAttributes attributes){
+        if(result.hasErrors()){
+            model.addAttribute(rol);
+            attributes.addFlashAttribute("error", "No se pudo guardar debido a un error.");
+            return "rol/create";
+        }
+
+        rolService.crearOEditar(rol);
+        attributes.addFlashAttribute("msg", "rol creado correctamente");
+        return "redirect:/roles";
+    }
 }
