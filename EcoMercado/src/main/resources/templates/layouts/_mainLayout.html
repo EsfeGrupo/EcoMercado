@@ -79,18 +79,11 @@
                             <div class="sb-nav-link-icon"><i class="fas fa-box"></i></div>
                             Mis Productos
                         </a>
-                        <a class="nav-link" th:href="@{/ventas}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-file-invoice-dollar"></i></div>
-                            Mis Ventas
-                        </a>
                     </div>
 
                     <!-----------------------------------USUARIO (CLIENTE) ----------------------------->
                     <div sec:authorize="hasAuthority('usuario')">
-                        <a class="nav-link" th:href="@{/catalogo}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-store"></i></div>
-                            Catálogo
-                        </a>
+
                         <a class="nav-link" th:href="@{/carrito}">
                             <div class="sb-nav-link-icon"><i class="fas fa-shopping-basket"></i></div>
                             Carrito
