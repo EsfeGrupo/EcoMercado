@@ -73,4 +73,12 @@ public class RolController {
         model.addAttribute("rol", rol);
         return "rol/details";
     }
+
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable("id") Integer id, Model model){
+        Rol rol = rolService.obtenerPorId(id);
+        model.addAttribute("rol", rol);
+        return "rol/edit";
+    }
+
 }
