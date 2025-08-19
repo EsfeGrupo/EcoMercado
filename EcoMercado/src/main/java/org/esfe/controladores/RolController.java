@@ -81,4 +81,17 @@ public class RolController {
         return "rol/edit";
     }
 
+    @GetMapping("/remove/{id}")
+    public String remove(@PathVariable("id") Integer id, Model model){
+        Rol rol = rolService.obtenerPorId(id);
+        model.addAttribute("rol", rol);
+        return "rol/delete";
+    }
+
+    @PostMapping("/delete")
+    public String delete(Rol rol, RedirectAttributes attributes){
+        rolService.eliminarPorId(rol.getId());
+        attributes.addFlashAttribute("msg", "Rol eliminado correctamente");
+        return "redirect:/roles";
+    }
 }
