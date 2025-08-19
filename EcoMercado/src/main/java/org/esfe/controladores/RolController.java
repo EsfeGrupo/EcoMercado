@@ -66,4 +66,11 @@ public class RolController {
         attributes.addFlashAttribute("msg", "rol creado correctamente");
         return "redirect:/roles";
     }
+
+    @GetMapping("/details/{id}")
+    public String details(@PathVariable("id") Integer id, Model model){
+        Rol rol = rolService.obtenerPorId(id);
+        model.addAttribute("rol", rol);
+        return "rol/details";
+    }
 }
