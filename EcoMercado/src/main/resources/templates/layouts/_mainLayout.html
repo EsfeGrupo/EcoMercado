@@ -43,6 +43,10 @@
 
                     <!------------------------------- ADMIN ---------------------------->
                     <div sec:authorize="hasAuthority('admin')">
+                        <a class="nav-link" th:href="@{/roles}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-receipt"></i></div>
+                            roles
+                        </a>
                         <a class="nav-link" th:href="@{/usuarios}">
                             <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
                             Usuarios
