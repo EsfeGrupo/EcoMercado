@@ -66,4 +66,32 @@ public class RolController {
         attributes.addFlashAttribute("msg", "rol creado correctamente");
         return "redirect:/roles";
     }
+
+    @GetMapping("/details/{id}")
+    public String details(@PathVariable("id") Integer id, Model model){
+        Rol rol = rolService.obtenerPorId(id);
+        model.addAttribute("rol", rol);
+        return "rol/details";
+    }
+
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable("id") Integer id, Model model){
+        Rol rol = rolService.obtenerPorId(id);
+        model.addAttribute("rol", rol);
+        return "rol/edit";
+    }
+
+    @GetMapping("/remove/{id}")
+    public String remove(@PathVariable("id") Integer id, Model model){
+        Rol rol = rolService.obtenerPorId(id);
+        model.addAttribute("rol", rol);
+        return "rol/delete";
+    }
+
+    @PostMapping("/delete")
+    public String delete(Rol rol, RedirectAttributes attributes){
+        rolService.eliminarPorId(rol.getId());
+        attributes.addFlashAttribute("msg", "Rol eliminado correctamente");
+        return "redirect:/roles";
+    }
 }
