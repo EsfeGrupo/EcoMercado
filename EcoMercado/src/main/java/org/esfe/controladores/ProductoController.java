@@ -79,6 +79,6 @@ public class ProductoController {
                 PageRequest.of(page, size)
         );
         model.addAttribute("productos", productos);
-        return "productos/lista";
+        return "Producto/Producto";
     }
 }
