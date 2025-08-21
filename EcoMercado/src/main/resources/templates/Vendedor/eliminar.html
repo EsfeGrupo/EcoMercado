@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Eliminar Vendedor</title>
+</head>
+<body>
+<h1>Eliminar Vendedor</h1>
+<p>¿Estás seguro que deseas eliminar al vendedor <strong th:text="${vendedor.nombre}"></strong>?</p>
+
+<form th:action="@{|/vendedores/eliminar/${vendedor.id}|}" method="post">
+    <button type="submit">Sí, eliminar</button>
+    <a th:href="@{/vendedores}">Cancelar</a>
+</form>
+</body>
+</html>

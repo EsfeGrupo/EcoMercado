@@ -1,0 +1,32 @@
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/layouts/_mainLayout">
+
+
+<head>
+    <title>Lista de Vendedores</title>
+</head>
+<body>
+<h1>Lista de Vendedores</h1>
+<a th:href="@{/vendedores/crear}">Nuevo Vendedor</a>
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Ubicación</th>
+        <th>Acciones</th>
+    </tr>
+    <tr th:each="v : ${listaVendedores}">
+        <td th:text="${v.id}"></td>
+        <td th:text="${v.nombre}"></td>
+        <td th:text="${v.ubicacion}"></td>
+        <td>
+            <a th:href="@{|/vendedores/detalles/${v.id}|}">Detalles</a> |
+            <a th:href="@{|/vendedores/editar/${v.id}|}">Editar</a> |
+            <a th:href="@{|/vendedores/eliminar/${v.id}|}">Eliminar</a>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

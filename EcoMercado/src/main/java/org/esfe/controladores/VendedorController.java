@@ -1,84 +1,91 @@
 package org.esfe.controladores;
 
-import jakarta.validation.Valid;
 import org.esfe.modelos.Vendedor;
-import org.esfe.servicios.interfaces.IVendedorService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.esfe.repositorios.IVendedorRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/vendedores")
 public class VendedorController {
 
-    @Autowired
-    private IVendedorService vendedorService;
+    private final IVendedorRepository vendedorRepository;
 
-    // Listar con paginación
-    @GetMapping
-    public String listar(@RequestParam(defaultValue = "0") int page,
-                         @RequestParam(defaultValue = "5") int size,
-                         Model model) {
-        Page<Vendedor> vendedores = vendedorService.obtenerTodosPaginados(PageRequest.of(page, size));
-        model.addAttribute("vendedores", vendedores);
-        return "vendedores/lista"; // templates/vendedores/lista.html
+    // Inyección de dependencias por constructor
+    public VendedorController(IVendedorRepository vendedorRepository) {
+        this.vendedorRepository = vendedorRepository;
     }
 
-    // Formulario para crear
+    // --- LISTAR ---
+    @GetMapping
+    public String listar(Model model) {
+        model.addAttribute("vendedores", vendedorRepository.findAll());
+        return "vendedores/lista"; // Vista: src/main/resources/templates/vendedores/lista.html
+    }
+
+    // --- DETALLES ---
+    @GetMapping("/detalles/{id}")
+    public String verDetalles(@PathVariable Integer id, Model model) {
+        Vendedor vendedor = vendedorRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("ID de vendedor no válido: " + id));
+        model.addAttribute("vendedor", vendedor);
+        return "vendedores/detalles"; // Vista: src/main/resources/templates/vendedores/detalles.html
+    }
+
+    // --- CREAR ---
     @GetMapping("/crear")
     public String mostrarFormularioCrear(Model model) {
         model.addAttribute("vendedor", new Vendedor());
-        return "vendedores/form"; // templates/vendedores/form.html
+        return "vendedores/crear"; // Vista: src/main/resources/templates/vendedores/crear.html
     }
 
-    // Guardar (crear o editar)
-    @PostMapping("/guardar")
-    public String guardar(@Valid @ModelAttribute Vendedor vendedor,
-                          BindingResult result,
-                          Model model) {
-        if (result.hasErrors()) {
-            return "vendedores/form";
-        }
-        vendedorService.crearOEditar(vendedor);
+    @PostMapping("/crear")
+    public String guardar(@ModelAttribute Vendedor vendedor) {
+        vendedorRepository.save(vendedor);
         return "redirect:/vendedores";
     }
 
-    // Editar
+    // --- EDITAR ---
     @GetMapping("/editar/{id}")
-    public String editar(@PathVariable Integer id, Model model) {
-        Vendedor vendedor = vendedorService.obtenerPorId(id);
-        if (vendedor == null) {
-            return "redirect:/vendedores";
-        }
+    public String mostrarFormularioEditar(@PathVariable Integer id, Model model) {
+        Vendedor vendedor = vendedorRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("ID de vendedor no válido: " + id));
         model.addAttribute("vendedor", vendedor);
-        return "vendedores/form";
+        return "vendedores/editar"; // Vista: src/main/resources/templates/vendedores/editar.html
     }
 
-    // Eliminar
-    @GetMapping("/eliminar/{id}")
-    public String eliminar(@PathVariable Integer id) {
-        vendedorService.eliminarPorId(id);
+    @PostMapping("/editar/{id}")
+    public String actualizar(@PathVariable Integer id, @ModelAttribute Vendedor vendedorActualizado) {
+        Vendedor vendedor = vendedorRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("ID de vendedor no válido: " + id));
+
+        // Actualizar campos
+        vendedor.setNombre(vendedorActualizado.getNombre());
+        vendedor.setUbicacion(vendedorActualizado.getUbicacion());
+        vendedor.setCorreo(vendedorActualizado.getCorreo());
+
+        vendedorRepository.save(vendedor);
         return "redirect:/vendedores";
     }
 
-    // Buscar por nombre y ubicación
-    @GetMapping("/buscar")
-    public String buscar(@RequestParam(required = false) String nombre,
-                         @RequestParam(required = false) String ubicacion,
-                         @RequestParam(defaultValue = "0") int page,
-                         @RequestParam(defaultValue = "5") int size,
-                         Model model) {
-        Page<Vendedor> vendedores = vendedorService.findByNombreContainingIgnoreCaseAndUbicacionContainingIgnoreCase(
-                nombre != null ? nombre : "",
-                ubicacion != null ? ubicacion : "",
-                PageRequest.of(page, size)
-        );
-        model.addAttribute("vendedores", vendedores);
-        return "Vendedor/Vendedor";
-
+    // --- ELIMINAR ---
+    // Mostrar confirmación de eliminación
+    @GetMapping("/eliminar/{id}")
+    public String confirmarEliminar(@PathVariable Integer id, Model model) {
+        Vendedor vendedor = vendedorRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("ID de vendedor no válido: " + id));
+        model.addAttribute("vendedor", vendedor);
+        return "vendedores/eliminar"; // Vista: eliminar.html
     }
+
+    // Procesar eliminación
+    @PostMapping("/eliminar/{id}")
+    public String eliminar(@PathVariable Integer id) {
+        Vendedor vendedor = vendedorRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("ID de vendedor no válido: " + id));
+        vendedorRepository.delete(vendedor);
+        return "redirect:/vendedores";
+    }
+
 }

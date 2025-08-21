@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Detalles del Vendedor</title>
+</head>
+<body>
+<h1>Detalles del Vendedor</h1>
+<p><strong>ID:</strong> <span th:text="${vendedor.id}"></span></p>
+<p><strong>Nombre:</strong> <span th:text="${vendedor.nombre}"></span></p>
+<p><strong>Ubicación:</strong> <span th:text="${vendedor.ubicacion}"></span></p>
+<a th:href="@{/vendedores}">Volver</a>
+</body>
+</html>

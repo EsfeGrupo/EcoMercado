@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Nuevo Vendedor</title>
+</head>
+<body>
+<h1>Registrar Vendedor</h1>
+<form th:action="@{/vendedores/crear}" th:object="${vendedor}" method="post">
+    <label>Nombre:</label>
+    <input type="text" th:field="*{nombre}" /><br/>
+
+    <label>Ubicación:</label>
+    <input type="text" th:field="*{ubicacion}" /><br/>
+
+    <button type="submit">Guardar</button>
+</form>
+<a th:href="@{/vendedores}">Volver</a>
+</body>
+</html>
