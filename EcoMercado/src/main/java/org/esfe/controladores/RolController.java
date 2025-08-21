@@ -1,4 +1,5 @@
 package org.esfe.controladores;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,12 +31,14 @@ public class RolController {
     private IRolService rolService;
 
     @GetMapping
-    public String index(Model model, @RequestParam("page") Optional<Integer> page, @RequestParam("size") Optional<Integer> size){
+    public String index(Model model, @RequestParam("page") Optional<Integer> page, @RequestParam("size") Optional<Integer> size, @RequestParam("nombre") Optional<String> nombre, @RequestParam("descripcion") Optional<String> descripcion ){
         int currentPage = page.orElse(1) - 1; // si no está seteado se asigna 0
         int pageSize = size.orElse(5); // tamaño de la página, se asigna 5
-        Pageable pageable = PageRequest.of(currentPage, pageSize);
-
-        Page<Rol> roles = rolService.obtenerTodosPaginados(pageable);
+        Sort sortByIdDesc = Sort.by(Sort.Direction.DESC, "id");
+        Pageable pageable = PageRequest.of(currentPage, pageSize,sortByIdDesc);
+        String nombreSearch = nombre.orElse("");
+        String descripcionSearch = descripcion.orElse("");
+        Page<Rol> roles = rolService.findByNombreContainingIgnoreCaseAndDescripcionContainingIgnoreCaseOrderByIdDesc(nombreSearch,descripcionSearch,pageable);
         model.addAttribute("roles", roles);
 
         int totalPages = roles.getTotalPages();

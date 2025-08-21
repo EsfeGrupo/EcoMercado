@@ -28,7 +28,26 @@
   </div>
 
   <h1>Listado de roles</h1>
-  <a th:href="@{/roles/create}" class="btn btn-outline-primary">Nuevo rol</a>
+
+  <form th:action="@{/roles}" method="get">
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="nombre">Nombre</label>
+          <input type="text" class="form-control" name="nombre" id="nombre" placeholder="Escriba el nombre del rol">
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="descripcion">Descripción</label>
+          <textarea class="form-control" id="descripcion" name="descripcion" cols="12" rows="3"></textarea>
+        </div>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Buscar</button>
+    <a th:href="@{/roles/create}" class="btn btn-outline-primary">Nuevo rol</a>
+  </form>
+
   <table class="table table-striped">
     <thead>
     <tr>
