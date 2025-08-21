@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import org.springframework.data.domain.Sort;
 
 @Controller
 @RequestMapping("/tipopagos")
@@ -25,12 +26,14 @@ public class TipoPagoController {
     private ITipoPagoService tipoPagoService;
 
     @GetMapping
-    public String index(Model model, @RequestParam("page") Optional<Integer> page, @RequestParam("size") Optional<Integer> size){
-        int currentPage = page.orElse(1) - 1;
-        int pageSize = size.orElse(5);
-        Pageable pageable = PageRequest.of(currentPage, pageSize);
-
-        Page<TipoPago> tipoPagos = tipoPagoService.obtenerTodosPaginados(pageable);
+    public String index(Model model, @RequestParam("page") Optional<Integer> page, @RequestParam("size") Optional<Integer> size, @RequestParam("metodoPago") Optional<String> metodoPago, @RequestParam("descripcion") Optional<String> descripcion ){
+        int currentPage = page.orElse(1) - 1; // si no está seteado se asigna 0
+        int pageSize = size.orElse(5); // tamaño de la página, se asigna 5
+        Sort sortByIdDesc = Sort.by(Sort.Direction.DESC, "id");
+        Pageable pageable = PageRequest.of(currentPage, pageSize,sortByIdDesc);
+        String metodoPagoSearch = metodoPago.orElse("");
+        String descripcionSearch = descripcion.orElse("");
+        Page<TipoPago> tipoPagos = tipoPagoService.findByMetodoPagoContainingAndDescripcionContaining(metodoPagoSearch,descripcionSearch,pageable);
         model.addAttribute("tipoPagos", tipoPagos);
 
         int totalPages = tipoPagos.getTotalPages();
@@ -40,7 +43,6 @@ public class TipoPagoController {
                     .collect(Collectors.toList());
             model.addAttribute("pageNumbers", pageNumbers);
         }
-
         return "tipopago/index";
     }
 
@@ -61,4 +63,31 @@ public class TipoPagoController {
         return "redirect:/tipopagos";
     }
 
+      @GetMapping("/details/{id}")
+    public String details(@PathVariable("id") Integer id, Model model){
+        TipoPago tipoPago = tipoPagoService.obtenerPorId(id).get();
+        model.addAttribute("tipoPago", tipoPago);
+        return "tipopago/details";
+    }
+
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable("id") Integer id, Model model){
+        TipoPago tipoPago = tipoPagoService.obtenerPorId(id).get();
+        model.addAttribute("tipoPago", tipoPago);
+        return "tipopago/edit";
+    }
+
+    @GetMapping("/remove/{id}")
+    public String remove(@PathVariable("id") Integer id, Model model){
+        TipoPago tipoPago = tipoPagoService.obtenerPorId(id).get();
+        model.addAttribute("tipoPago", tipoPago);
+        return "tipopago/delete";
+    }
+
+    @PostMapping("/delete")
+    public String delete(TipoPago tipoPago, RedirectAttributes attributes){
+        tipoPagoService.eliminarPorId(tipoPago.getId());
+        attributes.addFlashAttribute("msg", "Tipo de pago eliminado correctamente");
+        return "redirect:/tipopagos";
+    }
 }
