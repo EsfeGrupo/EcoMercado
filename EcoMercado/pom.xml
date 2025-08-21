@@ -82,6 +82,14 @@
             <artifactId>EcoMercado</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
+
+		<!-- dependencia para la generacion de reportes pdf aparir de plantilla de html-->
+		<!-- https://mvnrepository.com/artifact/org.xhtmlrenderer/flying-saucer-pdf -->
+		<dependency>
+			<groupId>org.xhtmlrenderer</groupId>
+			<artifactId>flying-saucer-pdf</artifactId>
+			<version>9.13.2</version>
+		</dependency>
     </dependencies>
 
 	<build>

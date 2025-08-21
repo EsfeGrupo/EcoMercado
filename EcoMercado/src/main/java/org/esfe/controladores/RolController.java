@@ -1,5 +1,10 @@
 package org.esfe.controladores;
+import org.esfe.servicios.utilerias.PdfGeneratorService;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -8,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
+import java.io.IOException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -29,6 +35,8 @@ import org.springframework.ui.Model;
 public class RolController {
     @Autowired
     private IRolService rolService;
+    @Autowired
+    private PdfGeneratorService pdfGeneratorService;
 
     @GetMapping
     public String index(Model model, @RequestParam("page") Optional<Integer> page, @RequestParam("size") Optional<Integer> size, @RequestParam("nombre") Optional<String> nombre, @RequestParam("descripcion") Optional<String> descripcion ){
@@ -96,5 +104,24 @@ public class RolController {
         rolService.eliminarPorId(rol.getId());
         attributes.addFlashAttribute("msg", "Rol eliminado correctamente");
         return "redirect:/roles";
+    }
+
+    @GetMapping("/reportegeneral/{visualizacion}")
+    public ResponseEntity<byte[]> ReporteGeneral(@PathVariable("visualizacion") String visualizacion) {
+
+        try {
+            List<Rol> roles = rolService.obtenerTodos();
+
+            // Genera el PDF. Si hay un error aquí, la excepción será capturada.
+            byte[] pdfBytes = pdfGeneratorService.generatePdfFromHtml("reportes/rpRoles", "roles", roles);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            // inline= vista previa, attachment=descarga el archivo
+            headers.add("Content-Disposition", visualizacion+"; filename=reporte_general.pdf");
+            return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+        } catch (IOException e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
