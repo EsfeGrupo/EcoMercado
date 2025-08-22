@@ -11,5 +11,5 @@ public interface IDetalleVentaRepository extends JpaRepository<DetalleVenta, Int
     // Buscar por idProducto
     Page<DetalleVenta> findByIdProducto(Integer idProducto, Pageable pageable);
 
-    List<DetalleVenta> findByIdVenta(Integer idVenta);
+    List<DetalleVenta> findByVenta_Id(Integer ventaId);
 }

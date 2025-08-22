@@ -50,6 +50,6 @@ public class DetalleVentaService implements IDetalleVentaService {
     @Override
     public List<DetalleVenta> obtenerPorVentaId(Integer idVenta) {
         // Llama al método del repositorio
-        return detalleVentaRepository.findByIdVenta(idVenta);
+        return detalleVentaRepository.findByVenta_Id(idVenta);
     }
 }
