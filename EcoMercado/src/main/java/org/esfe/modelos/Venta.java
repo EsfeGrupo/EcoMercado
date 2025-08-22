@@ -3,6 +3,7 @@ package org.esfe.modelos;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -17,9 +18,8 @@ public class Venta {
     @JoinColumn(name = "idUsuario", nullable = false)
     private Usuario usuario;
 
-    @OneToMany(mappedBy = "venta")
-    private List<DetalleVenta> detalleventas;
-
+    @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DetalleVenta> detalleventas = new ArrayList<>();
 
     private String correlativo;
 
@@ -41,6 +41,24 @@ public class Venta {
     private TarjetaCredito tarjetaCredito;
     // Getters y setters
 
+    public void addDetalle(DetalleVenta detalle) {
+        this.detalleventas.add(detalle);
+        detalle.setVenta(this);
+    }
+    
+    public void removeDetalle(DetalleVenta detalle) {
+        this.detalleventas.remove(detalle);
+        detalle.setVenta(null);
+    }
+
+     public List<DetalleVenta> getDetalleventas() {
+        return detalleventas;
+    }
+
+    public void setDetalleventas(List<DetalleVenta> detalleventas) {
+        this.detalleventas = detalleventas;
+    }
+    
     public Integer getId() {
         return id;
     }

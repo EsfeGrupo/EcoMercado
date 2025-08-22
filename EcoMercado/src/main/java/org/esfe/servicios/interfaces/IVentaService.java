@@ -19,4 +19,6 @@ public interface IVentaService {
     Venta crearOEditar(Venta venta);
 
     void eliminarPorId(Integer id);
+
+    Page<Venta> buscarVentas(String search, Pageable pageable);
 }

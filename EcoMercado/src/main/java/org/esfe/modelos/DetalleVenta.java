@@ -2,7 +2,6 @@ package org.esfe.modelos;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import java.util.List;
 
 @Entity
 public class DetalleVenta {
@@ -61,12 +60,11 @@ public class DetalleVenta {
         this.precioUnitario = precioUnitario;
     }
 
-    /*public List<Venta> getVentas() {
-        return ventas;
+    public Venta getVenta() {
+        return venta;
     }
-
-    public void setVentas(List<Venta> ventas) {
-        this.ventas = ventas;
-    }*/
+    public void setVenta(Venta venta) {
+        this.venta = venta;
+    }
 
 }
