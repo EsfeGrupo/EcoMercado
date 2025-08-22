@@ -1,30 +1,44 @@
 <html lang="en"
-     xmlns:th="http://www.thymeleaf.org"
-     xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-     layout:decorate="/layouts/_mainLayout">
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/layouts/_mainLayout">
 
 <div layout:fragment="content">
-   <h1>Editar rol</h1>
-   <form th:action="@{/roles/save}" th:object="${rol}" method="post">
-       <input type="hidden" th:field="*{id}">
-       <div class="row">
-           <div class="col-md-6">
-               <div class="form-group">
-                   <label for="nombre">Nombre</label>
-                   <input type="text" class="form-control" th:field="*{nombre}" id="nombre" placeholder="Escriba el nombre del grupo" required>
-               </div>
-           </div>
-       </div>
-       <div class="row">
-           <div class="col-md-6">
-               <div class="form-group">
-                   <label for="descripcion">Descripción</label>
-                   <textarea class="form-control" th:field="*{descripcion}" id="descripcion" cols="12" rows="3" required></textarea>
-               </div>
-           </div>
-       </div>
-       <hr>
-       <button type="submit" class="btn btn-primary">Guardar cambios</button> |
-       <a th:href="@{/roles}">Regresar</a>
-   </form>
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card shadow-lg border-success">
+          <div class="card-header bg-success text-white">
+            <h2 class="card-title mb-0 fw-bold">Editar Rol</h2>
+          </div>
+          <div class="card-body">
+            <form th:action="@{/roles/save}" th:object="${rol}" method="post">
+              <input type="hidden" th:field="*{id}">
+              
+              <div class="mb-3">
+                <label for="nombre" class="form-label fw-bold">Nombre del Rol</label>
+                <input type="text" class="form-control" th:field="*{nombre}" id="nombre" placeholder="Escriba el nombre del rol" required>
+              </div>
+
+              <div class="mb-3">
+                <label for="descripcion" class="form-label fw-bold">Descripción del Rol</label>
+                <textarea class="form-control" th:field="*{descripcion}" id="descripcion" rows="4" placeholder="Escriba la descripción del rol" required></textarea>
+              </div>
+
+              <hr class="my-4">
+
+              <div class="d-flex justify-content-end gap-2">
+                <button type="submit" class="btn btn-outline-success btn-lg">
+                  <i class="bi bi-save"></i> Guardar Cambios
+                </button>
+                <a th:href="@{/roles}" class="btn btn-outline-secondary btn-lg">
+                  <i class="bi bi-x-circle"></i> Regresar
+                </a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
