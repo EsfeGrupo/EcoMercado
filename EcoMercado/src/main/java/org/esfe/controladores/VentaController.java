@@ -14,7 +14,16 @@ import org.esfe.modelos.Venta;
 import org.esfe.modelos.DetalleVenta;
 import org.esfe.servicios.interfaces.IVentaService;
 import org.esfe.servicios.interfaces.IDetalleVentaService;
+import org.esfe.repositorios.IProductoRepository;
+import org.esfe.modelos.Producto;
 
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
+
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -27,14 +36,22 @@ public class VentaController {
     private IVentaService ventaService;
     @Autowired
     private IDetalleVentaService detalleVentaService;
+    @Autowired
+    private IProductoRepository productoRepository;
 
     @GetMapping
-    public String index(Model model, @RequestParam("page") Optional<Integer> page, @RequestParam("size") Optional<Integer> size){
+    public String index(Model model, @RequestParam("page") Optional<Integer> page, @RequestParam("size") Optional<Integer> size, @RequestParam(value = "search", required = false) String search){
         int currentPage = page.orElse(1) - 1;
         int pageSize = size.orElse(5);
         Pageable pageable = PageRequest.of(currentPage, pageSize);
 
-        Page<Venta> ventas = ventaService.obtenerTodosPaginados(pageable);
+        Page<Venta> ventas;
+        if (search != null && !search.isEmpty()) {
+            ventas = ventaService.buscarVentas(search, pageable);
+            model.addAttribute("search", search);
+        } else {
+            ventas = ventaService.obtenerTodosPaginados(pageable);
+        }
         model.addAttribute("ventas", ventas);
 
         int totalPages = ventas.getTotalPages();
@@ -139,5 +156,55 @@ public class VentaController {
                     detalleVentaService.eliminarPorId(detalleId);
                     attributes.addFlashAttribute("msg", "Detalle eliminado correctamente");
                     return "redirect:/ventas/details/" + ventaId;
+                }
+
+                @GetMapping("/downloadPdf/{id}")
+                public void downloadPdf(@PathVariable("id") Integer id, HttpServletResponse response) throws IOException, DocumentException {
+                    Venta venta = ventaService.obtenerPorId(id).orElse(null);
+                    if (venta == null) {
+                        response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                        return;
+                    }
+                    response.setContentType("application/pdf");
+                    response.setHeader("Content-Disposition", "attachment; filename=venta_" + id + ".pdf");
+                    Document document = new Document();
+                    PdfWriter.getInstance(document, response.getOutputStream());
+                    document.open();
+                    document.add(new Paragraph("Venta ID: " + venta.getId()));
+                    document.add(new Paragraph("Fecha: " + venta.getFecha()));
+                    document.add(new Paragraph("Total: " + venta.getTotal()));
+                    document.add(new Paragraph("Detalles:"));
+                    List<DetalleVenta> detalles = detalleVentaService.obtenerPorVentaId(id);
+                    for (DetalleVenta detalle : detalles) {
+                        Producto producto = productoRepository.findById(detalle.getIdProducto()).orElse(null);
+                        String nombreProducto = producto != null ? producto.getNombre() : "Producto no encontrado";
+                        document.add(new Paragraph("Producto: " + nombreProducto + ", Cantidad: " + detalle.getCantidad() + ", Precio: " + detalle.getPrecioUnitario()));
+                    }
+                    document.close();
+                }
+
+                @GetMapping("/previewPdf/{id}")
+                public void previewPdf(@PathVariable("id") Integer id, HttpServletResponse response) throws IOException, DocumentException {
+                    Venta venta = ventaService.obtenerPorId(id).orElse(null);
+                    if (venta == null) {
+                        response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                        return;
+                    }
+                    response.setContentType("application/pdf");
+                    response.setHeader("Content-Disposition", "inline; filename=venta_" + id + ".pdf");
+                    Document document = new Document();
+                    PdfWriter.getInstance(document, response.getOutputStream());
+                    document.open();
+                    document.add(new Paragraph("Venta ID: " + venta.getId()));
+                    document.add(new Paragraph("Fecha: " + venta.getFecha()));
+                    document.add(new Paragraph("Total: " + venta.getTotal()));
+                    document.add(new Paragraph("Detalles:"));
+                    List<DetalleVenta> detalles = detalleVentaService.obtenerPorVentaId(id);
+                    for (DetalleVenta detalle : detalles) {
+                        Producto producto = productoRepository.findById(detalle.getIdProducto()).orElse(null);
+                        String nombreProducto = producto != null ? producto.getNombre() : "Producto no encontrado";
+                        document.add(new Paragraph("Producto: " + nombreProducto + ", Cantidad: " + detalle.getCantidad() + ", Precio: " + detalle.getPrecioUnitario()));
+                    }
+                    document.close();
                 }
     }
