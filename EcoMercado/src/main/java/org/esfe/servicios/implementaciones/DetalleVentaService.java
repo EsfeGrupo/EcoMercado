@@ -46,4 +46,10 @@ public class DetalleVentaService implements IDetalleVentaService {
     public void eliminarPorId(Integer id) {
         detalleVentaRepository.deleteById(id);
     }
+    
+    @Override
+    public List<DetalleVenta> obtenerPorVentaId(Integer idVenta) {
+        // Llama al método del repositorio
+        return detalleVentaRepository.findByIdVenta(idVenta);
+    }
 }
