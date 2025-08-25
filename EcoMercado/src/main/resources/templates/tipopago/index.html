@@ -66,5 +66,11 @@
       </div>
     </div>
   </div>
+  <nav aria-label="Page navigation example" class="d-flex justify-content-center mt-4">
+    <ul class="pagination">
+      <li class="page-item" th:each="pageNumber : ${pageNumbers}">
+        <a class="page-link text-success" th:href="@{|/roles?page=${pageNumber}|}" th:text="${pageNumber}"></a>
+      </li>
+    </ul>
+  </nav>
 </div>
-</html>

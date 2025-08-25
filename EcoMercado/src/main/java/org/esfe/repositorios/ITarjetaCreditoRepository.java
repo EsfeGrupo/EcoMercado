@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface ITarjetaCreditoRepository extends JpaRepository<TarjetaCredito, Integer> {
-    Page<TarjetaCredito> findByNumeroContainingIgnoreCaseAndNombreTitularContainingIgnoreCaseAndBancoContainingIgnoreCaseOrderByIdDesc(String numero, String nombreTitular, String banco, Pageable pageable);
+    Page<TarjetaCredito> findByNombreTitularContainingIgnoreCaseAndBancoContainingIgnoreCaseOrderByIdDesc(String nombreTitular, String banco, Pageable pageable);
 
     List<TarjetaCredito> findByFechaExpiracionBefore(LocalDate fechaActual);
 }

@@ -36,8 +36,8 @@ public class TarjetaCreditoService implements ITarjetaCreditoService {
 
 
     @Override
-    public Page<TarjetaCredito> findByNumeroContainingIgnoreCaseAndNombreTitularContainingIgnoreCaseAndBancoContainingIgnoreCaseOrderByIdDesc(String numero, String nombreTitular, String banco, Pageable pageable) {
-        return tarjetaCreditoRepository.findByNumeroContainingIgnoreCaseAndNombreTitularContainingIgnoreCaseAndBancoContainingIgnoreCaseOrderByIdDesc(numero, nombreTitular, banco, pageable);
+    public Page<TarjetaCredito> findByNombreTitularContainingIgnoreCaseAndBancoContainingIgnoreCaseOrderByIdDesc(String nombreTitular, String banco, Pageable pageable) {
+        return tarjetaCreditoRepository.findByNombreTitularContainingIgnoreCaseAndBancoContainingIgnoreCaseOrderByIdDesc(nombreTitular, banco, pageable);
     }
 
 

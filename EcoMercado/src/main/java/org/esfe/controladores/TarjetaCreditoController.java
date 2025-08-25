@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.esfe.modelos.TarjetaCredito;
 import org.esfe.servicios.interfaces.ITarjetaCreditoService;
+import org.esfe.servicios.interfaces.IUsuarioService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,26 +20,32 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Controller
-@RequestMapping("/tarjetasCredito")
+@RequestMapping("/tarjetaCredito")
 public class TarjetaCreditoController {
     @Autowired
     private ITarjetaCreditoService tarjetaCreditoService;
 
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
+
+    @Autowired
+    private IUsuarioService usuarioService;
+
     @GetMapping
-    public String index(Model model, @RequestParam("page") Optional<Integer> page, @RequestParam("size") Optional<Integer> size, @RequestParam("numero") Optional<String> numero, @RequestParam("nombreTitular") Optional<String> nombreTitular, @RequestParam("banco") Optional<String> banco) {
+    public String index(Model model, @RequestParam("page") Optional<Integer> page, @RequestParam("size") Optional<Integer> size, @RequestParam("nombreTitular") Optional<String> nombreTitular, @RequestParam("banco") Optional<String> banco) {
         int currentPage = page.orElse(1) - 1;
         int pageSize = size.orElse(5);
         Sort sortByIdDesc = Sort.by(Sort.Direction.DESC, "id");
         Pageable pageable = PageRequest.of(currentPage, pageSize, sortByIdDesc);
-        String numeroSearch = numero.orElse("");
         String nombreTitularSearch = nombreTitular.orElse("");
         String bancoSearch = banco.orElse("");
 
         // Note: The search will now be based on the encrypted number in the database.
         // A better approach would be to only search on non-sensitive data, but for this example, we'll continue searching on the number.
-        Page<TarjetaCredito> tarjetas = tarjetaCreditoService.findByNumeroContainingIgnoreCaseAndNombreTitularContainingIgnoreCaseAndBancoContainingIgnoreCaseOrderByIdDesc(numeroSearch, nombreTitularSearch, bancoSearch, pageable);
+        Page<TarjetaCredito> tarjetas = tarjetaCreditoService.findByNombreTitularContainingIgnoreCaseAndBancoContainingIgnoreCaseOrderByIdDesc(nombreTitularSearch, bancoSearch, pageable);
 
         // Mask the credit card number for display
         tarjetas.getContent().forEach(tarjeta -> {
@@ -69,14 +76,24 @@ public class TarjetaCreditoController {
 
     @PostMapping("/save")
     public String save(TarjetaCredito tarjetaCredito, BindingResult result, Model model, RedirectAttributes attributes) {
-        if (result.hasErrors()) {
-            model.addAttribute(tarjetaCredito);
-            attributes.addFlashAttribute("error", "No se pudo guardar debido a un error.");
-            return "tarjetaCredito/create";
-        }
-        tarjetaCreditoService.crearOEditar(tarjetaCredito);
-        attributes.addFlashAttribute("msg", "Tarjeta de crédito creada correctamente");
-        return "redirect:/tarjetasCredito";
+    if (result.hasErrors()) {
+        model.addAttribute(tarjetaCredito);
+        attributes.addFlashAttribute("error", "No se pudo guardar debido a un error.");
+        return "tarjetaCredito/create";
+    }
+
+    // Lógica para encriptar
+    if (tarjetaCredito.getNumero() != null && !tarjetaCredito.getNumero().isEmpty()) {
+        String numeroEncriptado = passwordEncoder.encode(tarjetaCredito.getNumero());
+        tarjetaCredito.setNumeroEncriptado(numeroEncriptado);
+        
+        // Limpiar el campo transitorio
+        tarjetaCredito.setNumero(null);
+    }
+    
+    tarjetaCreditoService.crearOEditar(tarjetaCredito);
+    attributes.addFlashAttribute("msg", "Tarjeta de crédito creada correctamente");
+    return "redirect:/tarjetasCredito";
     }
 
     @GetMapping("/details/{id}")
