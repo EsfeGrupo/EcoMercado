@@ -42,6 +42,7 @@ public class Usuario {
             fetch = FetchType.LAZY // Cuando cargues un Rol, los Usuarios no se cargarán hasta que los pidas.
             // LAZY es el valor por defecto para OneToMany y es recomendado para rendimiento.
     )
+
     private List<Blog> blogs = new ArrayList<>();
 
     public Integer getId() {

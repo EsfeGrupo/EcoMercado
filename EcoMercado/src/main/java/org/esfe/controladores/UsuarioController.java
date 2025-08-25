@@ -35,6 +35,9 @@ public class UsuarioController {
         int pageSize = size.orElse(5);
         Pageable pageable = PageRequest.of(currentPage, pageSize);
 
+
+
+
         Page<Usuario> usuarios = usuarioService.obtenerTodosPaginados(pageable);
         model.addAttribute("usuarios", usuarios);
 

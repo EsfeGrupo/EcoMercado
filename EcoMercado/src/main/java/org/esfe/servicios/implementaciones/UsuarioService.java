@@ -1,4 +1,5 @@
 package org.esfe.servicios.implementaciones;
+
 import org.esfe.servicios.interfaces.IUsuarioService;
 import org.esfe.modelos.Usuario;
 import org.esfe.repositorios.IUsuarioRepository;
@@ -6,13 +7,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class UsuarioService implements IUsuarioService {
+
     @Autowired
     private IUsuarioRepository usuarioRepository;
+
+    // Método de login
+    @Override
+    public Usuario login(String correo, String password) {
+        return usuarioRepository.findByCorreoAndPassword(correo, password)
+                .orElse(null);
+    }
 
     @Override
     public Page<Usuario> obtenerTodosPaginados(Pageable pageable) {
@@ -27,8 +37,8 @@ public class UsuarioService implements IUsuarioService {
     @Override
     public Page<Usuario> findByNombreContainingIgnoreCaseAndCorreoContainingIgnoreCaseAndRol_IdOrderByIdDesc(
             String nombre, String correo, Integer idRol, Pageable pageable) {
-        // TODO Auto-generated method stub
-        return usuarioRepository.findByNombreContainingIgnoreCaseAndCorreoContainingIgnoreCaseAndRol_IdOrderByIdDesc(nombre, correo, idRol, pageable);
+        return usuarioRepository.findByNombreContainingIgnoreCaseAndCorreoContainingIgnoreCaseAndRol_IdOrderByIdDesc(
+                nombre, correo, idRol, pageable);
     }
 
     @Override

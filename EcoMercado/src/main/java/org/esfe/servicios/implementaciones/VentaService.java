@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,7 +28,7 @@ public class VentaService implements IVentaService {
     }
 
     @Override
-    public Page<Venta> findByCorrelativoContainingIgnoreCaseAndEstadoAndUsuario_IdAndTipoPago_IdAndTarjetaCredito_IdOrderByIdDesc(String correlativo, Byte estado, Integer idUsuario, Integer idTipoPago, Integer idTarjetaCredito, Pageable pageable) {
+    public Page<Venta> findByCorrelativoContainingIgnoreCaseAndEstadoAndUsuario_IdAndTipoPago_IdAndTarjetaCredito_IdOrderByIdDesc(String correlativo, Byte estado, Integer idUsuario, Integer idTipoPago, Optional<Integer> idTarjetaCredito, Pageable pageable) {
         return ventaRepository.findByCorrelativoContainingIgnoreCaseAndEstadoAndUsuario_IdAndTipoPago_IdAndTarjetaCredito_IdOrderByIdDesc(
                 correlativo, estado, idUsuario, idTipoPago, idTarjetaCredito, pageable);
     }
@@ -51,5 +52,22 @@ public class VentaService implements IVentaService {
     @Override
     public Page<Venta> buscarVentas(String search, Pageable pageable) {
         return ventaRepository.findByCorrelativoContainingIgnoreCase(search, pageable);
+    }
+
+    @Override
+    public Optional<Venta> findById(Integer id) {
+        return ventaRepository.findById(id);
+    }
+    @Override
+    public Venta save(Venta venta) {
+        return ventaRepository.save(venta);
+    }
+    @Override
+    public BigDecimal getStoredTotal(Integer ventaId) {
+        Optional<Venta> ventaOpt = ventaRepository.findById(ventaId);
+        if (ventaOpt.isPresent()) {
+            return ventaOpt.get().getTotal();
+        }
+        return BigDecimal.ZERO;
     }
 }
