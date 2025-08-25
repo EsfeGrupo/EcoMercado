@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Página de Pago</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .form-container { max-width: 400px; margin: 0 auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
+        .StripeElement { height: 40px; padding: 10px 12px; border: 1px solid #ccc; border-radius: 4px; background-color: white; }
+        #card-element { margin-bottom: 20px; }
+        #submit-button { background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <h2>Realizar Pago</h2>
+    <p>El total será calculado en el servidor.</p>
+    
+    <form id="payment-form">
+        <label for="card-element">Información de la tarjeta</label>
+        <div id="card-element"></div>
+        <button id="submit-button">Pagar</button>
+        <div id="card-errors" role="alert"></div>
+    </form>
+</div>
+
+<script>
+    const stripe = Stripe('pk_test_51RzlFK8Ds2Un1zoer7vW10x3VzUW916DnarlDKXCxHSPdgoACKPX2v5kgWYJR36ZhaRAB0svSbcUkBokT3PEQvvd00PaCmZ2L2'); // <-- TU CLAVE PÚBLICA AQUÍ
+    const elements = stripe.elements();
+    const card = elements.create('card');
+    card.mount('#card-element');
+
+    const form = document.getElementById('payment-form');
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const {paymentMethod, error} = await stripe.createPaymentMethod({
+            type: 'card',
+            card: card,
+        });
+
+        if (error) {
+            const errorElement = document.getElementById('card-errors');
+            errorElement.textContent = error.message;
+        } else {
+            // Envía el ID del método de pago y el ID de la venta al backend
+            const response = await fetch('http://localhost:8080/api/payment/charge', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    paymentMethodId: paymentMethod.id,
+                    ventaId: 1 // Asegúrate de que este ID de venta exista en tu BD
+                })
+            });
+            const result = await response.text();
+            alert(result);
+        }
+    });
+</script>
+</body>
+</html>

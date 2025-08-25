@@ -2,6 +2,8 @@ package org.esfe.modelos;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,23 +26,25 @@ public class Venta {
     private String correlativo;
 
     private LocalDateTime fecha;
-
-    private Float total;
+    // El total de la venta, calculado en el backend
+     // Usar BigDecimal para un cálculo preciso del dinero
+    @Column(precision=10, scale=2) // precision para la base de datos
+    private BigDecimal total;
 
     @ManyToOne
     @JoinColumn(name = "idTipoPago", nullable = false)
     private TipoPago tipoPago;
-
-    private Byte estado;
+    // El estado de la venta: pendiente, pagada, enviada, etc.
+    private String estado;
     
-
-    private LocalDateTime fechaEmision;
+    // El ID de la transacción de Stripe para referencia
+    // Este es el dato que enlaza tu venta con el pago real en Stripe
+    private String stripePaymentIntentId;
 
     @ManyToOne(fetch = FetchType.EAGER) // El rol se carga inmediatamente con el usuario
     @JoinColumn(name = "idTarjeta", nullable = false)
     private TarjetaCredito tarjetaCredito;
     // Getters y setters
-
     public void addDetalle(DetalleVenta detalle) {
         this.detalleventas.add(detalle);
         detalle.setVenta(this);
@@ -91,11 +95,11 @@ public class Venta {
         this.fecha = fecha;
     }
 
-    public Float getTotal() {
+    public BigDecimal  getTotal() {
         return total;
     }
 
-    public void setTotal(Float total) {
+    public void setTotal(BigDecimal  total) {
         this.total = total;
     }
 
@@ -107,11 +111,11 @@ public class Venta {
         this.tipoPago = tipoPago;
     }
 
-    public Byte getEstado() {
+    public String getEstado() {
         return estado;
     }
 
-    public void setEstado(Byte estado) {
+    public void setEstado(String estado) {
         this.estado = estado;
     }
 
@@ -123,11 +127,11 @@ public class Venta {
         this.tarjetaCredito = tarjetaCredito;
     }
 
-    public LocalDateTime getFechaEmision() {
-        return fechaEmision;
+    public String getStripePaymentIntentId() {
+        return stripePaymentIntentId;
     }
 
-    public void setFechaEmision(LocalDateTime fechaEmision) {
-        this.fechaEmision = fechaEmision;
+    public void setStripePaymentIntentId(String stripePaymentIntentId) {
+        this.stripePaymentIntentId = stripePaymentIntentId;
     }
 }
