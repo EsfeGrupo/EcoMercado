@@ -47,4 +47,9 @@ public class VentaService implements IVentaService {
         ventaRepository.deleteById(id);
 
     }
+
+    @Override
+    public Page<Venta> buscarVentas(String search, Pageable pageable) {
+        return ventaRepository.findByCorrelativoContainingIgnoreCase(search, pageable);
+    }
 }

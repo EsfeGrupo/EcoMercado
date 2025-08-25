@@ -20,4 +20,6 @@ public interface IDetalleVentaService {
     DetalleVenta crearOEditar(DetalleVenta detalleVenta);
 
     void eliminarPorId(Integer id);
+
+    List<DetalleVenta> obtenerPorVentaId(Integer idVenta);
 }

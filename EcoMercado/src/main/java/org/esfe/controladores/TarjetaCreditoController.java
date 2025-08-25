@@ -26,32 +26,6 @@ public class TarjetaCreditoController {
     @Autowired
     private ITarjetaCreditoService tarjetaCreditoService;
 
-    
-    /* @GetMapping
-    public String index(Model model, @RequestParam("page") Optional<Integer> page, @RequestParam("size") Optional<Integer> size) {
-        int currentPage = page.orElse(1) - 1;
-        int pageSize = size.orElse(5);
-        Sort sortByIdDesc = Sort.by(Sort.Direction.DESC, "id");
-        Pageable pageable = PageRequest.of(currentPage, pageSize, sortByIdDesc);
-        Page<TarjetaCredito> tarjetas = tarjetaCreditoService.obtenerTodos(pageable);
-        model.addAttribute("tarjetas", tarjetas);
-
-        // Verificar expiración de tarjetas
-        boolean expirada = tarjetas.stream().anyMatch(tc -> tc.getFechaExpiracion().isBefore(LocalDate.now()));
-        if (expirada) {
-            model.addAttribute("msg", "La tarjeta de crédito expiró");
-        }
-
-        int totalPages = tarjetas.getTotalPages();
-        if (totalPages > 0) {
-            List<Integer> pageNumbers = java.util.stream.IntStream.rangeClosed(1, totalPages)
-                    .boxed()
-                    .collect(java.util.stream.Collectors.toList());
-            model.addAttribute("pageNumbers", pageNumbers);
-        }
-        return "tarjetaCredito/index";
-    }
-        */
     @GetMapping
     public String index(Model model, @RequestParam("page") Optional<Integer> page, @RequestParam("size") Optional<Integer> size, @RequestParam("numero") Optional<String> numero, @RequestParam("nombreTitular") Optional<String> nombreTitular, @RequestParam("banco") Optional<String> banco) {
         int currentPage = page.orElse(1) - 1; // si no está seteado se asigna 0
@@ -77,7 +51,6 @@ public class TarjetaCreditoController {
                     .collect(Collectors.toList());
             model.addAttribute("pageNumbers", pageNumbers);
         }
-
         return "tarjetaCredito/index";
     }
 
@@ -98,4 +71,31 @@ public class TarjetaCreditoController {
         return "redirect:/tarjetasCredito";
     }
 
+    @GetMapping("/details/{id}")
+    public String details(@PathVariable("id") Integer id, Model model) {
+        TarjetaCredito tarjetaCredito = tarjetaCreditoService.obtenerPorId(id);
+        model.addAttribute("tarjetaCredito", tarjetaCredito);
+        return "tarjetaCredito/details";
+    }
+
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable("id") Integer id, Model model) {
+        TarjetaCredito tarjetaCredito = tarjetaCreditoService.obtenerPorId(id);
+        model.addAttribute("tarjetaCredito", tarjetaCredito);
+        return "tarjetaCredito/edit";
+    }
+
+    @GetMapping("/remove/{id}")
+    public String remove(@PathVariable("id") Integer id, Model model) {
+        TarjetaCredito tarjetaCredito = tarjetaCreditoService.obtenerPorId(id);
+        model.addAttribute("tarjetaCredito", tarjetaCredito);
+        return "tarjetaCredito/delete";
+    }
+
+    @PostMapping("/delete")
+    public String delete(TarjetaCredito tarjetaCredito, RedirectAttributes attributes) {
+        tarjetaCreditoService.eliminarPorId(tarjetaCredito.getId());
+        attributes.addFlashAttribute("msg", "Tarjeta de crédito eliminada correctamente");
+        return "redirect:/tarjetasCredito";
+    }
 }

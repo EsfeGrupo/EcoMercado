@@ -9,25 +9,23 @@
       <div class="col-md-8">
         <div class="card shadow-lg border-success">
           <div class="card-header bg-success text-white">
-            <h2 class="card-title mb-0 fw-bold">Detalles del Rol</h2>
+            <h2 class="card-title mb-0 fw-bold">Detalles del Tipo de Pago</h2>
           </div>
           <div class="card-body">
             <dl class="row">
               <dt class="col-sm-3 fw-bold text-success">ID</dt>
-              <dd class="col-sm-9" th:text="${rol.id}"></dd>
-              
-              <dt class="col-sm-3 fw-bold text-success">Nombre</dt>
-              <dd class="col-sm-9" th:text="${rol.nombre}"></dd>
-              
+              <dd class="col-sm-9" th:text="${tipoPago.id}"></dd>
+              <dt class="col-sm-3 fw-bold text-success">Método de Pago</dt>
+              <dd class="col-sm-9" th:text="${tipoPago.metodoPago}"></dd>
               <dt class="col-sm-3 fw-bold text-success">Descripción</dt>
-              <dd class="col-sm-9" th:text="${rol.descripcion}"></dd>
+              <dd class="col-sm-9" th:text="${tipoPago.descripcion}"></dd>
             </dl>
           </div>
           <div class="card-footer d-flex justify-content-end gap-2">
-            <a th:href="@{/roles/edit/{id} (id = ${rol.id}) }" class="btn btn-outline-primary btn-lg">
+            <a th:href="@{/tipopagos/edit/{id} (id = ${tipoPago.id}) }" class="btn btn-outline-primary btn-lg">
               <i class="bi bi-pencil-square"></i> Editar
             </a>
-            <a th:href="@{/roles}" class="btn btn-outline-secondary btn-lg">
+            <a th:href="@{/tipopagos}" class="btn btn-outline-secondary btn-lg">
               <i class="bi bi-arrow-left-circle"></i> Regresar
             </a>
           </div>
@@ -36,3 +34,4 @@
     </div>
   </div>
 </div>
+</html>
