@@ -11,7 +11,11 @@ public class TarjetaCredito {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @NotBlank(message = "El numero de la tarejta es requerido")
+    @NotBlank(message = "El numero de la tarjeta es requerido")
+    @Column(name = "numero_encriptado")
+    private String numeroEncriptado;
+
+    @Transient // This field won't be persisted to the
     private String numero;
 
     @NotBlank(message = "El correo de usuario es requerido")
@@ -86,5 +90,11 @@ public class TarjetaCredito {
         this.usuario = usuario;
     }
 
-    
+    public String getNumeroEncriptado() {
+        return numeroEncriptado;
+    }
+
+    public void setNumeroEncriptado(String numeroEncriptado) {
+        this.numeroEncriptado = numeroEncriptado;
+    }
 }

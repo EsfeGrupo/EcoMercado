@@ -28,17 +28,27 @@ public class TarjetaCreditoController {
 
     @GetMapping
     public String index(Model model, @RequestParam("page") Optional<Integer> page, @RequestParam("size") Optional<Integer> size, @RequestParam("numero") Optional<String> numero, @RequestParam("nombreTitular") Optional<String> nombreTitular, @RequestParam("banco") Optional<String> banco) {
-        int currentPage = page.orElse(1) - 1; // si no está seteado se asigna 0
-        int pageSize = size.orElse(5); // tamaño de la página, se asigna 5
+        int currentPage = page.orElse(1) - 1;
+        int pageSize = size.orElse(5);
         Sort sortByIdDesc = Sort.by(Sort.Direction.DESC, "id");
-        Pageable pageable = PageRequest.of(currentPage, pageSize,sortByIdDesc);
+        Pageable pageable = PageRequest.of(currentPage, pageSize, sortByIdDesc);
         String numeroSearch = numero.orElse("");
         String nombreTitularSearch = nombreTitular.orElse("");
         String bancoSearch = banco.orElse("");
-        Page<TarjetaCredito> tarjetas = tarjetaCreditoService.findByNumeroContainingIgnoreCaseAndNombreTitularContainingIgnoreCaseAndBancoContainingIgnoreCaseOrderByIdDesc(numeroSearch, nombreTitularSearch, bancoSearch,pageable);
+
+        // Note: The search will now be based on the encrypted number in the database.
+        // A better approach would be to only search on non-sensitive data, but for this example, we'll continue searching on the number.
+        Page<TarjetaCredito> tarjetas = tarjetaCreditoService.findByNumeroContainingIgnoreCaseAndNombreTitularContainingIgnoreCaseAndBancoContainingIgnoreCaseOrderByIdDesc(numeroSearch, nombreTitularSearch, bancoSearch, pageable);
+
+        // Mask the credit card number for display
+        tarjetas.getContent().forEach(tarjeta -> {
+            if (tarjeta.getNumeroEncriptado() != null && tarjeta.getNumeroEncriptado().length() >= 4) {
+                tarjeta.setNumero("**** **** **** " + tarjeta.getNumeroEncriptado().substring(tarjeta.getNumeroEncriptado().length() - 4));
+            }
+        });
+
         model.addAttribute("tarjetas", tarjetas);
 
-        // Verificar expiración de tarjetas
         boolean expirada = tarjetas.stream().anyMatch(tc -> tc.getFechaExpiracion().isBefore(LocalDate.now()));
         if (expirada) {
             model.addAttribute("msg", "La tarjeta de crédito expiró");
@@ -46,9 +56,7 @@ public class TarjetaCreditoController {
 
         int totalPages = tarjetas.getTotalPages();
         if (totalPages > 0) {
-            List<Integer> pageNumbers = IntStream.rangeClosed(1, totalPages)
-                    .boxed()
-                    .collect(Collectors.toList());
+            List<Integer> pageNumbers = IntStream.rangeClosed(1, totalPages).boxed().collect(Collectors.toList());
             model.addAttribute("pageNumbers", pageNumbers);
         }
         return "tarjetaCredito/index";
