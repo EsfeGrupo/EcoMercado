@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -40,18 +41,19 @@ public class VentaController {
     private IProductoRepository productoRepository;
 
     @GetMapping
-    public String index(Model model, @RequestParam("page") Optional<Integer> page, @RequestParam("size") Optional<Integer> size, @RequestParam(value = "search", required = false) String search){
+    public String index(Model model, @RequestParam("page") Optional<Integer> page, @RequestParam("size") Optional<Integer> size, @RequestParam("correlativo") String correlativo, @RequestParam("estado") Byte estado, @RequestParam("idUsuario") Integer idUsuario, @RequestParam("idTipoPago") Integer idTipoPago, @RequestParam("idTarjetaCredito") Optional<Integer> idTarjetaCredito){
         int currentPage = page.orElse(1) - 1;
         int pageSize = size.orElse(5);
-        Pageable pageable = PageRequest.of(currentPage, pageSize);
+        Sort sortByIdDesc = Sort.by(Sort.Direction.DESC, "id"); //Nuevo campo
+        Pageable pageable = PageRequest.of(currentPage, pageSize, sortByIdDesc);
 
-        Page<Venta> ventas;
-        if (search != null && !search.isEmpty()) {
-            ventas = ventaService.buscarVentas(search, pageable);
-            model.addAttribute("search", search);
-        } else {
-            ventas = ventaService.obtenerTodosPaginados(pageable);
-        }
+        //String correlativoSearch = correlativo.orElse("");
+        //String estadoSearch = estado.orElse("");
+
+
+        //Page<Venta> ventas;
+        Page<Venta> ventas = ventaService.findByCorrelativoContainingIgnoreCaseAndEstadoAndUsuario_IdAndTipoPago_IdAndTarjetaCredito_IdOrderByIdDesc(
+                correlativo, estado, idUsuario, idTipoPago, idTarjetaCredito, pageable);
         model.addAttribute("ventas", ventas);
 
         int totalPages = ventas.getTotalPages();
