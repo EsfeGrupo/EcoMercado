@@ -1,0 +1,41 @@
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/layouts/_mainLayout">
+
+<div layout:fragment="content">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card shadow-lg border-danger">
+          <div class="card-header bg-danger text-white">
+            <h2 class="card-title mb-0 fw-bold">Eliminar Tipo de Pago</h2>
+          </div>
+          <div class="card-body">
+            <h3 class="mb-4 text-center text-danger">¿Estas seguro que desea eliminar este registro?</h3>
+            <dl class="row">
+              <dt class="col-sm-3 fw-bold">ID</dt>
+              <dd class="col-sm-9" th:text="${tipoPago.id}"></dd>
+              <dt class="col-sm-3 fw-bold">Método de Pago</dt>
+              <dd class="col-sm-9" th:text="${tipoPago.metodoPago}"></dd>
+              <dt class="col-sm-3 fw-bold">Descripción</dt>
+              <dd class="col-sm-9" th:text="${tipoPago.descripcion}"></dd>
+            </dl>
+          </div>
+          <div class="card-footer d-flex justify-content-end gap-2">
+            <form th:action="@{/tipopagos/delete}" method="post" class="d-flex gap-2">
+              <input type="hidden" name="id" th:value="${tipoPago.id}">
+              <button type="submit" class="btn btn-danger btn-lg">
+                <i class="bi bi-trash"></i> Eliminar
+              </button>
+              <a th:href="@{/tipopagos}" class="btn btn-outline-secondary btn-lg">
+                <i class="bi bi-x-circle"></i> Regresar
+              </a>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</html>
