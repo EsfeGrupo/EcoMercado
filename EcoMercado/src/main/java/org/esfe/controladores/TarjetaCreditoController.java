@@ -19,12 +19,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Controller
 @RequestMapping("/tarjetasCredito")
 public class TarjetaCreditoController {
     @Autowired
     private ITarjetaCreditoService tarjetaCreditoService;
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     @GetMapping
     public String index(Model model, @RequestParam("page") Optional<Integer> page, @RequestParam("size") Optional<Integer> size, @RequestParam("numero") Optional<String> numero, @RequestParam("nombreTitular") Optional<String> nombreTitular, @RequestParam("banco") Optional<String> banco) {
@@ -69,14 +73,24 @@ public class TarjetaCreditoController {
 
     @PostMapping("/save")
     public String save(TarjetaCredito tarjetaCredito, BindingResult result, Model model, RedirectAttributes attributes) {
-        if (result.hasErrors()) {
-            model.addAttribute(tarjetaCredito);
-            attributes.addFlashAttribute("error", "No se pudo guardar debido a un error.");
-            return "tarjetaCredito/create";
-        }
-        tarjetaCreditoService.crearOEditar(tarjetaCredito);
-        attributes.addFlashAttribute("msg", "Tarjeta de crédito creada correctamente");
-        return "redirect:/tarjetasCredito";
+    if (result.hasErrors()) {
+        model.addAttribute(tarjetaCredito);
+        attributes.addFlashAttribute("error", "No se pudo guardar debido a un error.");
+        return "tarjetaCredito/create";
+    }
+
+    // Lógica para encriptar
+    if (tarjetaCredito.getNumero() != null && !tarjetaCredito.getNumero().isEmpty()) {
+        String numeroEncriptado = passwordEncoder.encode(tarjetaCredito.getNumero());
+        tarjetaCredito.setNumeroEncriptado(numeroEncriptado);
+        
+        // Limpiar el campo transitorio
+        tarjetaCredito.setNumero(null);
+    }
+    
+    tarjetaCreditoService.crearOEditar(tarjetaCredito);
+    attributes.addFlashAttribute("msg", "Tarjeta de crédito creada correctamente");
+    return "redirect:/tarjetasCredito";
     }
 
     @GetMapping("/details/{id}")
