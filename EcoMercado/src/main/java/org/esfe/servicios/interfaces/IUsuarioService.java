@@ -18,4 +18,7 @@ public interface IUsuarioService {
     Usuario crearOEditar(Usuario usuario);
 
     void eliminarPorId(Integer id);
+
+    Usuario login(String correo, String password);
+
 }
