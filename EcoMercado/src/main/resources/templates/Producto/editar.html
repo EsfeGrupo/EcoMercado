@@ -1,33 +1,40 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Editar Producto</title>
-</head>
-<body>
-<h1>Editar Producto</h1>
+<!-- src/main/resources/templates/producto/editar.html -->
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/layouts/_mainLayout">
 
-<form th:action="@{/productos/guardar}" th:object="${producto}" method="post" enctype="multipart/form-data">
-    <input type="hidden" th:field="*{id}" />
+<div layout:fragment="content">
 
-    <label>Nombre:</label>
-    <input type="text" th:field="*{nombre}" required/><br/>
+  <div class="container my-4">
+    <h1 class="mb-4 text-center text-warning fw-bold">Editar Producto</h1>
 
-    <label>Precio:</label>
-    <input type="number" step="0.01" th:field="*{precio}" required/><br/>
+    <form th:action="@{/producto/editar/{id}(id=${producto.id})}" method="post" enctype="multipart/form-data" class="p-4 rounded-3 shadow-sm" style="background-color: #f8f9fa;">
 
-    <label>Descripción:</label>
-    <textarea th:field="*{descripcion}"></textarea><br/>
+      <div class="mb-3">
+        <label for="nombre" class="form-label">Nombre</label>
+        <input type="text" class="form-control" id="nombre" name="nombre" th:value="${producto.nombre}" required>
+      </div>
 
-    <label>Imagen actual:</label><br/>
-    <img th:if="${producto.img != null}" th:src="@{${'/productos/imagen/' + producto.id}}" alt="Imagen del producto" width="150"/><br/>
+      <div class="mb-3">
+        <label for="precio" class="form-label">Precio</label>
+        <input type="number" step="0.01" class="form-control" id="precio" name="precio" th:value="${producto.precio}" required>
+      </div>
 
-    <label>Cambiar Imagen:</label>
-    <input type="file" name="imagenFile"/><br/><br/>
+      <div class="mb-3">
+        <label for="imagenFile" class="form-label">Cambiar Imagen</label>
+        <input type="file" class="form-control" id="imagenFile" name="imagenFile" accept="image/*">
+      </div>
 
-    <button type="submit">Actualizar</button>
-</form>
+      <div th:if="${producto.img != null}" class="mb-3">
+        <label class="form-label">Imagen Actual</label><br>
+        <img th:src="@{'data:image/jpeg;base64,' + ${#strings.encodeBase64(producto.img)}}" class="img-fluid mb-2" alt="Imagen producto">
+      </div>
 
-<a th:href="@{/productos}">Volver al listado</a>
-</body>
+      <button type="submit" class="btn btn-warning"><i class="bi bi-save"></i> Actualizar</button>
+      <a th:href="@{/producto}" class="btn btn-secondary">Cancelar</a>
+    </form>
+  </div>
+
+</div>
 </html>

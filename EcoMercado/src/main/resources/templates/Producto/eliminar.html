@@ -1,15 +1,38 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>Eliminar Producto</title>
-</head>
-<body>
-<h1>Eliminar Producto</h1>
-<p>¿Estás seguro de que deseas eliminar el producto <strong th:text="${producto.nombre}"></strong>?</p>
+<!-- src/main/resources/templates/producto/eliminar.html -->
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/layouts/_mainLayout">
 
-<form th:action="@{|/productos/eliminar/${producto.id}|}" method="post">
-    <button type="submit">Sí, eliminar</button>
-    <a th:href="@{/productos}">Cancelar</a>
-</form>
-</body>
+<div layout:fragment="content">
+
+  <div class="container my-4">
+    <h1 class="mb-4 text-center text-danger fw-bold">Eliminar Producto</h1>
+
+    <div class="card shadow-sm p-4">
+      <p>¿Está seguro de que desea eliminar el siguiente producto?</p>
+
+      <div class="mb-3">
+        <h5 class="fw-bold">Nombre:</h5>
+        <p th:text="${producto.nombre}">Nombre del producto</p>
+      </div>
+
+      <div class="mb-3">
+        <h5 class="fw-bold">Precio:</h5>
+        <p th:text="${producto.precio}">Precio del producto</p>
+      </div>
+
+      <div class="mb-3" th:if="${producto.img != null}">
+        <h5 class="fw-bold">Imagen:</h5>
+        <img th:src="@{'data:image/jpeg;base64,' + ${#strings.encodeBase64(producto.img)}}" class="img-fluid" alt="Imagen producto">
+      </div>
+
+      <form th:action="@{/producto/eliminar/{id}(id=${producto.id})}" method="post">
+        <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i> Eliminar</button>
+        <a th:href="@{/producto}" class="btn btn-secondary">Cancelar</a>
+      </form>
+    </div>
+  </div>
+
+</div>
 </html>
