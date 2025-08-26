@@ -20,21 +20,21 @@ public class ProductoController {
     @GetMapping
     public String listar(Model model) {
         model.addAttribute("productos", productoRepository.findAll());
-        return "productos/listar";
+        return "productos/index";
     }
 
     // Mostrar formulario de creación
     @GetMapping("/crear")
     public String mostrarFormularioCrear(Model model) {
         model.addAttribute("producto", new Producto());
-        return "productos/formulario";
+        return "productos/crear";
     }
 
     // Guardar producto (crear o editar)
     @PostMapping("/guardar")
     public String guardar(@ModelAttribute Producto producto) {
         productoRepository.save(producto);
-        return "redirect:/productos";
+        return "redirect:/index";
     }
 
     // Mostrar formulario de edición
@@ -43,7 +43,7 @@ public class ProductoController {
         Producto producto = productoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("ID de producto no válido: " + id));
         model.addAttribute("producto", producto);
-        return "productos/formulario";
+        return "productos/editar";
     }
 
     // Ver detalles
