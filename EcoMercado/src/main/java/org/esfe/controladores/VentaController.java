@@ -16,19 +16,17 @@ import org.esfe.modelos.DetalleVenta;
 import org.esfe.servicios.interfaces.IVentaService;
 import org.esfe.servicios.interfaces.IDetalleVentaService;
 import org.esfe.repositorios.IProductoRepository;
-import org.esfe.modelos.Producto;
 
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.pdf.PdfWriter;
-
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import org.esfe.servicios.utilerias.PdfGeneratorService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 
 @Controller
 @RequestMapping("/ventas")
@@ -45,6 +43,8 @@ public class VentaController {
     private org.esfe.repositorios.ITipoPagoRepository tipoPagoRepository;
     @Autowired
     private org.esfe.repositorios.ITarjetaCreditoRepository tarjetaCreditoRepository;
+    @Autowired
+    private PdfGeneratorService pdfGeneratorService;
 
     @GetMapping
     public String index(Model model,
@@ -212,53 +212,36 @@ public class VentaController {
                     return "redirect:/ventas/details/" + ventaId;
                 }
 
-                @GetMapping("/downloadPdf/{id}")
-                public void downloadPdf(@PathVariable("id") Integer id, HttpServletResponse response) throws IOException, DocumentException {
-                    Venta venta = ventaService.obtenerPorId(id).orElse(null);
-                    if (venta == null) {
-                        response.sendError(HttpServletResponse.SC_NOT_FOUND);
-                        return;
-                    }
-                    response.setContentType("application/pdf");
-                    response.setHeader("Content-Disposition", "attachment; filename=venta_" + id + ".pdf");
-                    Document document = new Document();
-                    PdfWriter.getInstance(document, response.getOutputStream());
-                    document.open();
-                    document.add(new Paragraph("Venta ID: " + venta.getId()));
-                    document.add(new Paragraph("Fecha: " + venta.getFecha()));
-                    document.add(new Paragraph("Total: " + venta.getTotal()));
-                    document.add(new Paragraph("Detalles:"));
-                    List<DetalleVenta> detalles = detalleVentaService.obtenerPorVentaId(id);
-                    for (DetalleVenta detalle : detalles) {
-                        Producto producto = productoRepository.findById(detalle.getIdProducto()).orElse(null);
-                        String nombreProducto = producto != null ? producto.getNombre() : "Producto no encontrado";
-                        document.add(new Paragraph("Producto: " + nombreProducto + ", Cantidad: " + detalle.getCantidad() + ", Precio: " + detalle.getPrecioUnitario()));
-                    }
-                    document.close();
-                }
+                @GetMapping("/reportegeneral/{visualizacion}")
+    public ResponseEntity<byte[]> reporteGeneralVentas(@PathVariable("visualizacion") String visualizacion) {
+        try {
+            List<Venta> ventas = ventaService.obtenerTodos();
+            byte[] pdfBytes = pdfGeneratorService.generatePdfFromHtml("reportes/rpVentas", "ventas", ventas);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.add("Content-Disposition", visualizacion+"; filename=reporte_general_ventas.pdf");
+            return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+        } catch (IOException e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
-                @GetMapping("/previewPdf/{id}")
-                public void previewPdf(@PathVariable("id") Integer id, HttpServletResponse response) throws IOException, DocumentException {
-                    Venta venta = ventaService.obtenerPorId(id).orElse(null);
-                    if (venta == null) {
-                        response.sendError(HttpServletResponse.SC_NOT_FOUND);
-                        return;
-                    }
-                    response.setContentType("application/pdf");
-                    response.setHeader("Content-Disposition", "inline; filename=venta_" + id + ".pdf");
-                    Document document = new Document();
-                    PdfWriter.getInstance(document, response.getOutputStream());
-                    document.open();
-                    document.add(new Paragraph("Venta ID: " + venta.getId()));
-                    document.add(new Paragraph("Fecha: " + venta.getFecha()));
-                    document.add(new Paragraph("Total: " + venta.getTotal()));
-                    document.add(new Paragraph("Detalles:"));
-                    List<DetalleVenta> detalles = detalleVentaService.obtenerPorVentaId(id);
-                    for (DetalleVenta detalle : detalles) {
-                        Producto producto = productoRepository.findById(detalle.getIdProducto()).orElse(null);
-                        String nombreProducto = producto != null ? producto.getNombre() : "Producto no encontrado";
-                        document.add(new Paragraph("Producto: " + nombreProducto + ", Cantidad: " + detalle.getCantidad() + ", Precio: " + detalle.getPrecioUnitario()));
-                    }
-                    document.close();
-                }
+    @GetMapping("/reporte/{id}/{visualizacion}")
+    public ResponseEntity<byte[]> reporteIndividualVenta(@PathVariable("id") Integer id, @PathVariable("visualizacion") String visualizacion) {
+        try {
+            Optional<Venta> ventaOpt = ventaService.obtenerPorId(id);
+            if (ventaOpt.isEmpty()) {
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            }
+            Venta venta = ventaOpt.get();
+            List<Venta> ventas = List.of(venta); // Para reutilizar la plantilla
+            byte[] pdfBytes = pdfGeneratorService.generatePdfFromHtml("reportes/rpVentas", "ventas", ventas);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.add("Content-Disposition", visualizacion+"; filename=reporte_venta_"+id+".pdf");
+            return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+        } catch (IOException e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
     }
