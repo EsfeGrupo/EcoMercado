@@ -24,8 +24,8 @@ public class TarjetaCredito {
     @NotBlank(message = "La fecha de expiracion es requerida")
     private LocalDate fechaExpiracion;
 
-    @NotBlank(message = "El codigo de seguridad es requerido")
-    private String codigoSeguridad;
+    @NotBlank(message = "El codigo postal es requerido")
+    private String codigoPostal;
 
     @NotBlank(message = "El banco de la tarjeta es requerido")
     private String banco;
@@ -66,12 +66,12 @@ public class TarjetaCredito {
         this.fechaExpiracion = fechaExpiracion;
     }
 
-    public String getCodigoSeguridad() {
-        return codigoSeguridad;
+    public String getCodigoPostal() {
+        return codigoPostal;
     }
 
-    public void setCodigoSeguridad(String codigoSeguridad) {
-        this.codigoSeguridad = codigoSeguridad;
+    public void setCodigoPostal(String codigoPostal) {
+        this.codigoPostal = codigoPostal;
     }
 
     public String getBanco() {

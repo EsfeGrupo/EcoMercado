@@ -93,7 +93,7 @@ public class TarjetaCreditoController {
     
     tarjetaCreditoService.crearOEditar(tarjetaCredito);
     attributes.addFlashAttribute("msg", "Tarjeta de crédito creada correctamente");
-    return "redirect:/tarjetasCredito";
+    return "redirect:/tarjetaCredito";
     }
 
     @GetMapping("/details/{id}")
@@ -121,6 +121,6 @@ public class TarjetaCreditoController {
     public String delete(TarjetaCredito tarjetaCredito, RedirectAttributes attributes) {
         tarjetaCreditoService.eliminarPorId(tarjetaCredito.getId());
         attributes.addFlashAttribute("msg", "Tarjeta de crédito eliminada correctamente");
-        return "redirect:/tarjetasCredito";
+        return "redirect:/tarjetaCredito";
     }
 }
