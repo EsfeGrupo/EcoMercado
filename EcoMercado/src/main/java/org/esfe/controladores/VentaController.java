@@ -51,27 +51,53 @@ public class VentaController {
         @RequestParam("page") Optional<Integer> page,
         @RequestParam("size") Optional<Integer> size,
         @RequestParam("correlativo") Optional<String> correlativo,
-        @RequestParam("estado") Optional<Byte> estado,
-        @RequestParam("idUsuario") Optional<Integer> idUsuario,
-        @RequestParam("idTipoPago") Optional<Integer> idTipoPago,
-        @RequestParam("idTarjetaCredito") Optional<Integer> idTarjetaCredito) {
+        @RequestParam("estado") Optional<String> estado,
+        @RequestParam("usuario") Optional<String> usuarioNombre,
+        @RequestParam("tipoPago") Optional<String> tipoPagoNombre,
+        @RequestParam("tarjetaCredito") Optional<String> tarjetaNumero) {
         int currentPage = page.orElse(1) - 1;
         int pageSize = size.orElse(5);
         Sort sortByIdDesc = Sort.by(Sort.Direction.DESC, "id");
         Pageable pageable = PageRequest.of(currentPage, pageSize, sortByIdDesc);
 
         String correlativoSearch = correlativo.orElse("");
-        Byte estadoSearch = estado.orElse(null);
-        Integer idUsuarioSearch = idUsuario.orElse(null);
-        Integer idTipoPagoSearch = idTipoPago.orElse(null);
-        Integer idTarjetaCreditoSearch = idTarjetaCredito.orElse(null);
+        String estadoSearch = estado.orElse("");
+        String usuarioSearch = usuarioNombre.orElse("");
+        String tipoPagoSearch = tipoPagoNombre.orElse("");
+        String tarjetaSearch = tarjetaNumero.orElse("");
+
+        // Buscar los IDs correspondientes a los valores legibles
+        Integer idUsuarioSearch = null;
+        if (!usuarioSearch.isEmpty()) {
+            idUsuarioSearch = usuarioRepository.findAll().stream()
+                .filter(u -> u.getNombre().equalsIgnoreCase(usuarioSearch))
+                .map(u -> u.getId())
+                .findFirst().orElse(null);
+        }
+        Integer idTipoPagoSearch = null;
+        if (!tipoPagoSearch.isEmpty()) {
+            idTipoPagoSearch = tipoPagoRepository.findAll().stream()
+                .filter(tp -> tp.getMetodoPago().equalsIgnoreCase(tipoPagoSearch))
+                .map(tp -> tp.getId())
+                .findFirst().orElse(null);
+        }
+        Optional<Integer> idTarjetaCreditoSearch = Optional.empty();
+        if (!tarjetaSearch.isEmpty()) {
+            idTarjetaCreditoSearch = tarjetaCreditoRepository.findAll().stream()
+                .filter(tc -> tc.getNumero().equalsIgnoreCase(tarjetaSearch))
+                .map(tc -> tc.getId())
+                .findFirst();
+        }
+        Byte estadoByte = null;
+        if (estadoSearch.equalsIgnoreCase("Pendiente")) estadoByte = 1;
+        else if (estadoSearch.equalsIgnoreCase("Cancelado")) estadoByte = 2;
 
         Page<Venta> ventas = ventaService.findByCorrelativoContainingIgnoreCaseAndEstadoAndUsuario_IdAndTipoPago_IdAndTarjetaCredito_IdOrderByIdDesc(
             correlativoSearch,
-            estadoSearch,
+            estadoByte,
             idUsuarioSearch,
             idTipoPagoSearch,
-            idTarjetaCredito,
+            idTarjetaCreditoSearch,
             pageable);
         model.addAttribute("ventas", ventas);
 
@@ -82,6 +108,9 @@ public class VentaController {
                 .collect(Collectors.toList());
             model.addAttribute("pageNumbers", pageNumbers);
         }
+        model.addAttribute("usuarios", usuarioRepository.findAll());
+        model.addAttribute("tiposPago", tipoPagoRepository.findAll());
+        model.addAttribute("tarjetasCredito", tarjetaCreditoRepository.findAll());
         return "venta/index";
     }
 
