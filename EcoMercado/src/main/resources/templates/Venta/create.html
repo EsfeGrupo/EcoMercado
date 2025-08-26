@@ -1,0 +1,66 @@
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/layouts/_mainLayout">
+
+<div layout:fragment="content">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card shadow-lg border-success">
+          <div class="card-header bg-success text-white">
+            <h2 class="card-title mb-0 fw-bold">Crear Nueva Venta</h2>
+          </div>
+          <div class="card-body">
+            <form th:action="@{/ventas/save}" th:object="${venta}" method="post">
+              <div class="mb-3">
+                <label for="correlativo" class="form-label fw-bold">Correlativo</label>
+                <input type="text" class="form-control" th:field="*{correlativo}" id="correlativo" placeholder="Escriba el correlativo" required>
+              </div>
+              <div class="mb-3">
+                <label for="estado" class="form-label fw-bold">Estado</label>
+                <select class="form-select" th:field="*{estado}" id="estado" required>
+                  <option th:value="1">Pendiente</option>
+                  <option th:value="2">Cancelado</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="idUsuario" class="form-label fw-bold">Usuario</label>
+                <select class="form-select" th:field="*{usuario.id}" id="idUsuario" required>
+                  <option th:each="usuario : ${usuarios}" th:value="${usuario.id}" th:text="${usuario.nombre}"></option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="idTipoPago" class="form-label fw-bold">Tipo de Pago</label>
+                <select class="form-select" th:field="*{tipoPago.id}" id="idTipoPago" required>
+                  <option th:each="tipo : ${tiposPago}" th:value="${tipo.id}" th:text="${tipo.metodoPago}"></option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="idTarjetaCredito" class="form-label fw-bold">Tarjeta de Crédito</label>
+                <select class="form-select" th:field="*{tarjetaCredito.id}" id="idTarjetaCredito">
+                  <option th:each="tarjeta : ${tarjetasCredito}" th:value="${tarjeta.id}" th:text="${tarjeta.numero}"></option>
+                </select>
+                <!--
+                // Para filtrar solo las tarjetas del usuario logueado en el futuro:
+                // <select class="form-select" th:field="*{tarjetaCredito.id}" id="idTarjetaCredito">
+                //   <option th:each="tarjeta : ${tarjetasCredito}" th:if="${tarjeta.usuario.id} == ${#authentication.principal.id}" th:value="${tarjeta.id}" th:text="${tarjeta.numero}"></option>
+                // </select>
+                -->
+              </div>
+              <hr class="my-4">
+              <div class="d-flex justify-content-end gap-2">
+                <button type="submit" class="btn btn-primary btn-lg">
+                  <i class="bi bi-save"></i> Guardar
+                </button>
+                <a th:href="@{/ventas}" class="btn btn-outline-secondary btn-lg">
+                  <i class="bi bi-x-circle"></i> Regresar
+                </a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

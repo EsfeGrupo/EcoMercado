@@ -39,28 +39,47 @@ public class VentaController {
     private IDetalleVentaService detalleVentaService;
     @Autowired
     private IProductoRepository productoRepository;
+    @Autowired
+    private org.esfe.repositorios.IUsuarioRepository usuarioRepository;
+    @Autowired
+    private org.esfe.repositorios.ITipoPagoRepository tipoPagoRepository;
+    @Autowired
+    private org.esfe.repositorios.ITarjetaCreditoRepository tarjetaCreditoRepository;
 
     @GetMapping
-    public String index(Model model, @RequestParam("page") Optional<Integer> page, @RequestParam("size") Optional<Integer> size, @RequestParam("correlativo") String correlativo, @RequestParam("estado") Byte estado, @RequestParam("idUsuario") Integer idUsuario, @RequestParam("idTipoPago") Integer idTipoPago, @RequestParam("idTarjetaCredito") Optional<Integer> idTarjetaCredito){
+    public String index(Model model,
+        @RequestParam("page") Optional<Integer> page,
+        @RequestParam("size") Optional<Integer> size,
+        @RequestParam("correlativo") Optional<String> correlativo,
+        @RequestParam("estado") Optional<Byte> estado,
+        @RequestParam("idUsuario") Optional<Integer> idUsuario,
+        @RequestParam("idTipoPago") Optional<Integer> idTipoPago,
+        @RequestParam("idTarjetaCredito") Optional<Integer> idTarjetaCredito) {
         int currentPage = page.orElse(1) - 1;
         int pageSize = size.orElse(5);
-        Sort sortByIdDesc = Sort.by(Sort.Direction.DESC, "id"); //Nuevo campo
+        Sort sortByIdDesc = Sort.by(Sort.Direction.DESC, "id");
         Pageable pageable = PageRequest.of(currentPage, pageSize, sortByIdDesc);
 
-        //String correlativoSearch = correlativo.orElse("");
-        //String estadoSearch = estado.orElse("");
+        String correlativoSearch = correlativo.orElse("");
+        Byte estadoSearch = estado.orElse(null);
+        Integer idUsuarioSearch = idUsuario.orElse(null);
+        Integer idTipoPagoSearch = idTipoPago.orElse(null);
+        Integer idTarjetaCreditoSearch = idTarjetaCredito.orElse(null);
 
-
-        //Page<Venta> ventas;
         Page<Venta> ventas = ventaService.findByCorrelativoContainingIgnoreCaseAndEstadoAndUsuario_IdAndTipoPago_IdAndTarjetaCredito_IdOrderByIdDesc(
-                correlativo, estado, idUsuario, idTipoPago, idTarjetaCredito, pageable);
+            correlativoSearch,
+            estadoSearch,
+            idUsuarioSearch,
+            idTipoPagoSearch,
+            idTarjetaCredito,
+            pageable);
         model.addAttribute("ventas", ventas);
 
         int totalPages = ventas.getTotalPages();
         if (totalPages > 0) {
             List<Integer> pageNumbers = IntStream.rangeClosed(1, totalPages)
-                    .boxed()
-                    .collect(Collectors.toList());
+                .boxed()
+                .collect(Collectors.toList());
             model.addAttribute("pageNumbers", pageNumbers);
         }
         return "venta/index";
@@ -68,10 +87,14 @@ public class VentaController {
 
     @GetMapping("/create")
     public String create(Venta venta, Model model){
-    model.addAttribute("venta", venta);
-    model.addAttribute("detalles", venta.getDetalleventas());
-    model.addAttribute("detalleNuevo", new DetalleVenta());
-    return "venta/create";
+        venta.setUsuario(new org.esfe.modelos.Usuario());
+        venta.setTipoPago(new org.esfe.modelos.TipoPago());
+        venta.setTarjetaCredito(new org.esfe.modelos.TarjetaCredito());
+        model.addAttribute("venta", venta);
+        model.addAttribute("usuarios", usuarioRepository.findAll());
+        model.addAttribute("tiposPago", tipoPagoRepository.findAll());
+        model.addAttribute("tarjetasCredito", tarjetaCreditoRepository.findAll());
+        return "venta/create";
     }
 
     @PostMapping("/save")

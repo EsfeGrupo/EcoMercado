@@ -12,3 +12,4 @@ public class BlogController {
         return "Blog/blog";
     }
 }
+// Falta plantear bien el controlador del blog, por ahora se le dio prioridad a al controlador de Ventas ya que es una tabla maestro-detalle.

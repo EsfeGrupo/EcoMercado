@@ -1,0 +1,52 @@
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/layouts/_mainLayout">
+
+<div layout:fragment="content">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card shadow-lg border-success">
+          <div class="card-header bg-success text-white">
+            <h2 class="card-title mb-0 fw-bold">Editar Venta</h2>
+          </div>
+          <div class="card-body">
+            <form th:action="@{/ventas/save}" th:object="${venta}" method="post">
+              <input type="hidden" th:field="*{id}">
+              <div class="mb-3">
+                <label for="correlativo" class="form-label fw-bold">Correlativo</label>
+                <input type="text" class="form-control" th:field="*{correlativo}" id="correlativo" placeholder="Correlativo" required>
+              </div>
+              <div class="mb-3">
+                <label for="estado" class="form-label fw-bold">Estado</label>
+                <input type="number" class="form-control" th:field="*{estado}" id="estado" placeholder="Estado" required>
+              </div>
+              <div class="mb-3">
+                <label for="idUsuario" class="form-label fw-bold">Usuario</label>
+                <input type="number" class="form-control" th:field="*{usuario.id}" id="idUsuario" placeholder="ID Usuario" required>
+              </div>
+              <div class="mb-3">
+                <label for="idTipoPago" class="form-label fw-bold">Tipo de Pago</label>
+                <input type="number" class="form-control" th:field="*{tipoPago.id}" id="idTipoPago" placeholder="ID Tipo de Pago" required>
+              </div>
+              <div class="mb-3">
+                <label for="idTarjetaCredito" class="form-label fw-bold">Tarjeta de Crédito</label>
+                <input type="number" class="form-control" th:field="*{tarjetaCredito.id}" id="idTarjetaCredito" placeholder="ID Tarjeta de Crédito">
+              </div>
+              <hr class="my-4">
+              <div class="d-flex justify-content-end gap-2">
+                <button type="submit" class="btn btn-outline-success btn-lg">
+                  <i class="bi bi-save"></i> Guardar Cambios
+                </button>
+                <a th:href="@{/ventas}" class="btn btn-outline-secondary btn-lg">
+                  <i class="bi bi-x-circle"></i> Regresar
+                </a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

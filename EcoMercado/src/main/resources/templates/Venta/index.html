@@ -30,36 +30,49 @@
 
   <div class="container my-4">
   <div class="row">
-    <h1 class="mb-4 text-center text-success fw-bold">Gestión de Roles</h1>
+    <h1 class="mb-4 text-center text-success fw-bold">Gestión de Ventas</h1>
     <div class="col-12 mb-4 p-4 rounded-3 shadow-sm" style="background-color: #f8f9fa;">
-      <form th:action="@{/ventas}" method="get" class="d-flex align-items-center gap-3">
+      <form th:action="@{/ventas}" method="get" class="d-flex align-items-center gap-3 flex-wrap">
         <div class="flex-grow-1">
-          <label for="id" class="form-label visually-hidden">ID</label>
-          <input type="text" class="form-control form-control-lg" name="nombre" id="nombre" placeholder="Buscar por id una venta">
+          <label for="correlativo" class="form-label visually-hidden">Correlativo</label>
+          <input type="text" class="form-control form-control-lg" name="correlativo" id="correlativo" placeholder="Buscar por correlativo">
         </div>
         <div class="flex-grow-1">
-          <label for="descripcion" class="form-label visually-hidden">Descripción</label>
-          <input type="text" class="form-control form-control-lg" id="descripcion" name="descripcion" placeholder="Buscar por correlativo">
+          <label for="estado" class="form-label visually-hidden">Estado</label>
+          <input type="number" class="form-control form-control-lg" name="estado" id="estado" placeholder="Buscar por estado">
         </div>
-
-        <div class="d-flex gap-2">
+        <div class="flex-grow-1">
+          <label for="idUsuario" class="form-label visually-hidden">Usuario</label>
+          <input type="number" class="form-control form-control-lg" name="idUsuario" id="idUsuario" placeholder="Buscar por usuario">
+        </div>
+        <div class="flex-grow-1">
+          <label for="idTipoPago" class="form-label visually-hidden">Tipo de Pago</label>
+          <input type="number" class="form-control form-control-lg" name="idTipoPago" id="idTipoPago" placeholder="Buscar por tipo de pago">
+        </div>
+        <div class="flex-grow-1">
+          <label for="idTarjetaCredito" class="form-label visually-hidden">Tarjeta de Crédito</label>
+          <input type="number" class="form-control form-control-lg" name="idTarjetaCredito" id="idTarjetaCredito" placeholder="Buscar por tarjeta de crédito">
+        </div>
+        <div class="d-flex gap-2 align-items-end">
           <button type="submit" class="btn btn-outline-primary btn-lg"><i class="bi bi-search"></i> Buscar</button>
-          <a th:href="@{/roles/create}" class="btn btn-outline-success btn-lg"><i class="bi bi-plus-circle"></i> Nuevo</a>
+          <a th:href="@{/ventas/create}" class="btn btn-outline-success btn-lg"><i class="bi bi-plus-circle"></i> Nuevo</a>
         </div>
       </form>
     </div>
-
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
       <div class="col" th:each="item : ${ventas}">
         <div class="card h-100 border-success shadow-lg">
           <div class="card-body d-flex flex-column">
-            <h5 class="card-title fw-bold text-success" th:text="${item.nombre}">Nombre del rol</h5>
+            <h5 class="card-title fw-bold text-success" th:text="${item.correlativo}">Correlativo</h5>
             <h6 class="card-subtitle mb-2 text-muted">ID: <span th:text="${item.id}"></span></h6>
-            <p class="card-text flex-grow-1" th:text="${item.descripcion}">Descripción del rol.</p>
+            <p class="card-text flex-grow-1">Estado: <span th:text="${item.estado}"></span></p>
+            <p class="card-text flex-grow-1">Usuario: <span th:text="${item.usuario.nombre}"></span></p>
+            <p class="card-text flex-grow-1">Tipo de Pago: <span th:text="${item.tipoPago.nombre}"></span></p>
+            <p class="card-text flex-grow-1">Tarjeta de Crédito: <span th:text="${item.tarjetaCredito != null ? item.tarjetaCredito.numero : 'N/A'}"></span></p>
             <div class="mt-auto d-grid gap-2">
-              <a th:href="@{/roles/details/{id}(id=${item.id})}" class="btn btn-outline-secondary"><i class="bi bi-eye"></i> Detalles</a>
-              <a th:href="@{/roles/edit/{id}(id=${item.id})}" class="btn btn-outline-warning text-dark"><i class="bi bi-pencil-square"></i> Editar</a>
-              <a th:href="@{/roles/remove/{id}(id=${item.id})}" class="btn btn-outline-danger"><i class="bi bi-trash"></i> Eliminar</a>
+              <a th:href="@{/ventas/details/{id}(id=${item.id})}" class="btn btn-outline-secondary"><i class="bi bi-eye"></i> Detalles</a>
+              <a th:href="@{/ventas/edit/{id}(id=${item.id})}" class="btn btn-outline-warning text-dark"><i class="bi bi-pencil-square"></i> Editar</a>
+              <a th:href="@{/ventas/remove/{id}(id=${item.id})}" class="btn btn-outline-danger"><i class="bi bi-trash"></i> Eliminar</a>
             </div>
           </div>
         </div>
@@ -71,7 +84,7 @@
 <nav aria-label="Page navigation example" class="d-flex justify-content-center mt-4">
   <ul class="pagination">
     <li class="page-item" th:each="pageNumber : ${pageNumbers}">
-      <a class="page-link text-success" th:href="@{|/roles?page=${pageNumber}|}" th:text="${pageNumber}"></a>
+      <a class="page-link text-success" th:href="@{|/ventas?page=${pageNumber}|}" th:text="${pageNumber}"></a>
     </li>
   </ul>
 </nav>

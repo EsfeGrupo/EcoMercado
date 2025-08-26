@@ -71,11 +71,11 @@ public class Venta {
         this.id = id;
     }
 
-    public Usuario getIdUsuario() {
+    public Usuario getUsuario() {
         return usuario;
     }
 
-    public void setIdUsuario(Usuario usuario) {
+    public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
     }
 
@@ -119,11 +119,11 @@ public class Venta {
         this.estado = estado;
     }
 
-    public TarjetaCredito getIdTarjeta() {
+    public TarjetaCredito getTarjetaCredito() {
         return tarjetaCredito;
     }
 
-    public void setIdTarjeta(TarjetaCredito tarjetaCredito) {
+    public void setTarjetaCredito(TarjetaCredito tarjetaCredito) {
         this.tarjetaCredito = tarjetaCredito;
     }
 

@@ -102,8 +102,7 @@
     <groupId>org.springframework.security</groupId>
     <artifactId>spring-security-crypto</artifactId>
     <version>6.2.0</version> </dependency>
-    </dependencies>
-	<!---<dependency>
+	<dependency>
 			<groupId>com.itextpdf</groupId>
 			<artifactId>itextpdf</artifactId>
 			<version>5.5.13.3</version>
@@ -113,7 +112,7 @@
 			<artifactId>flying-saucer-pdf</artifactId>
 			<version>9.13.2</version>
 		</dependency>
-	</dependencies>-->
+	</dependencies>
 
 	<build>
 		<plugins>

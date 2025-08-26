@@ -1,0 +1,42 @@
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/layouts/_mainLayout">
+
+<div layout:fragment="content">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card shadow-lg border-success">
+          <div class="card-header bg-success text-white">
+            <h2 class="card-title mb-0 fw-bold">Detalles de la Venta</h2>
+          </div>
+          <div class="card-body">
+            <dl class="row">
+              <dt class="col-sm-3 fw-bold text-success">ID</dt>
+              <dd class="col-sm-9" th:text="${venta.id}"></dd>
+              <dt class="col-sm-3 fw-bold text-success">Correlativo</dt>
+              <dd class="col-sm-9" th:text="${venta.correlativo}"></dd>
+              <dt class="col-sm-3 fw-bold text-success">Estado</dt>
+              <dd class="col-sm-9" th:text="${venta.estado}"></dd>
+              <dt class="col-sm-3 fw-bold text-success">Usuario</dt>
+              <dd class="col-sm-9" th:text="${venta.usuario.nombre}"></dd>
+              <dt class="col-sm-3 fw-bold text-success">Tipo de Pago</dt>
+              <dd class="col-sm-9" th:text="${venta.tipoPago.nombre}"></dd>
+              <dt class="col-sm-3 fw-bold text-success">Tarjeta de Crédito</dt>
+              <dd class="col-sm-9" th:text="${venta.tarjetaCredito != null ? venta.tarjetaCredito.numero : 'N/A'}"></dd>
+            </dl>
+          </div>
+          <div class="card-footer d-flex justify-content-end gap-2">
+            <a th:href="@{/ventas/edit/{id}(id=${venta.id})}" class="btn btn-outline-primary btn-lg">
+              <i class="bi bi-pencil-square"></i> Editar
+            </a>
+            <a th:href="@{/ventas}" class="btn btn-outline-secondary btn-lg">
+              <i class="bi bi-arrow-left-circle"></i> Regresar
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
