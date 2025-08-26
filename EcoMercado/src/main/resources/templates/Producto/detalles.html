@@ -6,6 +6,13 @@
 <body>
 <h1>Detalles del Producto</h1>
 
+<!-- Imagen del producto -->
+<div th:if="${producto.img != null}">
+    <img th:src="'data:image/jpeg;base64,' + ${T(org.apache.tomcat.util.codec.binary.Base64).encodeBase64String(producto.img)}"
+         alt="Imagen del Producto"
+         width="300"/>
+</div>
+
 <p><strong>ID:</strong> <span th:text="${producto.id}"></span></p>
 <p><strong>Nombre:</strong> <span th:text="${producto.nombre}"></span></p>
 <p><strong>Precio:</strong> $<span th:text="${producto.precio}"></span></p>

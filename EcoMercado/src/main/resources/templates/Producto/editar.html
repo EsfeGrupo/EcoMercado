@@ -7,7 +7,9 @@
 <body>
 <h1>Editar Producto</h1>
 
-<form th:action="@{/productos/editar/{id}(id=${producto.id})}" th:object="${producto}" method="post">
+<form th:action="@{/productos/guardar}" th:object="${producto}" method="post" enctype="multipart/form-data">
+    <input type="hidden" th:field="*{id}" />
+
     <label>Nombre:</label>
     <input type="text" th:field="*{nombre}" required/><br/>
 
@@ -16,6 +18,12 @@
 
     <label>Descripción:</label>
     <textarea th:field="*{descripcion}"></textarea><br/>
+
+    <label>Imagen actual:</label><br/>
+    <img th:if="${producto.img != null}" th:src="@{${'/productos/imagen/' + producto.id}}" alt="Imagen del producto" width="150"/><br/>
+
+    <label>Cambiar Imagen:</label>
+    <input type="file" name="imagenFile"/><br/><br/>
 
     <button type="submit">Actualizar</button>
 </form>

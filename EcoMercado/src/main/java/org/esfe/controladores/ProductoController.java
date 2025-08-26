@@ -5,6 +5,9 @@ import org.esfe.repositorios.IProductoRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @Controller
 @RequestMapping("/productos")
@@ -30,11 +33,22 @@ public class ProductoController {
         return "productos/crear";
     }
 
-    // Guardar producto (crear o editar)
+    // Guardar producto (crear o editar) con imagen en la base de datos
     @PostMapping("/guardar")
-    public String guardar(@ModelAttribute Producto producto) {
+    public String guardar(@ModelAttribute Producto producto,
+                          @RequestParam("imagenFile") MultipartFile imagenFile) {
+
+        // Si se subió una imagen
+        if (!imagenFile.isEmpty()) {
+            try {
+                producto.setImg(imagenFile.getBytes()); // Guardar bytes en el campo img
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         productoRepository.save(producto);
-        return "redirect:/index";
+        return "redirect:/productos";
     }
 
     // Mostrar formulario de edición
@@ -72,4 +86,6 @@ public class ProductoController {
         productoRepository.delete(producto);
         return "redirect:/productos";
     }
+
+
 }

@@ -7,7 +7,7 @@
 <body>
 <h1>Crear Producto</h1>
 
-<form th:action="@{/productos/crear}" th:object="${producto}" method="post">
+<form th:action="@{/productos/guardar}" th:object="${producto}" method="post" enctype="multipart/form-data">
     <label>Nombre:</label>
     <input type="text" th:field="*{nombre}" required/><br/>
 
@@ -16,6 +16,9 @@
 
     <label>Descripción:</label>
     <textarea th:field="*{descripcion}"></textarea><br/>
+
+    <label>Imagen:</label>
+    <input type="file" name="imagenFile"/><br/><br/>
 
     <button type="submit">Guardar</button>
 </form>

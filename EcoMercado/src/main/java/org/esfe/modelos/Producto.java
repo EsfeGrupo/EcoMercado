@@ -22,6 +22,19 @@ public class Producto {
     @ManyToMany(mappedBy = "productos")
     private Set<Tipo> tipos = new HashSet<>();
 
+    @Lob
+    @Column(name = "img")
+    private byte[] img;
+
+    public byte[] getImg() {
+        return img;
+    }
+
+    public void setImg(byte[] img) {
+        this.img = img;
+    }
+
+
     public Set<Tipo> getTipos() {
         return tipos;
     }

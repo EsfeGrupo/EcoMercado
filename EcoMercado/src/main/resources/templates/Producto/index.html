@@ -9,6 +9,7 @@
 <table border="1">
     <thead>
     <tr>
+        <th>Imagen</th>
         <th>Nombre</th>
         <th>Precio</th>
         <th>Acciones</th>
@@ -16,6 +17,13 @@
     </thead>
     <tbody>
     <tr th:each="producto : ${productos}">
+        <!-- Mostrar imagen si existe -->
+        <td>
+            <img th:if="${producto.img != null}"
+                 th:src="'data:image/jpeg;base64,' + ${T(org.apache.tomcat.util.codec.binary.Base64).encodeBase64String(producto.img)}"
+                 alt="Imagen Producto"
+                 width="100"/>
+        </td>
         <td th:text="${producto.nombre}"></td>
         <td th:text="${producto.precio}"></td>
         <td>
