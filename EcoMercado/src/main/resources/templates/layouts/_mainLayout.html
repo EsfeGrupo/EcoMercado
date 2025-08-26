@@ -81,14 +81,6 @@
                             Mis Productos
                         </a>
                     </div>
-
-                    <div sec:authorize="hasAuthority('vendedor')">
-                        <a class="nav-link" th:href="@{/productos}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-box"></i></div>
-                            Mis Productos
-                        </a>
-                    </div>
-
                     <!-----------------------------------USUARIO (CLIENTE) ----------------------------->
                     <div sec:authorize="hasAuthority('usuario')">
 
