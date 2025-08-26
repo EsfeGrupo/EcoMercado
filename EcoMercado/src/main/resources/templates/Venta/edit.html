@@ -20,19 +20,34 @@
               </div>
               <div class="mb-3">
                 <label for="estado" class="form-label fw-bold">Estado</label>
-                <input type="number" class="form-control" th:field="*{estado}" id="estado" placeholder="Estado" required>
+                <select class="form-select" th:field="*{estado}" id="estado" required>
+                  <option th:value="1">Pendiente</option>
+                  <option th:value="2">Cancelado</option>
+                </select>
               </div>
               <div class="mb-3">
                 <label for="idUsuario" class="form-label fw-bold">Usuario</label>
-                <input type="number" class="form-control" th:field="*{usuario.id}" id="idUsuario" placeholder="ID Usuario" required>
+                <select class="form-select" th:field="*{usuario.id}" id="idUsuario" required>
+                  <option th:each="usuario : ${usuarios}" th:value="${usuario.id}" th:text="${usuario.nombre}"></option>
+                </select>
               </div>
               <div class="mb-3">
                 <label for="idTipoPago" class="form-label fw-bold">Tipo de Pago</label>
-                <input type="number" class="form-control" th:field="*{tipoPago.id}" id="idTipoPago" placeholder="ID Tipo de Pago" required>
+                <select class="form-select" th:field="*{tipoPago.id}" id="idTipoPago" required>
+                  <option th:each="tipo : ${tiposPago}" th:value="${tipo.id}" th:text="${tipo.metodoPago}"></option>
+                </select>
               </div>
               <div class="mb-3">
                 <label for="idTarjetaCredito" class="form-label fw-bold">Tarjeta de Crédito</label>
-                <input type="number" class="form-control" th:field="*{tarjetaCredito.id}" id="idTarjetaCredito" placeholder="ID Tarjeta de Crédito">
+                <select class="form-select" th:field="*{tarjetaCredito.id}" id="idTarjetaCredito">
+                  <option th:each="tarjeta : ${tarjetasCredito}" th:value="${tarjeta.id}" th:text="${tarjeta.numero}"></option>
+                </select>
+                <!--
+                // Para filtrar solo las tarjetas del usuario logueado en el futuro:
+                // <select class="form-select" th:field="*{tarjetaCredito.id}" id="idTarjetaCredito">
+                //   <option th:each="tarjeta : ${tarjetasCredito}" th:if="${tarjeta.usuario.id} == ${#authentication.principal.id}" th:value="${tarjeta.id}" th:text="${tarjeta.numero}"></option>
+                // </select>
+                -->
               </div>
               <hr class="my-4">
               <div class="d-flex justify-content-end gap-2">

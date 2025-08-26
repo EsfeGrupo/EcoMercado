@@ -22,7 +22,7 @@
               <dt class="col-sm-3 fw-bold text-success">Usuario</dt>
               <dd class="col-sm-9" th:text="${venta.usuario.nombre}"></dd>
               <dt class="col-sm-3 fw-bold text-success">Tipo de Pago</dt>
-              <dd class="col-sm-9" th:text="${venta.tipoPago.nombre}"></dd>
+              <dd class="col-sm-9" th:text="${venta.tipoPago.metodoPago}"></dd>
               <dt class="col-sm-3 fw-bold text-success">Tarjeta de Crédito</dt>
               <dd class="col-sm-9" th:text="${venta.tarjetaCredito != null ? venta.tarjetaCredito.numero : 'N/A'}"></dd>
             </dl>
