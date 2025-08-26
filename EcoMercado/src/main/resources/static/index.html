@@ -45,13 +45,22 @@
             const errorElement = document.getElementById('card-errors');
             errorElement.textContent = error.message;
         } else {
-            // Envía el ID del método de pago y el ID de la venta al backend
+            // Lee el ID de la venta de los parámetros de la URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const ventaId = parseInt(urlParams.get('ventaId'));
+
+            if (!ventaId) {
+                alert("Error: ID de venta no encontrado en la URL.");
+                return;
+            }
+            
+            // Envía el ID de la venta al backend
             const response = await fetch('http://localhost:8080/api/payment/charge', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     paymentMethodId: paymentMethod.id,
-                    ventaId: 1 // Asegúrate de que este ID de venta exista en tu BD
+                    ventaId: ventaId
                 })
             });
             const result = await response.text();
