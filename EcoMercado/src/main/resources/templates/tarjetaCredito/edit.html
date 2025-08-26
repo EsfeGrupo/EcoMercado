@@ -9,7 +9,7 @@
       <div class="col-md-8">
         <div class="card shadow-lg border-success">
           <div class="card-header bg-success text-white">
-            <h2 class="card-title mb-0 fw-bold">Crear Nueva Tarjeta de Crédito</h2>
+            <h2 class="card-title mb-0 fw-bold">Editar Tarjeta de Crédito</h2>
           </div>
           <div class="card-body">
             <!-- Mensajes de Alerta -->
@@ -23,11 +23,14 @@
             </div>
 
             <form th:action="@{/tarjetaCredito/save}" th:object="${tarjetaCredito}" method="post">
-             
+              <input type="hidden" th:field="*{id}">
+              <input type="hidden" th:field="*{numeroEncriptado}">
+              
               <!-- Campo: Número de la Tarjeta -->
               <div class="mb-3">
                 <label for="numero" class="form-label fw-bold">Número de la Tarjeta</label>
-                <input type="text" class="form-control" th:field="*{numero}" id="numero" placeholder="Escriba el número de la tarjeta" required>
+                <input type="text" class="form-control" th:field="*{numero}" id="numero" placeholder="Ingrese el nuevo número de la tarjeta (opcional)">
+                <small class="text-muted">Deje en blanco para mantener el número actual</small>
               </div>
 
               <!-- Campo: Nombre del Titular -->
@@ -64,12 +67,12 @@
                   </option>
                 </select>
               </div>
-             
+
               <hr class="my-4">
-             
+
               <div class="d-flex justify-content-end gap-2">
-                <button type="submit" class="btn btn-primary btn-lg">
-                  <i class="bi bi-save"></i> Guardar
+                <button type="submit" class="btn btn-outline-success btn-lg">
+                  <i class="bi bi-save"></i> Guardar Cambios
                 </button>
                 <a th:href="@{/tarjetaCredito}" class="btn btn-outline-secondary btn-lg">
                   <i class="bi bi-x-circle"></i> Regresar
@@ -79,6 +82,6 @@
           </div>
         </div>
       </div>
-      </div>
     </div>
   </div>
+</div>

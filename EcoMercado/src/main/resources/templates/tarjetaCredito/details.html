@@ -1,0 +1,59 @@
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/layouts/_mainLayout">
+
+<div layout:fragment="content">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card shadow-lg border-success">
+          <div class="card-header bg-success text-white">
+            <h2 class="card-title mb-0 fw-bold">Detalles de la Tarjeta de Crédito</h2>
+          </div>
+          <div class="card-body">
+            <dl class="row">
+              <dt class="col-sm-3 fw-bold text-success">ID</dt>
+              <dd class="col-sm-9" th:text="${tarjetaCredito.id}"></dd>
+              
+              <dt class="col-sm-3 fw-bold text-success">Número de Tarjeta</dt>
+              <dd class="col-sm-9" th:text="${tarjetaCredito.numero}">**** **** **** 1234</dd>
+              
+              <dt class="col-sm-3 fw-bold text-success">Nombre del Titular</dt>
+              <dd class="col-sm-9" th:text="${tarjetaCredito.nombreTitular}"></dd>
+              
+              <dt class="col-sm-3 fw-bold text-success">Fecha de Expiración</dt>
+              <dd class="col-sm-9" th:text="${#temporals.format(tarjetaCredito.fechaExpiracion, 'dd/MM/yyyy')}"></dd>
+              
+              <dt class="col-sm-3 fw-bold text-success">Código Postal</dt>
+              <dd class="col-sm-9" th:text="${tarjetaCredito.codigoPostal}"></dd>
+              
+              <dt class="col-sm-3 fw-bold text-success">Banco</dt>
+              <dd class="col-sm-9" th:text="${tarjetaCredito.banco}"></dd>
+              
+              <dt class="col-sm-3 fw-bold text-success">Usuario</dt>
+              <dd class="col-sm-9" th:text="${tarjetaCredito.usuario.nombre}"></dd>
+              
+              <!-- Mostrar alerta si la tarjeta está expirada -->
+              <div th:if="${tarjetaCredito.fechaExpiracion.isBefore(T(java.time.LocalDate).now())}" 
+                   class="col-12 mt-3">
+                <div class="alert alert-warning" role="alert">
+                  <i class="bi bi-exclamation-triangle-fill"></i>
+                  Esta tarjeta de crédito está expirada
+                </div>
+              </div>
+            </dl>
+          </div>
+          <div class="card-footer d-flex justify-content-end gap-2">
+            <a th:href="@{/tarjetaCredito/edit/{id}(id=${tarjetaCredito.id})}" class="btn btn-outline-primary btn-lg">
+              <i class="bi bi-pencil-square"></i> Editar
+            </a>
+            <a th:href="@{/tarjetaCredito}" class="btn btn-outline-secondary btn-lg">
+              <i class="bi bi-arrow-left-circle"></i> Regresar
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -65,10 +65,10 @@
                             <h6 class="card-subtitle mb-2 text-muted">Banco: <span th:text="${tarjeta.banco}"></span></h6>
                             <p class="card-text flex-grow-1">Fecha de expiración: <span th:text="${tarjeta.fechaExpiracion}"></span></p>
                             <div class="mt-auto d-grid gap-2">
-                                <a th:href="@{/tarjetaCredito/details/{id}(id=${item.id})}" class="btn btn-outline-secondary"><i class="bi bi-eye"></i> Detalles</a>
-                                <a th:href="@{/tarjetaCredito/edit/{id}(id=${item.id})}" class="btn btn-outline-warning text-dark"><i class="bi bi-pencil-square"></i> Editar</a>
-                                <a th:href="@{/tarjetaCredito/remove/{id}(id=${item.id})}" class="btn btn-outline-danger"><i class="bi bi-trash"></i> Eliminar</a>
-                            </div>
+                            <a th:href="@{/tarjetaCredito/details/{id}(id=${tarjeta.id})}" class="btn btn-outline-secondary"><i class="bi bi-eye"></i> Detalles</a>
+                            <a th:href="@{/tarjetaCredito/edit/{id}(id=${tarjeta.id})}" class="btn btn-outline-warning text-dark"><i class="bi bi-pencil-square"></i> Editar</a>
+                            <a th:href="@{/tarjetaCredito/remove/{id}(id=${tarjeta.id})}" class="btn btn-outline-danger"><i class="bi bi-trash"></i> Eliminar</a>
+                        </div>
                         </div>
                     </div>
                 </div>

@@ -2,8 +2,7 @@ package org.esfe.modelos;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 public class TarjetaCredito {
@@ -11,17 +10,17 @@ public class TarjetaCredito {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @NotBlank(message = "El numero de la tarjeta es requerido")
+    
     @Column(name = "numero_encriptado")
     private String numeroEncriptado;
-
+    
     @Transient // This field won't be persisted to the
     private String numero;
 
     @NotBlank(message = "El correo de usuario es requerido")
     private String nombreTitular;
 
-    @NotBlank(message = "La fecha de expiracion es requerida")
+    @NotNull(message = "La fecha de expiración es requerida")
     private LocalDate fechaExpiracion;
 
     @NotBlank(message = "El codigo postal es requerido")

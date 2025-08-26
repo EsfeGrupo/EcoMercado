@@ -6,6 +6,9 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import jakarta.validation.Valid;
+
 import org.esfe.modelos.TarjetaCredito;
 import org.esfe.servicios.interfaces.ITarjetaCreditoService;
 import org.esfe.servicios.interfaces.IUsuarioService;
@@ -57,9 +60,6 @@ public class TarjetaCreditoController {
         model.addAttribute("tarjetas", tarjetas);
 
         boolean expirada = tarjetas.stream().anyMatch(tc -> tc.getFechaExpiracion().isBefore(LocalDate.now()));
-        if (expirada) {
-            model.addAttribute("msg", "La tarjeta de crédito expiró");
-        }
 
         int totalPages = tarjetas.getTotalPages();
         if (totalPages > 0) {
@@ -70,14 +70,16 @@ public class TarjetaCreditoController {
     }
 
     @GetMapping("/create")
-    public String create(TarjetaCredito tarjetaCredito) {
+    public String create(Model model) {
+        model.addAttribute("usuarios", usuarioService.obtenerTodos());
+        model.addAttribute("tarjetaCredito", new TarjetaCredito());
         return "tarjetaCredito/create";
     }
 
     @PostMapping("/save")
-    public String save(TarjetaCredito tarjetaCredito, BindingResult result, Model model, RedirectAttributes attributes) {
-    if (result.hasErrors()) {
-        model.addAttribute(tarjetaCredito);
+    public String save(@Valid TarjetaCredito tarjetaCredito, BindingResult result, Model model, RedirectAttributes attributes) {
+        if (result.hasErrors()) {
+        model.addAttribute("tarjetaCredito", tarjetaCredito);
         attributes.addFlashAttribute("error", "No se pudo guardar debido a un error.");
         return "tarjetaCredito/create";
     }
@@ -98,14 +100,22 @@ public class TarjetaCreditoController {
 
     @GetMapping("/details/{id}")
     public String details(@PathVariable("id") Integer id, Model model) {
-        TarjetaCredito tarjetaCredito = tarjetaCreditoService.obtenerPorId(id);
-        model.addAttribute("tarjetaCredito", tarjetaCredito);
-        return "tarjetaCredito/details";
+    TarjetaCredito tarjetaCredito = tarjetaCreditoService.obtenerPorId(id);
+    
+    // Mask the credit card number for display
+    if (tarjetaCredito.getNumeroEncriptado() != null && tarjetaCredito.getNumeroEncriptado().length() >= 4) {
+        tarjetaCredito.setNumero("**** **** **** " + 
+            tarjetaCredito.getNumeroEncriptado().substring(tarjetaCredito.getNumeroEncriptado().length() - 4));
     }
+    
+    model.addAttribute("tarjetaCredito", tarjetaCredito);
+    return "tarjetaCredito/details";
+}
 
     @GetMapping("/edit/{id}")
     public String edit(@PathVariable("id") Integer id, Model model) {
         TarjetaCredito tarjetaCredito = tarjetaCreditoService.obtenerPorId(id);
+        model.addAttribute("usuarios", usuarioService.obtenerTodos());
         model.addAttribute("tarjetaCredito", tarjetaCredito);
         return "tarjetaCredito/edit";
     }
