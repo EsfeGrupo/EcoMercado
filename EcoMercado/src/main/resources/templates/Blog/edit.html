@@ -1,0 +1,55 @@
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/layouts/_mainLayout">
+<div layout:fragment="content">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card shadow-lg border-success">
+          <div class="card-header bg-success text-white">
+            <h2 class="card-title mb-0 fw-bold">Editar Blog</h2>
+          </div>
+          <div class="card-body">
+            <form th:action="@{/blog/save}" th:object="${blog}" method="post">
+              <input type="hidden" th:field="*{id}">
+              <input type="hidden" th:field="*{fechaPublicacion}">
+              <div class="mb-3">
+                <label for="titulo" class="form-label fw-bold">Título</label>
+                <input type="text" class="form-control" th:field="*{titulo}" id="titulo" placeholder="Título del blog" required>
+              </div>
+              <div class="mb-3">
+                <label for="descripcion" class="form-label fw-bold">Descripción</label>
+                <textarea class="form-control" th:field="*{descripcion}" id="descripcion" rows="4" placeholder="Descripción del blog" required></textarea>
+              </div>
+              <div class="mb-3">
+                <label for="autor" class="form-label fw-bold">Autor</label>
+                <input type="text" class="form-control" th:field="*{autor}" id="autor" placeholder="Autor" required>
+              </div>
+              <div class="mb-3">
+                <label for="usuario" class="form-label fw-bold">Usuario</label>
+                <select class="form-select" th:field="*{usuario.id}" id="usuario" required>
+                  <option value="">Seleccione un usuario</option>
+                  <option th:each="usuario : ${usuarios}" 
+                          th:value="${usuario.id}" 
+                          th:text="${usuario.nombre}">
+                  </option>
+                </select>
+              </div>
+              <hr class="my-4">
+              <div class="d-flex justify-content-end gap-2">
+                <button type="submit" class="btn btn-outline-success btn-lg">
+                  <i class="bi bi-save"></i> Guardar Cambios
+                </button>
+                <a th:href="@{/blog}" class="btn btn-outline-secondary btn-lg">
+                  <i class="bi bi-x-circle"></i> Regresar
+                </a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</html>
