@@ -129,8 +129,12 @@ public class TarjetaCreditoController {
 
     @PostMapping("/delete")
     public String delete(TarjetaCredito tarjetaCredito, RedirectAttributes attributes) {
-        tarjetaCreditoService.eliminarPorId(tarjetaCredito.getId());
-        attributes.addFlashAttribute("msg", "Tarjeta de crédito eliminada correctamente");
+        try {
+            tarjetaCreditoService.eliminarPorId(tarjetaCredito.getId());
+            attributes.addFlashAttribute("msg", "Tarjeta de crédito eliminada correctamente");
+        } catch (Exception e) {
+            attributes.addFlashAttribute("error", "No se puede eliminar la tarjeta de crédito porque ya está vinculada a una venta.");
+        }
         return "redirect:/tarjetaCredito";
     }
 }
