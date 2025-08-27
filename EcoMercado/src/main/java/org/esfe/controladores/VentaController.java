@@ -89,13 +89,12 @@ public class VentaController {
                 .map(tc -> tc.getId())
                 .findFirst();
         }
-        Byte estadoByte = null;
-        if (estadoSearch.equalsIgnoreCase("Pendiente")) estadoByte = 1;
-        else if (estadoSearch.equalsIgnoreCase("Cancelado")) estadoByte = 2;
+        // Usar directamente el estado como String
+        String estadoFinal = estadoSearch.isEmpty() ? null : estadoSearch;
 
-        Page<Venta> ventas = ventaService.findByCorrelativoContainingIgnoreCaseAndEstadoAndUsuario_IdAndTipoPago_IdAndTarjetaCredito_IdOrderByIdDesc(
+        Page<Venta> ventas = ventaService.buscarVentasConFiltros(
             correlativoSearch,
-            estadoByte,
+            estadoFinal,
             idUsuarioSearch,
             idTipoPagoSearch,
             idTarjetaCreditoSearch,
@@ -135,6 +134,7 @@ public class VentaController {
             attributes.addFlashAttribute("error", "No se pudo guardar la venta debido a un error.");
             return "venta/create";
         }
+        venta.setEstado("Pendiente"); // Estado pendiente por defecto
         Venta ventaGuardada = ventaService.crearOEditar(venta);
         if(venta.getDetalleventas() != null){
             for(DetalleVenta detalle : venta.getDetalleventas()){

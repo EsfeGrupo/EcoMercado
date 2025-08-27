@@ -40,42 +40,33 @@
             <label for="descripcion" class="form-label visually-hidden">Descripción</label>
             <input type="text" class="form-control form-control-lg" name="descripcion" id="descripcion" placeholder="Buscar por descripción">
           </div>
-          <button type="submit" class="btn btn-success btn-lg">Buscar</button>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-outline-primary btn-lg"><i class="bi bi-search"></i> Buscar</button>
+            <a th:href="@{/blog/create}" class="btn btn-outline-success btn-lg"><i class="bi bi-plus-circle"></i> Nuevo</a>
+            </div>
         </form>
       </div>
-      <div class="col-12">
-        <a th:href="@{/blog/create}" class="btn btn-success mb-3">
-          <i class="bi bi-plus-circle"></i> Agregar Blog
-        </a>
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Título</th>
-              <th>Descripción</th>
-              <th>Autor</th>
-              <th>Fecha Publicación</th>
-              <th>Usuario</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr th:each="blog : ${blogs}">
-              <td th:text="${blog.id}"></td>
-              <td th:text="${blog.titulo}"></td>
-              <td th:text="${blog.descripcion}"></td>
-              <td th:text="${blog.autor}"></td>
-              <td th:text="${#temporals.format(blog.fechaPublicacion, 'dd/MM/yyyy HH:mm')}"></td>
-              <td th:text="${blog.usuario.nombre}"></td>
-              <td>
-                <a th:href="@{/blog/details/{id}(id=${blog.id})}" class="btn btn-info btn-sm">Ver</a>
-                <a th:href="@{/blog/edit/{id}(id=${blog.id})}" class="btn btn-primary btn-sm">Editar</a>
-                <a th:href="@{/blog/remove/{id}(id=${blog.id})}" class="btn btn-danger btn-sm">Eliminar</a>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        <div class="col" th:each="item : ${blogs}">
+          <div class="card h-100 border-success shadow-lg">
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title fw-bold text-success" th:text="${item.titulo}">Título del blog</h5>
+              <h6 class="card-subtitle mb-2 text-muted">ID: <span th:text="${item.id}"></span></h6>
+              <p class="card-text">Autor: <span th:text="${item.autor}"></span></p>
+              <p class="card-text">Fecha: <span th:text="${#temporals.format(item.fechaPublicacion, 'dd/MM/yyyy HH:mm')}"></span></p>
+              <p class="card-text">Descripción: <span th:text="${item.descripcion}"></span></p>
+              <p class="card-text">Usuario: <span th:text="${item.usuario.nombre}"></span></p>
+              <div class="mt-auto d-grid gap-2">
+                <a th:href="@{/blog/details/{id}(id=${item.id})}" class="btn btn-outline-secondary"><i class="bi bi-eye"></i> Detalles</a>
+                <a th:href="@{/blog/edit/{id}(id=${item.id})}" class="btn btn-outline-warning text-dark"><i class="bi bi-pencil-square"></i> Editar</a>
+                <a th:href="@{/blog/remove/{id}(id=${item.id})}" class="btn btn-outline-danger"><i class="bi bi-trash"></i> Eliminar</a>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-</div>
+
+  </div>

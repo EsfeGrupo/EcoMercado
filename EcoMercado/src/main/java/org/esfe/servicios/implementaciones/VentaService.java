@@ -28,9 +28,14 @@ public class VentaService implements IVentaService {
     }
 
     @Override
-    public Page<Venta> findByCorrelativoContainingIgnoreCaseAndEstadoAndUsuario_IdAndTipoPago_IdAndTarjetaCredito_IdOrderByIdDesc(String correlativo, Byte estado, Integer idUsuario, Integer idTipoPago, Optional<Integer> idTarjetaCredito, Pageable pageable) {
-        return ventaRepository.findByCorrelativoContainingIgnoreCaseAndEstadoAndUsuario_IdAndTipoPago_IdAndTarjetaCredito_IdOrderByIdDesc(
-                correlativo, estado, idUsuario, idTipoPago, idTarjetaCredito, pageable);
+    public Page<Venta> buscarVentasConFiltros(String correlativo, String estado, Integer idUsuario, Integer idTipoPago, Optional<Integer> idTarjetaCredito, Pageable pageable) {
+        return ventaRepository.buscarVentasConFiltros(
+                correlativo, 
+                estado, 
+                idUsuario, 
+                idTipoPago, 
+                idTarjetaCredito.orElse(null), 
+                pageable);
     }
 
     @Override

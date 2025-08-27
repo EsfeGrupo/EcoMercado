@@ -13,7 +13,7 @@ public interface IVentaService {
 
     List<Venta> obtenerTodos();
 
-    Page<Venta> findByCorrelativoContainingIgnoreCaseAndEstadoAndUsuario_IdAndTipoPago_IdAndTarjetaCredito_IdOrderByIdDesc(String correlativo, Byte estado, Integer idUsuario, Integer idTipoPago, Optional<Integer> idTarjetaCredito, Pageable pageable);
+    Page<Venta> buscarVentasConFiltros(String correlativo, String estado, Integer idUsuario, Integer idTipoPago, Optional<Integer> idTarjetaCredito, Pageable pageable);
 
     Optional<Venta> obtenerPorId(Integer id);
 
