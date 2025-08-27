@@ -94,6 +94,10 @@ public class Venta {
     public void setFecha(LocalDateTime fecha) {
         this.fecha = fecha;
     }
+    // ✅ AGREGADO: Getter adicional para compatibilidad con la vista
+    public LocalDateTime getFechaCreacion() {
+        return fecha;
+    }
 
     public BigDecimal  getTotal() {
         return total;

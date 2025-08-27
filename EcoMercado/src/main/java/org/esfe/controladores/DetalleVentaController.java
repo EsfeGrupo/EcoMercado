@@ -3,124 +3,295 @@ package org.esfe.controladores;
 import org.esfe.modelos.Producto;
 import org.esfe.modelos.Venta;
 import org.esfe.modelos.DetalleVenta;
+import org.esfe.modelos.TipoPago;
+import org.esfe.modelos.TarjetaCredito;
+import org.esfe.modelos.Usuario;
 import org.esfe.servicios.interfaces.IVentaService;
 import org.esfe.servicios.interfaces.IDetalleVentaService;
 import org.esfe.repositorios.IProductoRepository;
+import org.esfe.repositorios.ITipoPagoRepository;
+import org.esfe.repositorios.ITarjetaCreditoRepository;
+import org.esfe.repositorios.IUsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Controller
 @RequestMapping("/carrito")
+@SessionAttributes("carritoTemporal")
 public class DetalleVentaController {
     @Autowired
     private IVentaService ventaService;
+
     @Autowired
     private IDetalleVentaService detalleVentaService;
+
     @Autowired
     private IProductoRepository productoRepository;
 
+    @Autowired
+    private ITipoPagoRepository tipoPagoRepository;
+
+    @Autowired
+    private ITarjetaCreditoRepository tarjetaCreditoRepository;
+
+    @Autowired
+    private IUsuarioRepository usuarioRepository;
+
+    @ModelAttribute("carritoTemporal")
+    public List<DetalleVenta> carritoTemporal() {
+        return new java.util.ArrayList<>();
+    }
+
     @GetMapping
-    public String verCarrito(@RequestParam(value = "ventaId", required = false) Integer ventaId, Model model) {
-        if (ventaId != null) {
-            Venta venta = ventaService.obtenerPorId(ventaId).orElse(null);
-            List<DetalleVenta> detalles = ventaId != null ? detalleVentaService.obtenerPorVentaId(ventaId) : List.of();
-            model.addAttribute("venta", venta);
-            model.addAttribute("detalles", detalles);
-            model.addAttribute("productos", productoRepository.findAll());
-            model.addAttribute("detalleNuevo", new DetalleVenta());
-            double total = detalles.stream().mapToDouble(d -> d.getPrecioUnitario() * d.getCantidad()).sum();
-            model.addAttribute("total", total);
-        } else {
-            model.addAttribute("venta", null);
-            model.addAttribute("detalles", List.of());
-            model.addAttribute("productos", productoRepository.findAll());
-            model.addAttribute("detalleNuevo", new DetalleVenta());
-            model.addAttribute("total", 0);
-        }
+    public String verCarrito(Model model, @ModelAttribute("carritoTemporal") List<DetalleVenta> carrito) {
+        model.addAttribute("productos", productoRepository.findAll());
+        model.addAttribute("detalles", carrito);
+        model.addAttribute("venta", null); // No hay venta aún
+
+        // Agregar datos para el formulario de finalización de compra
+        model.addAttribute("usuarios", usuarioRepository.findAll());
+        model.addAttribute("tiposPago", tipoPagoRepository.findAll());
+        model.addAttribute("tarjetasCredito", tarjetaCreditoRepository.findAll());
+
+        double total = carrito.stream().mapToDouble(d -> d.getPrecioUnitario() * d.getCantidad()).sum();
+        model.addAttribute("total", total);
         return "venta/detalleVenta";
     }
 
-    @PostMapping("/add")
-    public String addDetalleCarrito(@RequestParam("idProducto") Integer idProducto,
-                                  @RequestParam("cantidad") Integer cantidad,
-                                  @RequestParam("ventaId") Integer ventaId,
-                                  RedirectAttributes attributes, Model model) {
+    @PostMapping
+    public String addProductoAlCarrito(
+            @RequestParam("idProducto") Integer idProducto,
+            @RequestParam("cantidad") Integer cantidad,
+            @RequestParam("precioUnitario") Float precioUnitario,
+            @ModelAttribute("carritoTemporal") List<DetalleVenta> carrito,
+            RedirectAttributes attributes) {
+
         Producto producto = productoRepository.findById(idProducto).orElse(null);
         if (producto == null) {
             attributes.addFlashAttribute("error", "Producto no encontrado");
-            return "Venta/detalleVenta";
+            return "redirect:/carrito";
         }
         if (producto.getStock() < cantidad) {
-            attributes.addFlashAttribute("error", "Stock insuficiente para el producto seleccionado");
-            return "Venta/detalleVenta";
+            attributes.addFlashAttribute("error", "Stock insuficiente");
+            return "redirect:/carrito";
         }
-        List<DetalleVenta> detalles = detalleVentaService.obtenerPorVentaId(ventaId);
-        DetalleVenta existente = detalles.stream()
-            .filter(d -> d.getIdProducto().equals(idProducto))
-            .findFirst().orElse(null);
+
+        // Ver si ya existe el producto en el carrito
+        DetalleVenta existente = carrito.stream()
+                .filter(d -> d.getIdProducto().equals(idProducto))
+                .findFirst()
+                .orElse(null);
+
         if (existente != null) {
             int nuevaCantidad = existente.getCantidad() + cantidad;
             if (producto.getStock() < nuevaCantidad) {
-                attributes.addFlashAttribute("error", "Stock insuficiente para el producto seleccionado");
-                return "Venta/detalleVenta";
+                attributes.addFlashAttribute("error", "Stock insuficiente para esa cantidad");
+                return "redirect:/carrito";
             }
             existente.setCantidad(nuevaCantidad);
-            existente.setPrecioUnitario(producto.getPrecio().floatValue());
-            detalleVentaService.crearOEditar(existente);
         } else {
-            DetalleVenta detalleNuevo = new DetalleVenta();
-            detalleNuevo.setVenta(ventaService.obtenerPorId(ventaId).get());
-            detalleNuevo.setIdProducto(idProducto);
-            detalleNuevo.setCantidad(cantidad);
-            detalleNuevo.setPrecioUnitario(producto.getPrecio().floatValue());
-            detalleVentaService.crearOEditar(detalleNuevo);
+            DetalleVenta nuevo = new DetalleVenta();
+            nuevo.setIdProducto(idProducto);
+            nuevo.setCantidad(cantidad);
+            nuevo.setPrecioUnitario(precioUnitario);
+            carrito.add(nuevo);
         }
-        attributes.addFlashAttribute("msg", "Producto añadido correctamente");
-        return "Venta/detalleVenta";
+
+        attributes.addFlashAttribute("msg", "Producto añadido al carrito");
+        return "redirect:/carrito";
+    }
+
+    @PostMapping("/guardar")
+    public String guardarCarrito(
+            @RequestParam("idUsuario") Integer idUsuario,
+            @RequestParam("idTipoPago") Integer idTipoPago,
+            @RequestParam(value = "idTarjetaCredito", required = false) Integer idTarjetaCredito,
+            @ModelAttribute("carritoTemporal") List<DetalleVenta> carrito,
+            RedirectAttributes attributes,
+            SessionStatus sessionStatus) {
+
+        if (carrito.isEmpty()) {
+            attributes.addFlashAttribute("error", "El carrito está vacío");
+            return "redirect:/carrito";
+        }
+
+        try {
+            // Log para debug
+            System.out.println("=== PROCESANDO VENTA ===");
+            System.out.println("Usuario ID: " + idUsuario);
+            System.out.println("Tipo Pago ID: " + idTipoPago);
+            System.out.println("Tarjeta ID: " + idTarjetaCredito);
+            System.out.println("Productos en carrito: " + carrito.size());
+
+            // Validar usuario
+            Usuario usuario = usuarioRepository.findById(idUsuario).orElse(null);
+            if (usuario == null) {
+                attributes.addFlashAttribute("error", "Usuario no encontrado");
+                return "redirect:/carrito";
+            }
+
+            // Validar tipo de pago
+            TipoPago tipoPago = tipoPagoRepository.findById(idTipoPago).orElse(null);
+            if (tipoPago == null) {
+                attributes.addFlashAttribute("error", "Método de pago no encontrado");
+                return "redirect:/carrito";
+            }
+
+            // Validar tarjeta (solo si se proporcionó un ID válido)
+            TarjetaCredito tarjetaCredito = null;
+            if (idTarjetaCredito != null && idTarjetaCredito > 0) {
+                tarjetaCredito = tarjetaCreditoRepository.findById(idTarjetaCredito).orElse(null);
+                if (tarjetaCredito == null) {
+                    attributes.addFlashAttribute("error", "Tarjeta de crédito no encontrada");
+                    return "redirect:/carrito";
+                }
+            }
+
+            // Verificar stock antes de proceder
+            for (DetalleVenta detalle : carrito) {
+                Producto producto = productoRepository.findById(detalle.getIdProducto()).orElse(null);
+                if (producto == null) {
+                    attributes.addFlashAttribute("error", "Producto no encontrado: " + detalle.getIdProducto());
+                    return "redirect:/carrito";
+                }
+                if (producto.getStock() < detalle.getCantidad()) {
+                    attributes.addFlashAttribute("error", "Stock insuficiente para: " + producto.getNombre());
+                    return "redirect:/carrito";
+                }
+            }
+
+            // Calcular total
+            double totalDouble = carrito.stream()
+                    .mapToDouble(d -> d.getPrecioUnitario() * d.getCantidad())
+                    .sum();
+            BigDecimal total = BigDecimal.valueOf(totalDouble);
+
+            // Crear la venta
+            Venta venta = new Venta();
+            venta.setUsuario(usuario);
+            venta.setTipoPago(tipoPago);
+            venta.setTarjetaCredito(tarjetaCredito); // Puede ser null para efectivo
+            venta.setFecha(LocalDateTime.now());
+            venta.setTotal(total);
+            venta.setEstado("PENDIENTE");
+
+            // Generar correlativo simple
+            String correlativo = "VENTA-" +
+                    LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+            venta.setCorrelativo(correlativo);
+
+            // Guardar la venta
+            venta = ventaService.crearOEditar(venta);
+            System.out.println("Venta creada con ID: " + venta.getId());
+
+            // Procesar detalles y actualizar stock
+            for (DetalleVenta detalle : carrito) {
+                Producto producto = productoRepository.findById(detalle.getIdProducto()).get();
+
+                // Reducir stock
+                producto.setStock(producto.getStock() - detalle.getCantidad());
+                productoRepository.save(producto);
+
+                // Asignar venta al detalle
+                detalle.setVenta(venta);
+                detalleVentaService.crearOEditar(detalle);
+            }
+
+            // Limpiar carrito
+            sessionStatus.setComplete();
+
+            attributes.addFlashAttribute("success",
+                    "Venta procesada exitosamente. Correlativo: " + correlativo);
+            return "redirect:/ventas";
+
+        } catch (Exception e) {
+            System.err.println("ERROR en guardarCarrito: " + e.getMessage());
+            e.printStackTrace();
+            attributes.addFlashAttribute("error", "Error inesperado: " + e.getMessage());
+            return "redirect:/carrito";
+        }
+    }
+
+    @PostMapping("/delete")
+    public String eliminarProductoDelCarrito(@RequestParam("detalleId") Integer detalleId,
+                                             @ModelAttribute("carritoTemporal") List<DetalleVenta> carrito,
+                                             RedirectAttributes attributes) {
+        carrito.removeIf(d -> d.getIdProducto().equals(detalleId));
+        attributes.addFlashAttribute("msg", "Producto eliminado del carrito");
+        return "redirect:/carrito";
     }
 
     @PostMapping("/updateCantidad")
-    public String updateCantidadCarrito(@RequestParam("detalleId") Integer detalleId,
-                                             @RequestParam("ventaId") Integer ventaId,
-                                             @RequestParam("accion") String accion,
-                                             RedirectAttributes attributes, Model model) {
-        DetalleVenta detalle = detalleVentaService.obtenerPorId(detalleId);
-        if (detalle == null) {
-            attributes.addFlashAttribute("error", "Detalle no encontrado");
-            return "Venta/detalleVenta";
-        }
-        Producto producto = productoRepository.findById(detalle.getIdProducto()).orElse(null);
-        if (producto == null) {
-            attributes.addFlashAttribute("error", "Producto no encontrado");
-            return "Venta/detalleVenta";
-        }
-        int cantidadActual = detalle.getCantidad();
-        if ("incrementar".equals(accion)) {
-            if (producto.getStock() < cantidadActual + 1) {
-                attributes.addFlashAttribute("error", "Stock insuficiente para el producto seleccionado");
-                return "Venta/detalleVenta";
-            }
-            detalle.setCantidad(cantidadActual + 1);
-        } else if ("decrementar".equals(accion)) {
-            if (cantidadActual > 1) {
-                detalle.setCantidad(cantidadActual - 1);
-            } else {
-                detalleVentaService.eliminarPorId(detalleId);
-                attributes.addFlashAttribute("msg", "Producto eliminado del carrito");
-                return "Venta/detalleVenta";
+    public String actualizarCantidad(@RequestParam("detalleId") Integer detalleId,
+                                     @RequestParam("accion") String accion,
+                                     @ModelAttribute("carritoTemporal") List<DetalleVenta> carrito,
+                                     RedirectAttributes attributes) {
+        for (DetalleVenta d : carrito) {
+            if (d.getIdProducto().equals(detalleId)) {
+                if ("incrementar".equals(accion)) {
+                    Producto prod = productoRepository.findById(d.getIdProducto()).orElse(null);
+                    if (prod != null && prod.getStock() > d.getCantidad()) {
+                        d.setCantidad(d.getCantidad() + 1);
+                    } else {
+                        attributes.addFlashAttribute("error", "Stock insuficiente");
+                    }
+                } else if ("decrementar".equals(accion)) {
+                    if (d.getCantidad() > 1) {
+                        d.setCantidad(d.getCantidad() - 1);
+                    } else {
+                        carrito.remove(d);
+                    }
+                }
+                break;
             }
         }
-        detalle.setPrecioUnitario(producto.getPrecio().floatValue());
-        detalleVentaService.crearOEditar(detalle);
-        attributes.addFlashAttribute("msg", "Cantidad actualizada");
-        return "Venta/detalleVenta";
+        return "redirect:/carrito";
     }
+}
 
+    /**
+     * Genera un correlativo único para la venta
+     * Formato: VENTA-YYYYMMDD-NNNN
+     */
+    /*
+    private String generarCorrelativo() {
+        String fechaActual = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String prefijo = "VENTA-" + fechaActual + "-";
+
+        // Buscar el último correlativo del día
+        List<Venta> ventasDelDia = ventaService.findByCorrelativoStartingWith(prefijo);
+
+        int numeroSecuencial = 1;
+        if (!ventasDelDia.isEmpty()) {
+            // Encontrar el número más alto
+            numeroSecuencial = ventasDelDia.stream()
+                    .mapToInt(v -> {
+                        String corr = v.getCorrelativo();
+                        String numStr = corr.substring(corr.lastIndexOf("-") + 1);
+                        try {
+                            return Integer.parseInt(numStr);
+                        } catch (NumberFormatException e) {
+                            return 0;
+                        }
+                    })
+                    .max()
+                    .orElse(0) + 1;
+        }
+
+        return prefijo + String.format("%04d", numeroSecuencial);
+    }
+}*/
+/*
     @PostMapping("/delete")
     public String deleteDetalleCarrito(@RequestParam("detalleId") Integer detalleId,
                                      @RequestParam("ventaId") Integer ventaId,
@@ -136,17 +307,11 @@ public class DetalleVentaController {
         for (DetalleVenta detalle : detalles) {
             Producto producto = productoRepository.findById(detalle.getIdProducto()).orElse(null);
             if (producto != null) {
-                int nuevoStock = producto.getStock() - detalle.getCantidad();
-                if (nuevoStock < 0) {
-                    attributes.addFlashAttribute("error", "Stock insuficiente para el producto " + producto.getNombre());
-                    return "Venta/detalleVenta";
-                }
-                producto.setStock(nuevoStock);
+                producto.setStock(producto.getStock() - detalle.getCantidad());
                 productoRepository.save(producto);
             }
         }
         attributes.addFlashAttribute("msg", "Venta guardada y stock actualizado correctamente");
         return "Venta/detalleVenta";
     }
-}
-
+}*/

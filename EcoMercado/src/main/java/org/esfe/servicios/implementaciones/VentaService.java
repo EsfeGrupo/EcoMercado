@@ -24,7 +24,7 @@ public class VentaService implements IVentaService {
 
     @Override
     public List<Venta> obtenerTodos() {
-        return List.of();
+        return ventaRepository.findAll();
     }
 
     @Override
@@ -69,5 +69,14 @@ public class VentaService implements IVentaService {
             return ventaOpt.get().getTotal();
         }
         return BigDecimal.ZERO;
+    }
+    @Override
+    public List<Venta> findByCorrelativoStartingWith(String prefijo) {
+        return ventaRepository.findByCorrelativoStartingWithOrderByCorrelativoDesc(prefijo);
+    }
+
+    @Override
+    public boolean existsByCorrelativo(String correlativo) {
+        return ventaRepository.existsByCorrelativo(correlativo);
     }
 }

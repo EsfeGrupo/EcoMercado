@@ -2,116 +2,170 @@
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="/layouts/_mainLayout">
-<!--<head>
-    <meta charset="UTF-8">
-    <title>Detalle de Venta</title>
-    <link rel="stylesheet" th:href="@{/css/styles.css}" />
-</head>-->
 
 <div layout:fragment="content">
-  <div class="container my-4">
-    <div class="row">
-      <h2 class="mb-4 text-center text-success fw-bold">Detalle de Venta</h2>
-      <div class="col-12 mb-4 p-4 rounded-3 shadow-sm" style="background-color: #f8f9fa;">
-        <div th:if="${error}" style="color:red;">[[${error}]]</div>
-        <div th:if="${msg}" style="color:green;">[[${msg}]]</div>
-        <form th:action="@{/ventas/carrito/add}" method="post" class="d-flex align-items-center gap-3 flex-wrap">
-          <div th:if="${venta != null}">
-            <input type="hidden" name="ventaId" th:value="${venta.id}" />
-          </div>
-          <div class="flex-grow-1">
-            <label>Producto:</label>
-            <select name="idProducto" required class="form-select">
-              <option value="" disabled selected>Seleccione un producto</option>
-              <option th:each="prod : ${productos}" th:value="${prod.id}" th:text="${prod.nombre + ' (Stock: ' + prod.stock + ')'}"></option>
-            </select>
-          </div>
-          <div class="flex-grow-1">
-            <label>Cantidad:</label>
-            <input type="number" name="cantidad" min="1" required class="form-control" />
-          </div>
-          <div class="flex-grow-1">
-            <label>Precio Unitario:</label>
-            <input type="number" name="precioUnitario" step="0.01" min="0" required class="form-control" />
-          </div>
-          <button type="submit" class="btn btn-success">Añadir Producto</button>
-        </form>
-      </div>
-    </div>
-    <hr/>
-    <h3 class="mb-3">Productos añadidos</h3>
-    <div class="row">
-      <div class="col">
-        <table class="table table-bordered">
-          <thead>
-            <tr>
-              <th>Producto</th>
-              <th>Cantidad</th>
-              <th>Precio Unitario</th>
-              <th>Subtotal</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr th:each="detalle : ${detalles}">
-              <td th:text="${#lists.find(productos, p -> p.id == detalle.idProducto)?.nombre}"></td>
-              <td>
-                <div th:if="${venta != null}">
-                  <form th:action="@{/ventas/carrito/updateCantidad}" method="post" style="display:inline;">
-                    <input type="hidden" name="detalleId" th:value="${detalle.id}" />
-                    <input type="hidden" name="ventaId" th:value="${venta.id}" />
-                    <button type="submit" name="accion" value="decrementar" class="btn btn-outline-secondary btn-sm">-</button>
-                  </form>
-                  <span th:text="${detalle.cantidad}"></span>
-                  <form th:action="@{/ventas/carrito/updateCantidad}" method="post" style="display:inline;">
-                    <input type="hidden" name="detalleId" th:value="${detalle.id}" />
-                    <input type="hidden" name="ventaId" th:value="${venta.id}" />
-                    <button type="submit" name="accion" value="incrementar" class="btn btn-outline-secondary btn-sm">+</button>
-                  </form>
+    <div class="container my-4">
+        <div class="row">
+            <h2 class="mb-4 text-center text-success fw-bold">Detalle de Venta</h2>
+            <div class="col-12 mb-4 p-4 rounded-3 shadow-sm" style="background-color: #f8f9fa;">
+                <div th:if="${error}" class="alert alert-danger">[[${error}]]</div>
+                <div th:if="${success}" class="alert alert-success">[[${success}]]</div>
+                <div th:if="${msg}" class="alert alert-info">[[${msg}]]</div>
+
+                <!-- Formulario para añadir productos -->
+                <form th:action="@{/carrito}" method="post" class="d-flex align-items-center gap-3 flex-wrap">
+                    <div th:if="${venta != null}">
+                        <!--<input type="hidden" name="ventaId" th:value="${venta.id}" />-->
+                    </div>
+                    <div class="flex-grow-1">
+                        <label>Producto:</label>
+                        <select name="idProducto" required class="form-select">
+                            <option value="" disabled selected>Seleccione un producto</option>
+                            <option th:each="prod : ${productos}" th:value="${prod.id}"
+                                    th:text="${prod.nombre + ' (Stock: ' + prod.stock + ')'}"></option>
+                        </select>
+                    </div>
+                    <div class="flex-grow-1">
+                        <label>Cantidad:</label>
+                        <input type="number" name="cantidad" min="1" required class="form-control" />
+                    </div>
+                    <div class="flex-grow-1">
+                        <label>Precio Unitario:</label>
+                        <input type="number" name="precioUnitario" step="0.01" min="0" required class="form-control" />
+                    </div>
+                    <button type="submit" class="btn btn-success">Añadir Producto</button>
+                </form>
+            </div>
+        </div>
+
+        <hr/>
+
+        <!-- Tabla de productos en el carrito -->
+        <h3 class="mb-3">Productos añadidos</h3>
+        <div class="row">
+            <div class="col">
+                <table class="table table-bordered">
+                    <thead class="table-dark">
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Precio Unitario</th>
+                        <th>Subtotal</th>
+                        <th>Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="detalle : ${detalles}">
+                        <td>
+                            <span th:each="p : ${productos}" th:if="${p.id} == ${detalle.idProducto}" th:text="${p.nombre}"></span>
+                        </td>
+                        <td>
+                            <!-- Botones de cantidad -->
+                            <form th:action="@{/carrito/updateCantidad}" method="post" style="display:inline;">
+                                <input type="hidden" name="detalleId" th:value="${detalle.idProducto}" />
+                                <button type="submit" name="accion" value="decrementar" class="btn btn-outline-secondary btn-sm">-</button>
+                            </form>
+
+                            <span th:text="${detalle.cantidad}" class="mx-2"></span>
+
+                            <form th:action="@{/carrito/updateCantidad}" method="post" style="display:inline;">
+                                <input type="hidden" name="detalleId" th:value="${detalle.idProducto}" />
+                                <button type="submit" name="accion" value="incrementar" class="btn btn-outline-secondary btn-sm">+</button>
+                            </form>
+                        </td>
+                        <td>$<span th:text="${#numbers.formatDecimal(detalle.precioUnitario, 1, 2)}"></span></td>
+                        <td>$<span th:text="${#numbers.formatDecimal(detalle.cantidad * detalle.precioUnitario, 1, 2)}"></span></td>
+                        <td>
+                            <!-- Botón Eliminar -->
+                            <form th:action="@{/carrito/delete}" method="post" style="display:inline;">
+                                <input type="hidden" name="detalleId" th:value="${detalle.idProducto}" />
+                                <button type="submit" class="btn btn-danger btn-sm"
+                                        onclick="return confirm('¿Está seguro de eliminar este producto?')">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Total y formulario de finalización -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h4 class="text-primary">Total: $<span th:text="${#numbers.formatDecimal(total, 1, 2)}"></span></h4>
+            </div>
+        </div>
+
+        <!-- Formulario de finalización de compra SIMPLIFICADO -->
+        <div class="row mt-4" th:if="${!detalles.isEmpty()}">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Finalizar Compra</h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/carrito/guardar}" method="post">
+                            <div class="row">
+                                <!-- Usuario -->
+                                <div class="col-md-4 mb-3">
+                                    <label for="idUsuario" class="form-label">Usuario *</label>
+                                    <select name="idUsuario" id="idUsuario" required class="form-select">
+                                        <option value="" disabled selected>Seleccione un usuario</option>
+                                        <option th:each="usuario : ${usuarios}" th:value="${usuario.id}" th:text="${usuario.nombre}"></option>
+                                    </select>
+                                </div>
+
+                                <!-- Tipo de Pago -->
+                                <div class="col-md-4 mb-3">
+                                    <label for="idTipoPago" class="form-label">Método de Pago *</label>
+                                    <select name="idTipoPago" id="idTipoPago" required class="form-select">
+                                        <option value="" disabled selected>Seleccione método de pago</option>
+                                        <option th:each="tipoPago : ${tiposPago}" th:value="${tipoPago.id}" th:text="${tipoPago.metodoPago}"></option>
+                                    </select>
+                                </div>
+
+                                <!-- Tarjeta de Crédito (SIEMPRE VISIBLE, OPCIONAL) -->
+                                <div class="col-md-4 mb-3">
+                                    <label for="idTarjetaCredito" class="form-label">Tarjeta de Crédito (Opcional)</label>
+                                    <select name="idTarjetaCredito" id="idTarjetaCredito" class="form-select">
+                                        <option value="">No usar tarjeta</option>
+                                        <option th:each="tarjeta : ${tarjetasCredito}" th:value="${tarjeta.id}"
+                                                th:text="${tarjeta.banco + ' - ' + tarjeta.nombreTitular}"></option>
+                                    </select>
+                                    <div class="form-text">Solo llenar si el pago es con tarjeta</div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-success btn-lg">Procesar Venta</button>
+                                        <a th:href="@{/carrito}" class="btn btn-warning btn-lg">Continuar Comprando</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <div th:if="${venta == null}">
-                  <span th:text="${detalle.cantidad}"></span>
-                </div>
-              </td>
-              <td th:text="${detalle.precioUnitario}"></td>
-              <td th:text="${detalle.cantidad * detalle.precioUnitario}"></td>
-              <td>
-                <div th:if="${venta != null}">
-                  <form th:action="@{/ventas/carrito/delete}" method="post" style="display:inline;">
-                    <input type="hidden" name="detalleId" th:value="${detalle.id}" />
-                    <input type="hidden" name="ventaId" th:value="${venta.id}" />
-                    <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
-                  </form>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+            </div>
+        </div>
     </div>
-    <h4 class="mt-4">Total: <span th:text="${total}"></span></h4>
-    <div th:if="${venta != null}">
-      <form th:action="@{/ventas/carrito/guardar}" method="post">
-        <input type="hidden" name="ventaId" th:value="${venta.id}" />
-        <button type="submit" class="btn btn-primary">Guardar Venta</button>
-      </form>
-    </div>
-    <br>
-    <a th:href="@{/ventas}" class="btn btn-link">Volver a ventas</a>
-  </div>
 </div>
-<script>
-    // Autocompletar precio unitario al seleccionar producto
-    document.addEventListener('DOMContentLoaded', function() {
-        const productos = /*[[${productos}]]*/ [];
-        const select = document.querySelector('select[name="idProducto"]');
-        const precioInput = document.querySelector('input[name="precioUnitario"]');
-        select.addEventListener('change', function() {
-            const prodId = parseInt(this.value);
-            const prod = productos.find(p => p.id === prodId);
-            if (prod) {
-                precioInput.value = prod.precio;
-            }
-        });
-    });
-</script>
+        <!-- JavaScript SOLO para autocompletar precio -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const productos = /*[[${productos}]]*/ [];
+                const select = document.querySelector('select[name="idProducto"]');
+                const precioInput = document.querySelector('input[name="precioUnitario"]');
+
+                if (select && precioInput) {
+                    select.addEventListener('change', function() {
+                        const prodId = parseInt(this.value);
+                        const prod = productos.find(p => p.id === prodId);
+                        if (prod) {
+                            precioInput.value = prod.precio;
+                        }
+                    });
+                }
+            });
+        </script>

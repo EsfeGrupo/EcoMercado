@@ -29,4 +29,10 @@ public interface IVentaService {
     Venta save(Venta venta); // Method to save a sale
     
     BigDecimal getStoredTotal(Integer ventaId); // Method to calculate the total
+    // Metodo para buscar ventas por correlativo que comience con un prefijo
+    List<Venta> findByCorrelativoStartingWith(String prefijo);
+
+    // Metodo para verificar si existe un correlativo (opcional pero recomendado)
+    boolean existsByCorrelativo(String correlativo);
+
 }
