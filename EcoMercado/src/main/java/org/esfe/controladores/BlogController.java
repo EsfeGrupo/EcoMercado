@@ -95,8 +95,12 @@ public class BlogController {
 
     @PostMapping("/remove")
     public String delete(@RequestParam("id") Integer id, RedirectAttributes attributes) {
+    try {
         blogService.eliminarPorId(id);
         attributes.addFlashAttribute("msg", "Blog eliminado correctamente");
-        return "redirect:/blog";
+    } catch (Exception e) {
+        attributes.addFlashAttribute("error", "No se puede eliminar el blog.");
+    }
+    return "redirect:/blog";
     }
 }

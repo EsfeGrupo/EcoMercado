@@ -6,10 +6,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
@@ -100,10 +96,14 @@ public class RolController {
     }
 
     @PostMapping("/delete")
-    public String delete(Rol rol, RedirectAttributes attributes){
+    public String delete(Rol rol, RedirectAttributes attributes) {
+    try {
         rolService.eliminarPorId(rol.getId());
         attributes.addFlashAttribute("msg", "Rol eliminado correctamente");
-        return "redirect:/roles";
+    } catch (Exception e) {
+        attributes.addFlashAttribute("error", "No se puede eliminar el rol porque ya está vinculado a un usuario.");
+    }
+    return "redirect:/roles";
     }
 
     @GetMapping("/reportegeneral/{visualizacion}")

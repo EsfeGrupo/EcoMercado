@@ -85,9 +85,13 @@ public class TipoPagoController {
     }
 
     @PostMapping("/delete")
-    public String delete(TipoPago tipoPago, RedirectAttributes attributes){
+    public String delete(TipoPago tipoPago, RedirectAttributes attributes) {
+    try {
         tipoPagoService.eliminarPorId(tipoPago.getId());
         attributes.addFlashAttribute("msg", "Tipo de pago eliminado correctamente");
-        return "redirect:/tipopagos";
+    } catch (Exception e) {
+        attributes.addFlashAttribute("error", "No se puede eliminar el tipo de pago porque está vinculado a un pago.");
     }
+    return "redirect:/tipopagos";
+}
 }
