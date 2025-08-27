@@ -1,41 +1,40 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
-  <title>Reporte de ventas</title>
-  <style>
-    table { width: 100%; border-collapse: collapse; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    th { background-color: #f8f9fa; }
-  </style>
+    <title>Reporte de ventas</title>
+    <style>
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background-color: #f8f9fa; }
+    </style>
 </head>
 <body>
 <h2>Reporte de Ventas</h2>
 <table>
-  <thead>
+    <thead>
     <tr>
-      <th>ID</th>
-      <th>Correlativo</th>
-      <th>Fecha</th>
-      <th>Total</th>
-      <th>Estado</th>
-      <th>Usuario</th>
-      <th>Tipo de Pago</th>
-      <th>Tarjeta de Crédito</th>
+        <th>ID</th>
+        <th>Correlativo</th>
+        <th>Fecha</th>
+        <th>Total</th>
+        <th>Estado</th>
+        <th>Usuario</th>
+        <th>Tipo de Pago</th>
+        <th>Tarjeta de Crédito</th>
     </tr>
-  </thead>
-  <tbody>
+    </thead>
+    <tbody>
     <tr th:each="item : ${ventas}">
-      <td th:text="${item.id}"></td>
-      <td th:text="${item.correlativo}"></td>
-      <td th:text="${#dates.format(item.fecha, 'dd/MM/yyyy HH:mm')}"></td>
-      <td th:text="${item.total}"></td>
-      <td th:text="${item.estado}"></td>
-      <td th:text="${item.usuario.nombre}"></td>
-      <td th:text="${item.tipoPago.metodoPago}"></td>
-      <td th:text="${item.tarjetaCredito != null ? item.tarjetaCredito.numero : 'N/A'}"></td>
+        <td th:text="${item.id}"></td>
+        <td th:text="${item.correlativo}"></td>
+        <td th:text="${item.fecha != null ? #temporals.format(item.fecha, 'dd/MM/yyyy HH:mm') : 'N/A'}"></td>
+        <td th:text="${item.total != null ? '$' + #numbers.formatDecimal(item.total, 0, 2) : '$0.00'}"></td>
+        <td th:text="${item.estado}"></td>
+        <td th:text="${item.usuario != null ? item.usuario.nombre : 'N/A'}"></td>
+        <td th:text="${item.tipoPago != null ? item.tipoPago.metodoPago : 'N/A'}"></td>
+        <td th:text="${item.tarjetaCredito != null ? item.tarjetaCredito.banco : 'N/A'}"></td>
     </tr>
-  </tbody>
+    </tbody>
 </table>
 </body>
 </html>
-

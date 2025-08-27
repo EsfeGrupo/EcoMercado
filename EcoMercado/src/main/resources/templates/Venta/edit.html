@@ -4,64 +4,144 @@
       layout:decorate="/layouts/_mainLayout">
 
 <div layout:fragment="content">
-  <div class="container py-5">
-    <div class="row justify-content-center">
-      <div class="col-md-8">
-        <div class="card shadow-lg border-success">
-          <div class="card-header bg-success text-white">
-            <h2 class="card-title mb-0 fw-bold">Editar Venta</h2>
-          </div>
-          <div class="card-body">
-            <form th:action="@{/ventas/save}" th:object="${venta}" method="post">
-              <input type="hidden" th:field="*{id}">
-              <div class="mb-3">
-                <label for="correlativo" class="form-label fw-bold">Correlativo</label>
-                <input type="text" class="form-control" th:field="*{correlativo}" id="correlativo" placeholder="Correlativo" required>
-              </div>
-              <div class="mb-3">
-                <label for="estado" class="form-label fw-bold">Estado</label>
-                <select class="form-select" th:field="*{estado}" id="estado" required>
-                  <option th:value="1">Pendiente</option>
-                  <option th:value="2">Cancelado</option>
-                </select>
-              </div>
-              <div class="mb-3">
-                <label for="idUsuario" class="form-label fw-bold">Usuario</label>
-                <select class="form-select" th:field="*{usuario.id}" id="idUsuario" required>
-                  <option th:each="usuario : ${usuarios}" th:value="${usuario.id}" th:text="${usuario.nombre}"></option>
-                </select>
-              </div>
-              <div class="mb-3">
-                <label for="idTipoPago" class="form-label fw-bold">Tipo de Pago</label>
-                <select class="form-select" th:field="*{tipoPago.id}" id="idTipoPago" required>
-                  <option th:each="tipo : ${tiposPago}" th:value="${tipo.id}" th:text="${tipo.metodoPago}"></option>
-                </select>
-              </div>
-              <div class="mb-3">
-                <label for="idTarjetaCredito" class="form-label fw-bold">Tarjeta de Crédito</label>
-                <select class="form-select" th:field="*{tarjetaCredito.id}" id="idTarjetaCredito">
-                  <option th:each="tarjeta : ${tarjetasCredito}" th:value="${tarjeta.id}" th:text="${tarjeta.numero}"></option>
-                </select>
-                <!--
-                // Para filtrar solo las tarjetas del usuario logueado en el futuro:
-                // <select class="form-select" th:field="*{tarjetaCredito.id}" id="idTarjetaCredito">
-                //   <option th:each="tarjeta : ${tarjetasCredito}" th:if="${tarjeta.usuario.id} == ${#authentication.principal.id}" th:value="${tarjeta.id}" th:text="${tarjeta.numero}"></option>
-                // </select>
-                -->
-              </div>
-              <hr class="my-4">
-              <div class="d-flex justify-content-end gap-2">
-                <button type="submit" class="btn btn-outline-success btn-lg">
-                  <i class="bi bi-save"></i> Guardar Cambios
-                </button>
-                <a th:href="@{/ventas}" class="btn btn-outline-secondary btn-lg">
-                  <i class="bi bi-x-circle"></i> Regresar
-                </a>
-              </div>
-            </form>
-          </div>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-lg border-success">
+                    <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #28a745, #20c997);">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h2 class="card-title mb-0 fw-bold">
+                                <i class="bi bi-pencil-square me-2"></i>Editar Venta
+                            </h2>
+                            <span class="badge bg-light text-dark fs-6" th:text="'ID: ' + ${venta.id}">ID: #</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- Información actual de la venta -->
+                        <div class="alert alert-info mb-4" role="alert">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>Correlativo Actual:</strong> <span th:text="${venta.correlativo}">-</span>
+                                </div>
+                                <div class="col-md-6" th:if="${venta.fecha != null}">
+                                    <strong>Fecha:</strong> <span th:text="${#temporals.format(venta.fecha, 'dd/MM/yyyy HH:mm')}">-</span>
+                                </div>
+                            </div>
+                            <div class="row mt-2" th:if="${venta.total != null}">
+                                <div class="col-md-6">
+                                    <strong>Total:</strong> <span class="text-success fw-bold" th:text="'$' + ${#numbers.formatDecimal(venta.total, 0, 2)}">$0.00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form th:action="@{/ventas/save}" th:object="${venta}" method="post">
+                            <input type="hidden" th:field="*{id}">
+
+                            <!-- Información básica -->
+                            <div class="row mb-4">
+                                <h5 class="text-success mb-3">
+                                    <i class="bi bi-info-circle me-2"></i>Información Básica
+                                </h5>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="correlativo" class="form-label fw-bold">
+                                        <i class="bi bi-hash text-primary me-1"></i>Correlativo *
+                                    </label>
+                                    <input type="text" class="form-control form-control-lg"
+                                           th:field="*{correlativo}" id="correlativo"
+                                           placeholder="Ingrese el correlativo" required readonly>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="estado" class="form-label fw-bold">
+                                        <i class="bi bi-flag text-warning me-1"></i>Estado *
+                                    </label>
+                                    <!-- CORREGIDO: Cambié name="estado" por th:field="*{estado}" -->
+                                    <select class="form-select form-select-lg" th:field="*{estado}" id="estado" required>
+                                        <option value="PENDIENTE"
+                                                th:selected="${venta.estado != null and (venta.estado.equalsIgnoreCase('Pendiente') or venta.estado.equalsIgnoreCase('PENDIENTE'))}">
+                                            PENDIENTE
+                                        </option>
+                                        <option value="PAGADO"
+                                                th:selected="${venta.estado != null and (venta.estado.equalsIgnoreCase('Pagado') or venta.estado.equalsIgnoreCase('PAGADO'))}">
+                                            PAGADO
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Información de pago -->
+                            <div class="row mb-4">
+                                <h5 class="text-success mb-3">
+                                    <i class="bi bi-credit-card me-2"></i>Información de Pago
+                                </h5>
+
+                                <div class="col-md-4 mb-3">
+                                    <label for="idUsuario" class="form-label fw-bold">
+                                        <i class="bi bi-person text-info me-1"></i>Usuario *
+                                    </label>
+                                    <select class="form-select form-select-lg" th:field="*{usuario.id}" id="idUsuario" required>
+                                        <option value="">-- Seleccione un usuario --</option>
+                                        <option th:each="usuario : ${usuarios}"
+                                                th:value="${usuario.id}"
+                                                th:text="${usuario.nombre}"
+                                                th:selected="${venta.usuario != null && venta.usuario.id == usuario.id}">
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label for="idTipoPago" class="form-label fw-bold">
+                                        <i class="bi bi-wallet text-success me-1"></i>Tipo de Pago *
+                                    </label>
+                                    <select class="form-select form-select-lg" th:field="*{tipoPago.id}" id="idTipoPago" required>
+                                        <option value="">-- Seleccione tipo de pago --</option>
+                                        <option th:each="tipo : ${tiposPago}"
+                                                th:value="${tipo.id}"
+                                                th:text="${tipo.metodoPago}"
+                                                th:selected="${venta.tipoPago != null && venta.tipoPago.id == tipo.id}">
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label for="idTarjetaCredito" class="form-label fw-bold">
+                                        <i class="bi bi-credit-card-2-front text-primary me-1"></i>Tarjeta de Crédito
+                                    </label>
+                                    <select class="form-select form-select-lg" th:field="*{tarjetaCredito.id}" id="idTarjetaCredito">
+                                        <option value="">-- Sin tarjeta / Opcional --</option>
+                                        <option th:each="tarjeta : ${tarjetasCredito}"
+                                                th:value="${tarjeta.id}"
+                                                th:text="${tarjeta.banco != null ? tarjeta.banco : 'N/A'}"
+                                                th:selected="${venta.tarjetaCredito != null && venta.tarjetaCredito.id == tarjeta.id}">
+                                        </option>
+                                    </select>
+                                    <div class="form-text">Opcional - Solo si el pago es con tarjeta</div>
+                                </div>
+                            </div>
+
+                            <!-- Botones de acción -->
+                            <hr class="my-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="text-muted">
+                                    <small>
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Los campos marcados con * son obligatorios
+                                    </small>
+                                </div>
+                                <div class="d-flex gap-3">
+                                    <a th:href="@{/ventas}" class="btn btn-outline-secondary btn-lg">
+                                        <i class="bi bi-arrow-left me-2"></i>Cancelar
+                                    </a>
+                                    <button type="submit" class="btn btn-success btn-lg shadow">
+                                        <i class="bi bi-check-circle me-2"></i>Guardar Cambios
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 </div>

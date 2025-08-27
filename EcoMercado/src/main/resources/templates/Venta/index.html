@@ -58,12 +58,11 @@
                     <div class="flex-grow-1">
                         <label for="tarjetaCredito" class="form-label visually-hidden">Tarjeta de Crédito</label>
                         <input type="text" class="form-control form-control-lg" name="tarjetaCredito" id="tarjetaCredito"
-                               placeholder="Buscar por tarjeta de crédito" th:value="${param.tarjetaCredito}">
+                               placeholder="Buscar por banco de tarjeta" th:value="${param.tarjetaCredito}">
                     </div>
 
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-outline-primary btn-lg"><i class="bi bi-search"></i> Buscar</button>
-                        <a th:href="@{/ventas/create}" class="btn btn-outline-success btn-lg"><i class="bi bi-plus-circle"></i> Nuevo</a>
                         <a th:href="@{/ventas/reportegeneral/attachment}" class="btn btn-outline-primary">Descargar reporte general</a>
                         <a th:href="@{/ventas/reportegeneral/inline}" target="_blank" class="btn btn-outline-primary">Imprimir reporte general</a>
                     </div>
@@ -79,7 +78,7 @@
                             <p class="card-text flex-grow-1">Estado: <span th:text="${item.estado}">Estado</span></p>
                             <p class="card-text flex-grow-1">Usuario: <span th:text="${item.usuario != null ? item.usuario.nombre : 'N/A'}">Usuario</span></p>
                             <p class="card-text flex-grow-1">Tipo de Pago: <span th:text="${item.tipoPago != null ? item.tipoPago.metodoPago : 'N/A'}">Tipo Pago</span></p>
-                            <p class="card-text flex-grow-1">Tarjeta de Crédito: <span th:text="${item.tarjetaCredito != null ? item.tarjetaCredito.numero : 'N/A'}">Tarjeta</span></p>
+                            <p class="card-text flex-grow-1">Tarjeta de Crédito: <span th:text="${item.tarjetaCredito != null ? item.tarjetaCredito.banco : 'N/A'}">Tarjeta</span></p>
                             <p class="card-text flex-grow-1" th:if="${item.fecha != null}">Fecha: <span th:text="${#temporals.format(item.fecha, 'dd/MM/yyyy HH:mm')}">Fecha</span></p>
                             <p class="card-text flex-grow-1" th:if="${item.total != null}">Total: <span class="text-success fw-bold" th:text="'$' + ${#numbers.formatDecimal(item.total, 0, 2)}">$0.00</span></p>
                             <div class="mt-auto d-grid gap-2">

@@ -49,13 +49,14 @@ public class VentaController {
 
     @GetMapping
     public String index(Model model,
-        @RequestParam("page") Optional<Integer> page,
-        @RequestParam("size") Optional<Integer> size,
-        @RequestParam("correlativo") Optional<String> correlativo,
-        @RequestParam("estado") Optional<String> estado,
-        @RequestParam("usuario") Optional<String> usuarioNombre,
-        @RequestParam("tipoPago") Optional<String> tipoPagoNombre,
-        @RequestParam("tarjetaCredito") Optional<String> tarjetaNumero) {
+                        @RequestParam("page") Optional<Integer> page,
+                        @RequestParam("size") Optional<Integer> size,
+                        @RequestParam("correlativo") Optional<String> correlativo,
+                        @RequestParam("estado") Optional<String> estado,
+                        @RequestParam("usuario") Optional<String> usuarioNombre,
+                        @RequestParam("tipoPago") Optional<String> tipoPagoNombre,
+                        @RequestParam("tarjetaCredito") Optional<String> tarjetaBanco) { // Cambiado de tarjetaNumero a tarjetaBanco
+
         int currentPage = page.orElse(1) - 1;
         int pageSize = size.orElse(5);
         Sort sortByIdDesc = Sort.by(Sort.Direction.DESC, "id");
@@ -65,52 +66,60 @@ public class VentaController {
         String estadoSearch = estado.orElse("");
         String usuarioSearch = usuarioNombre.orElse("");
         String tipoPagoSearch = tipoPagoNombre.orElse("");
-        String tarjetaSearch = tarjetaNumero.orElse("");
+        String tarjetaSearch = tarjetaBanco.orElse(""); // Cambiado nombre de variable
 
-        // Buscar los IDs correspondientes a los valores legibles
+        // Buscar ID de Usuario - Corregido para manejar nombres parciales
         Integer idUsuarioSearch = null;
         if (!usuarioSearch.isEmpty()) {
             idUsuarioSearch = usuarioRepository.findAll().stream()
-                .filter(u -> u.getNombre().equalsIgnoreCase(usuarioSearch))
-                .map(u -> u.getId())
-                .findFirst().orElse(null);
+                    .filter(u -> u.getNombre() != null && u.getNombre().toLowerCase().contains(usuarioSearch.toLowerCase()))
+                    .map(u -> u.getId())
+                    .findFirst().orElse(null);
         }
+
+        // Buscar ID de Tipo de Pago - Corregido para manejar nombres parciales
         Integer idTipoPagoSearch = null;
         if (!tipoPagoSearch.isEmpty()) {
             idTipoPagoSearch = tipoPagoRepository.findAll().stream()
-                .filter(tp -> tp.getMetodoPago().equalsIgnoreCase(tipoPagoSearch))
-                .map(tp -> tp.getId())
-                .findFirst().orElse(null);
+                    .filter(tp -> tp.getMetodoPago() != null && tp.getMetodoPago().toLowerCase().contains(tipoPagoSearch.toLowerCase()))
+                    .map(tp -> tp.getId())
+                    .findFirst().orElse(null);
         }
+
+        // Buscar ID de Tarjeta de Crédito - Corregido para buscar por banco y manejar nulls
         Optional<Integer> idTarjetaCreditoSearch = Optional.empty();
         if (!tarjetaSearch.isEmpty()) {
             idTarjetaCreditoSearch = tarjetaCreditoRepository.findAll().stream()
-                .filter(tc -> tc.getNumero().equalsIgnoreCase(tarjetaSearch))
-                .map(tc -> tc.getId())
-                .findFirst();
+                    .filter(tc -> tc.getBanco() != null && tc.getBanco().toLowerCase().contains(tarjetaSearch.toLowerCase()))
+                    .map(tc -> tc.getId())
+                    .findFirst();
         }
+
         // Usar directamente el estado como String
         String estadoFinal = estadoSearch.isEmpty() ? null : estadoSearch;
 
         Page<Venta> ventas = ventaService.buscarVentasConFiltros(
-            correlativoSearch,
-            estadoFinal,
-            idUsuarioSearch,
-            idTipoPagoSearch,
-            idTarjetaCreditoSearch,
-            pageable);
+                correlativoSearch,
+                estadoFinal,
+                idUsuarioSearch,
+                idTipoPagoSearch,
+                idTarjetaCreditoSearch,
+                pageable);
+
         model.addAttribute("ventas", ventas);
 
         int totalPages = ventas.getTotalPages();
         if (totalPages > 0) {
             List<Integer> pageNumbers = IntStream.rangeClosed(1, totalPages)
-                .boxed()
-                .collect(Collectors.toList());
+                    .boxed()
+                    .collect(Collectors.toList());
             model.addAttribute("pageNumbers", pageNumbers);
         }
+
         model.addAttribute("usuarios", usuarioRepository.findAll());
         model.addAttribute("tiposPago", tipoPagoRepository.findAll());
         model.addAttribute("tarjetasCredito", tarjetaCreditoRepository.findAll());
+
         return "venta/index";
     }
 
@@ -134,7 +143,7 @@ public class VentaController {
             attributes.addFlashAttribute("error", "No se pudo guardar la venta debido a un error.");
             return "venta/create";
         }
-        venta.setEstado("Pendiente"); // Estado pendiente por defecto
+        //venta.setEstado("Pendiente"); // Estado pendiente por defecto
         Venta ventaGuardada = ventaService.crearOEditar(venta);
         if(venta.getDetalleventas() != null){
             for(DetalleVenta detalle : venta.getDetalleventas()){
@@ -158,14 +167,20 @@ public class VentaController {
 
     @GetMapping("/edit/{id}")
     public String edit(@PathVariable("id") Integer id, Model model){
-    Venta venta = ventaService.obtenerPorId(id).get();
-    List<DetalleVenta> detalles = detalleVentaService.obtenerPorVentaId(id);
-    model.addAttribute("venta", venta);
-    model.addAttribute("detalles", detalles);
-    model.addAttribute("detalleNuevo", new DetalleVenta());
-    return "venta/edit";
-    }
+        Venta venta = ventaService.obtenerPorId(id).get();
+        List<DetalleVenta> detalles = detalleVentaService.obtenerPorVentaId(id);
 
+        model.addAttribute("venta", venta);
+        model.addAttribute("detalles", detalles);
+        model.addAttribute("detalleNuevo", new DetalleVenta());
+
+        // Agregar las listas necesarias para los selects
+        model.addAttribute("usuarios", usuarioRepository.findAll());
+        model.addAttribute("tiposPago", tipoPagoRepository.findAll());
+        model.addAttribute("tarjetasCredito", tarjetaCreditoRepository.findAll());
+
+        return "venta/edit";
+    }
     @GetMapping("/remove/{id}")
     public String remove(@PathVariable("id") Integer id, Model model){
         Venta venta = ventaService.obtenerPorId(id).get();
@@ -188,12 +203,21 @@ public class VentaController {
     public ResponseEntity<byte[]> reporteGeneralVentas(@PathVariable("visualizacion") String visualizacion) {
         try {
             List<Venta> ventas = ventaService.obtenerTodos();
+
+            // Validar que la lista no esté vacía
+            if (ventas == null || ventas.isEmpty()) {
+                return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+            }
+
             byte[] pdfBytes = pdfGeneratorService.generatePdfFromHtml("reportes/rpVentas", "ventas", ventas);
+
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.add("Content-Disposition", visualizacion+"; filename=reporte_general_ventas.pdf");
+            headers.add("Content-Disposition", visualizacion + "; filename=reporte_general_ventas.pdf");
+
             return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
         } catch (IOException e) {
+            e.printStackTrace(); // Para debug - puedes usar logger en producción
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -205,14 +229,19 @@ public class VentaController {
             if (ventaOpt.isEmpty()) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
+
             Venta venta = ventaOpt.get();
             List<Venta> ventas = List.of(venta); // Para reutilizar la plantilla
+
             byte[] pdfBytes = pdfGeneratorService.generatePdfFromHtml("reportes/rpVentas", "ventas", ventas);
+
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.add("Content-Disposition", visualizacion+"; filename=reporte_venta_"+id+".pdf");
+            headers.add("Content-Disposition", visualizacion + "; filename=reporte_venta_" + id + ".pdf");
+
             return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
         } catch (IOException e) {
+            e.printStackTrace(); // Para debug - puedes usar logger en producción
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
