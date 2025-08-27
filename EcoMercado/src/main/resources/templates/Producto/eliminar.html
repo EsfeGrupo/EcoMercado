@@ -1,4 +1,4 @@
-<!-- src/main/resources/templates/producto/eliminar.html -->
+<!DOCTYPE html>
 <html lang="es"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
@@ -7,32 +7,237 @@
 <div layout:fragment="content">
 
   <div class="container my-4">
-    <h1 class="mb-4 text-center text-danger fw-bold">Eliminar Producto</h1>
 
-    <div class="card shadow-sm p-4">
-      <p>¿Está seguro de que desea eliminar el siguiente producto?</p>
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-6">
 
-      <div class="mb-3">
-        <h5 class="fw-bold">Nombre:</h5>
-        <p th:text="${producto.nombre}">Nombre del producto</p>
+        <!-- ALERTA PRINCIPAL -->
+        <div class="alert alert-danger border-danger shadow" role="alert">
+          <div class="d-flex align-items-center mb-3">
+            <i class="bi bi-exclamation-triangle-fill me-3" style="font-size: 2rem;"></i>
+            <div>
+              <h4 class="alert-heading mb-1">¡Confirmar Eliminación!</h4>
+              <p class="mb-0">Esta acción no se puede deshacer</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- TARJETA DEL PRODUCTO A ELIMINAR -->
+        <div class="card border-danger shadow">
+          <div class="card-header bg-danger text-white">
+            <h5 class="mb-0">
+              <i class="bi bi-trash me-2"></i>Eliminar Producto
+            </h5>
+          </div>
+
+          <div class="card-body">
+
+            <!-- INFORMACIÓN DEL PRODUCTO -->
+            <div class="row">
+              <!-- IMAGEN -->
+              <div class="col-md-4 text-center">
+                <div class="mb-3">
+                  <div th:if="${producto.img != null}">
+                    <img th:src="@{'/producto/imagen/' + ${producto.id}}"
+                         th:alt="${producto.nombre}"
+                         class="img-thumbnail"
+                         style="max-width: 150px; max-height: 150px;">
+                  </div>
+
+                  <div th:if="${producto.img == null}" class="border rounded p-3 bg-light">
+                    <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                    <p class="text-muted small mt-2 mb-0">Sin imagen</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- DETALLES -->
+              <div class="col-md-8">
+                <div class="mb-4">
+                  <h4 class="text-danger fw-bold mb-3" th:text="${producto.nombre}">
+                    Nombre del Producto
+                  </h4>
+
+                  <table class="table table-borderless">
+                    <tbody>
+                    <tr>
+                      <td class="fw-bold text-muted ps-0" style="width: 40%;">
+                        <i class="bi bi-hash me-2"></i>ID:
+                      </td>
+                      <td th:text="${producto.id}">1</td>
+                    </tr>
+                    <tr>
+                      <td class="fw-bold text-muted ps-0">
+                        <i class="bi bi-tag me-2"></i>Nombre:
+                      </td>
+                      <td class="fw-bold" th:text="${producto.nombre}">Producto</td>
+                    </tr>
+                    <tr>
+                      <td class="fw-bold text-muted ps-0">
+                        <i class="bi bi-currency-dollar me-2"></i>Precio:
+                      </td>
+                      <td class="fw-bold text-success">
+                        $<span th:text="${#numbers.formatDecimal(producto.precio, 1, 2)}">0.00</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="fw-bold text-muted ps-0">
+                        <i class="bi bi-image me-2"></i>Imagen:
+                      </td>
+                      <td>
+                          <span th:if="${producto.img != null}" class="badge bg-success">
+                            <i class="bi bi-check-circle me-1"></i>Disponible
+                          </span>
+                        <span th:if="${producto.img == null}" class="badge bg-secondary">
+                            <i class="bi bi-x-circle me-1"></i>No disponible
+                          </span>
+                      </td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- MENSAJE DE ADVERTENCIA -->
+            <div class="alert alert-warning border-warning">
+              <div class="d-flex align-items-start">
+                <i class="bi bi-exclamation-triangle-fill me-3 text-warning" style="font-size: 1.5rem; margin-top: 2px;"></i>
+                <div>
+                  <h6 class="fw-bold mb-2">¿Está seguro de que desea eliminar este producto?</h6>
+                  <ul class="mb-0 ps-0" style="list-style: none;">
+                    <li><i class="bi bi-x-circle text-danger me-2"></i>Esta acción es <strong>irreversible</strong></li>
+                    <li><i class="bi bi-x-circle text-danger me-2"></i>Se perderán todos los datos del producto</li>
+                    <li><i class="bi bi-x-circle text-danger me-2"></i>La imagen asociada también será eliminada</li>
+                    <li><i class="bi bi-x-circle text-danger me-2"></i>No podrá recuperar esta información</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- FORMULARIO DE CONFIRMACIÓN -->
+            <form th:action="@{/producto/eliminar/{id}(id=${producto.id})}" method="post" id="deleteForm">
+
+              <!-- CHECKBOX DE CONFIRMACIÓN -->
+              <div class="form-check mb-4">
+                <input class="form-check-input" type="checkbox" id="confirmDelete" required>
+                <label class="form-check-label fw-bold text-danger" for="confirmDelete">
+                  Confirmo que deseo eliminar permanentemente este producto
+                </label>
+              </div>
+
+              <!-- BOTONES -->
+              <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                <a th:href="@{/producto}" class="btn btn-outline-secondary btn-lg me-md-3">
+                  <i class="bi bi-arrow-left me-2"></i>Cancelar
+                </a>
+                <a th:href="@{/producto/detalles/{id}(id=${producto.id})}" class="btn btn-outline-info btn-lg me-md-3">
+                  <i class="bi bi-eye me-2"></i>Ver Detalles
+                </a>
+                <button type="submit" class="btn btn-danger btn-lg" id="deleteBtn" disabled>
+                  <i class="bi bi-trash me-2"></i>Eliminar Definitivamente
+                </button>
+              </div>
+            </form>
+
+          </div>
+        </div>
+
+        <!-- INFORMACIÓN ADICIONAL -->
+        <div class="card border-secondary mt-4">
+          <div class="card-header bg-secondary text-white">
+            <h6 class="mb-0">
+              <i class="bi bi-info-circle me-1"></i>Alternativas
+            </h6>
+          </div>
+          <div class="card-body">
+            <p class="mb-3">Si no está seguro de eliminar el producto, considere estas opciones:</p>
+            <div class="row">
+              <div class="col-md-6">
+                <ul class="list-unstyled">
+                  <li class="mb-2">
+                    <i class="bi bi-pencil-square text-warning me-2"></i>
+                    <a th:href="@{/producto/editar/{id}(id=${producto.id})}" class="text-decoration-none">
+                      Editar el producto
+                    </a>
+                  </li>
+                  <li class="mb-2">
+                    <i class="bi bi-eye text-info me-2"></i>
+                    <a th:href="@{/producto/detalles/{id}(id=${producto.id})}" class="text-decoration-none">
+                      Revisar los detalles
+                    </a>
+                  </li>
+                </ul>
+              </div>
+              <div class="col-md-6">
+                <ul class="list-unstyled">
+                  <li class="mb-2">
+                    <i class="bi bi-arrow-left text-secondary me-2"></i>
+                    <a th:href="@{/producto}" class="text-decoration-none">
+                      Volver al listado
+                    </a>
+                  </li>
+                  <li class="mb-2">
+                    <i class="bi bi-plus-circle text-success me-2"></i>
+                    <a th:href="@{/producto/crear}" class="text-decoration-none">
+                      Crear un nuevo producto
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
-
-      <div class="mb-3">
-        <h5 class="fw-bold">Precio:</h5>
-        <p th:text="${producto.precio}">Precio del producto</p>
-      </div>
-
-      <div class="mb-3" th:if="${producto.img != null}">
-        <h5 class="fw-bold">Imagen:</h5>
-        <img th:src="@{'data:image/jpeg;base64,' + ${#strings.encodeBase64(producto.img)}}" class="img-fluid" alt="Imagen producto">
-      </div>
-
-      <form th:action="@{/producto/eliminar/{id}(id=${producto.id})}" method="post">
-        <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i> Eliminar</button>
-        <a th:href="@{/producto}" class="btn btn-secondary">Cancelar</a>
-      </form>
     </div>
   </div>
+
+  <!-- SCRIPT PARA MANEJO DEL FORMULARIO -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const confirmCheckbox = document.getElementById('confirmDelete');
+      const deleteBtn = document.getElementById('deleteBtn');
+      const deleteForm = document.getElementById('deleteForm');
+
+      // Habilitar/deshabilitar botón según checkbox
+      confirmCheckbox.addEventListener('change', function() {
+        deleteBtn.disabled = !this.checked;
+
+        if (this.checked) {
+          deleteBtn.classList.remove('btn-danger');
+          deleteBtn.classList.add('btn-danger');
+        }
+      });
+
+      // Confirmación final antes de enviar
+      deleteForm.addEventListener('submit', function(e) {
+        if (!confirmCheckbox.checked) {
+          e.preventDefault();
+          alert('Debe confirmar que desea eliminar el producto');
+          return;
+        }
+
+        const productName = /*[[${producto.nombre}]]*/ 'este producto';
+        const confirmMessage = `¿Está completamente seguro de que desea eliminar "${productName}"?\n\nEsta acción NO se puede deshacer.`;
+
+        if (!confirm(confirmMessage)) {
+          e.preventDefault();
+        }
+      });
+
+      // Efecto visual en el botón cuando está habilitado
+      confirmCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+          deleteBtn.classList.add('shadow');
+          deleteBtn.innerHTML = '<i class="bi bi-trash me-2"></i>¡Eliminar Ahora!';
+        } else {
+          deleteBtn.classList.remove('shadow');
+          deleteBtn.innerHTML = '<i class="bi bi-trash me-2"></i>Eliminar Definitivamente';
+        }
+      });
+    });
+  </script>
 
 </div>
 </html>

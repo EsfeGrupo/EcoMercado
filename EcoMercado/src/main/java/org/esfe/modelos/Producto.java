@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -21,17 +23,24 @@ public class Producto {
     @Min(value = 0, message = "El precio no puede ser negativo")
     private Double precio;
 
+    // NUEVO CAMPO STOCK
     @NotNull(message = "El stock del producto es requerido")
-    @Min(value = 0, message = "El stock no puede ser negativo")
-    private Integer stock;
+    @Column(nullable = false)
+    private Integer stock = 0; // Valor por defecto
 
     @ManyToMany(mappedBy = "productos")
     private Set<Tipo> tipos = new HashSet<>();
 
+    // CONFIGURACIÓN ESPECÍFICA PARA IMÁGENES GRANDES
     @Lob
-    @Column(name = "img")
+    @Basic(fetch = FetchType.LAZY)
+    @Column(name = "img", columnDefinition = "LONGBLOB")
     private byte[] img;
 
+    @ManyToMany(mappedBy = "productos")
+    private Set<Vendedor> vendedores = new HashSet<>();
+
+    // Getters y Setters existentes
     public byte[] getImg() {
         return img;
     }
@@ -39,7 +48,6 @@ public class Producto {
     public void setImg(byte[] img) {
         this.img = img;
     }
-
 
     public Set<Tipo> getTipos() {
         return tipos;
@@ -49,9 +57,6 @@ public class Producto {
         this.tipos = tipos;
     }
 
-    @ManyToMany(mappedBy = "productos")
-    private Set<Vendedor> vendedores = new HashSet<>();
-
     public Set<Vendedor> getVendedores() {
         return vendedores;
     }
@@ -59,7 +64,6 @@ public class Producto {
     public void setVendedores(Set<Vendedor> vendedores) {
         this.vendedores = vendedores;
     }
-
 
     public Integer getId() {
         return id;
@@ -85,6 +89,7 @@ public class Producto {
         this.precio = precio;
     }
 
+    // NUEVOS GETTERS Y SETTERS PARA STOCK
     public Integer getStock() {
         return stock;
     }
