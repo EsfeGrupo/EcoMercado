@@ -1,4 +1,4 @@
-<!-- src/main/resources/templates/producto/detalles.html -->
+<!DOCTYPE html>
 <html lang="es"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
@@ -7,26 +7,206 @@
 <div layout:fragment="content">
 
   <div class="container my-4">
-    <h1 class="mb-4 text-center text-primary fw-bold">Detalles del Producto</h1>
 
-    <div class="card shadow-sm p-4">
-      <div class="mb-3">
-        <h5 class="fw-bold">Nombre:</h5>
-        <p th:text="${producto.nombre}">Nombre del producto</p>
+    <div class="row justify-content-center">
+      <div class="col-md-10 col-lg-8">
+
+        <!-- ENCABEZADO -->
+        <div class="card border-info shadow mb-4">
+          <div class="card-header bg-info text-white">
+            <div class="d-flex justify-content-between align-items-center">
+              <h4 class="mb-0">
+                <i class="bi bi-eye me-2"></i>Detalles del Producto
+              </h4>
+              <span class="badge bg-light text-dark">ID: <span th:text="${producto.id}">1</span></span>
+            </div>
+          </div>
+
+          <div class="card-body">
+
+            <!-- MENSAJES DE NOTIFICACIÓN -->
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+              <i class="bi bi-check-circle-fill me-2"></i>
+              <span th:text="${success}">Mensaje de éxito</span>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              <span th:text="${error}">Mensaje de error</span>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <div class="row">
+              <!-- IMAGEN DEL PRODUCTO -->
+              <div class="col-md-6">
+                <div class="card bg-light">
+                  <div class="card-body text-center">
+                    <div th:if="${producto.img != null}">
+                      <img th:src="@{'/producto/imagen/' + ${producto.id}}"
+                           th:alt="${producto.nombre}"
+                           class="img-fluid rounded shadow"
+                           data-bs-toggle="modal"
+                           data-bs-target="#imageModal"
+                           style="max-height: 400px; width: auto; cursor: pointer;">
+                      <p class="text-muted small mt-2 mb-0">
+                        <i class="bi bi-zoom-in me-1"></i>Haz clic para ampliar
+                      </p>
+                    </div>
+
+                    <div th:if="${producto.img == null}" class="py-5">
+                      <i class="bi bi-image text-muted" style="font-size: 5rem;"></i>
+                      <p class="text-muted mt-3 mb-0">Sin imagen disponible</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- INFORMACIÓN DEL PRODUCTO -->
+              <div class="col-md-6">
+                <div class="card h-100">
+                  <div class="card-body">
+                    <h2 class="card-title text-success fw-bold mb-4" th:text="${producto.nombre}">
+                      Nombre del Producto
+                    </h2>
+
+                    <!-- PRECIO -->
+                    <div class="mb-4">
+                      <h5 class="text-muted mb-2">
+                        <i class="bi bi-currency-dollar me-2"></i>Precio
+                      </h5>
+                      <h3 class="text-success fw-bold mb-0">
+                        $<span th:text="${#numbers.formatDecimal(producto.precio, 1, 2)}">0.00</span>
+                      </h3>
+                    </div>
+
+                    <!-- INFORMACIÓN ADICIONAL -->
+                    <div class="row">
+                      <div class="col-12">
+                        <table class="table table-borderless">
+                          <tbody>
+                          <tr>
+                            <td class="fw-bold text-muted ps-0">
+                              <i class="bi bi-hash me-2"></i>ID del Producto:
+                            </td>
+                            <td th:text="${producto.id}">1</td>
+                          </tr>
+                          <tr>
+                            <td class="fw-bold text-muted ps-0">
+                              <i class="bi bi-tag me-2"></i>Nombre:
+                            </td>
+                            <td th:text="${producto.nombre}">Producto</td>
+                          </tr>
+                          <tr>
+                            <td class="fw-bold text-muted ps-0">
+                              <i class="bi bi-currency-dollar me-2"></i>Precio:
+                            </td>
+                            <td class="fw-bold text-success">
+                              $<span th:text="${#numbers.formatDecimal(producto.precio, 1, 2)}">0.00</span>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class="fw-bold text-muted ps-0">
+                              <i class="bi bi-image me-2"></i>Imagen:
+                            </td>
+                            <td>
+                                <span th:if="${producto.img != null}" class="badge bg-success">
+                                  <i class="bi bi-check-circle me-1"></i>Disponible
+                                </span>
+                              <span th:if="${producto.img == null}" class="badge bg-secondary">
+                                  <i class="bi bi-x-circle me-1"></i>No disponible
+                                </span>
+                            </td>
+                          </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- BOTONES DE ACCIÓN -->
+            <div class="row mt-4">
+              <div class="col-12">
+                <div class="d-flex flex-wrap gap-2 justify-content-center justify-content-md-end">
+                  <a th:href="@{/producto}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Volver al Listado
+                  </a>
+                  <a th:href="@{/producto/editar/{id}(id=${producto.id})}" class="btn btn-warning">
+                    <i class="bi bi-pencil-square me-1"></i>Editar Producto
+                  </a>
+                  <a th:href="@{/producto/eliminar/{id}(id=${producto.id})}" class="btn btn-danger">
+                    <i class="bi bi-trash me-1"></i>Eliminar Producto
+                  </a>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- INFORMACIÓN ADICIONAL -->
+        <div class="card border-secondary">
+          <div class="card-header bg-secondary text-white">
+            <h6 class="mb-0">
+              <i class="bi bi-info-circle me-1"></i>Información del Sistema
+            </h6>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <h6 class="fw-bold">Acciones Disponibles:</h6>
+                <ul class="list-unstyled">
+                  <li><i class="bi bi-pencil-square text-warning me-2"></i>Editar información del producto</li>
+                  <li><i class="bi bi-trash text-danger me-2"></i>Eliminar producto del sistema</li>
+                  <li><i class="bi bi-arrow-left text-secondary me-2"></i>Regresar al listado principal</li>
+                </ul>
+              </div>
+              <div class="col-md-6">
+                <h6 class="fw-bold">Estado del Producto:</h6>
+                <ul class="list-unstyled">
+                  <li>
+                    <span class="badge bg-success me-2">Activo</span>
+                    El producto está disponible en el sistema
+                  </li>
+                  <li th:if="${producto.img != null}">
+                    <span class="badge bg-info me-2">Con Imagen</span>
+                    Tiene imagen asociada
+                  </li>
+                  <li th:if="${producto.img == null}">
+                    <span class="badge bg-secondary me-2">Sin Imagen</span>
+                    No tiene imagen asociada
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
+    </div>
+  </div>
 
-      <div class="mb-3">
-        <h5 class="fw-bold">Precio:</h5>
-        <p th:text="${producto.precio}">Precio del producto</p>
+  <!-- MODAL PARA AMPLIAR IMAGEN -->
+  <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true" th:if="${producto.img != null}">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="imageModalLabel" th:text="${producto.nombre}">Imagen del Producto</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-center">
+          <img th:src="@{'/producto/imagen/' + ${producto.id}}"
+               th:alt="${producto.nombre}"
+               class="img-fluid rounded">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        </div>
       </div>
-
-      <div class="mb-3" th:if="${producto.img != null}">
-        <h5 class="fw-bold">Imagen:</h5>
-        <img th:src="@{'data:image/jpeg;base64,' + ${#strings.encodeBase64(producto.img)}}" class="img-fluid" alt="Imagen producto">
-      </div>
-
-      <a th:href="@{/producto}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Volver</a>
-      <a th:href="@{/producto/editar/{id}(id=${producto.id})}" class="btn btn-warning"><i class="bi bi-pencil-square"></i> Editar</a>
     </div>
   </div>
 

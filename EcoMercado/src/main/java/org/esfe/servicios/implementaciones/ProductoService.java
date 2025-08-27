@@ -36,6 +36,11 @@ public class ProductoService implements IProductoService {
     }
 
     @Override
+    public Page<Producto> findByNombreContainingIgnoreCase(String nombre, Pageable pageable) {
+        return productoRepository.findByNombreContainingIgnoreCase(nombre, pageable);
+    }
+
+    @Override
     public Producto obtenerPorId(Integer id) {
         return productoRepository.findById(id).orElse(null);
     }

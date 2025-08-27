@@ -18,6 +18,9 @@ public interface IProductoService {
             Pageable pageable
     );
 
+    // Método faltante para buscar solo por nombre
+    Page<Producto> findByNombreContainingIgnoreCase(String nombre, Pageable pageable);
+
     Producto obtenerPorId(Integer id);
 
     Producto crearOEditar(Producto producto);

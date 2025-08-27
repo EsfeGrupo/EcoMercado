@@ -1,16 +1,24 @@
 package org.esfe.controladores;
 
 import org.esfe.modelos.Producto;
-import org.esfe.repositorios.IProductoRepository;
+import org.esfe.servicios.interfaces.IProductoService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,11 +29,8 @@ import java.util.Optional;
 @RequestMapping("/producto")
 public class ProductoController {
 
-    private final IProductoRepository productoRepository;
-
-    public ProductoController(IProductoRepository productoRepository) {
-        this.productoRepository = productoRepository;
-    }
+    @Autowired
+    private IProductoService productoService;
 
     // --- LISTAR CON BUSQUEDA Y PAGINACION ---
     @GetMapping
@@ -45,11 +50,19 @@ public class ProductoController {
 
         Page<Producto> productos;
 
-        if (precioSearch != null) {
-            productos = productoRepository.findByNombreContainingIgnoreCaseAndPrecio(nombreSearch, precioSearch, pageable);
-        } else {
-            // Si no se especifica precio, buscamos solo por nombre
-            productos = productoRepository.findByNombreContainingIgnoreCase(nombreSearch, pageable);
+        try {
+            if (!nombreSearch.isEmpty() && precioSearch != null) {
+                productos = productoService.findByNombreContainingIgnoreCaseAndPrecio(nombreSearch, precioSearch, pageable);
+            } else if (!nombreSearch.isEmpty()) {
+                // Solo buscar por nombre
+                productos = productoService.findByNombreContainingIgnoreCase(nombreSearch, pageable);
+            } else {
+                // Sin filtros, mostrar todos
+                productos = productoService.obtenerTodosPaginados(pageable);
+            }
+        } catch (Exception e) {
+            // En caso de error, mostrar todos los productos
+            productos = productoService.obtenerTodosPaginados(pageable);
         }
 
         model.addAttribute("productos", productos);
@@ -67,6 +80,27 @@ public class ProductoController {
         return "producto/index";
     }
 
+    // --- MOSTRAR IMAGEN ---
+    @GetMapping("/imagen/{id}")
+    @ResponseBody
+    public ResponseEntity<byte[]> mostrarImagen(@PathVariable Integer id) {
+        try {
+            Producto producto = productoService.obtenerPorId(id);
+
+            if (producto != null && producto.getImg() != null) {
+                byte[] imagen = producto.getImg();
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.IMAGE_JPEG);
+                headers.setContentLength(imagen.length);
+                return new ResponseEntity<>(imagen, headers, HttpStatus.OK);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
     // --- CREAR PRODUCTO ---
     @GetMapping("/crear")
     public String mostrarFormularioCrear(Model model) {
@@ -75,74 +109,176 @@ public class ProductoController {
     }
 
     @PostMapping("/crear")
-    public String guardar(@ModelAttribute Producto producto,
-                          @RequestParam("imagenFile") MultipartFile imagenFile) {
-        if (!imagenFile.isEmpty()) {
-            try {
-                producto.setImg(imagenFile.getBytes());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+    public String guardar(@Valid @ModelAttribute Producto producto,
+                          BindingResult result,
+                          @RequestParam("imagenFile") MultipartFile imagenFile,
+                          RedirectAttributes redirectAttributes) {
+
+        if (result.hasErrors()) {
+            return "producto/crear";
         }
-        productoRepository.save(producto);
+
+        try {
+            if (!imagenFile.isEmpty()) {
+                // Validar tipo de archivo
+                String contentType = imagenFile.getContentType();
+                if (contentType == null || (!contentType.startsWith("image/"))) {
+                    redirectAttributes.addFlashAttribute("error", "Solo se permiten archivos de imagen");
+                    return "redirect:/producto/crear";
+                }
+
+                // Validar tamaño (máximo 5MB)
+                if (imagenFile.getSize() > 5 * 1024 * 1024) {
+                    redirectAttributes.addFlashAttribute("error", "La imagen no puede ser mayor a 5MB");
+                    return "redirect:/producto/crear";
+                }
+
+                producto.setImg(imagenFile.getBytes());
+            }
+
+            productoService.crearOEditar(producto);
+            redirectAttributes.addFlashAttribute("success", "Producto creado exitosamente");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Error al procesar la imagen");
+            return "redirect:/producto/crear";
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Error al guardar el producto");
+            return "redirect:/producto/crear";
+        }
+
         return "redirect:/producto";
     }
 
     // --- EDITAR PRODUCTO ---
     @GetMapping("/editar/{id}")
-    public String mostrarFormularioEditar(@PathVariable Integer id, Model model) {
-        Producto producto = productoRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("ID de producto no válido: " + id));
-        model.addAttribute("producto", producto);
-        return "producto/editar";
+    public String mostrarFormularioEditar(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
+        try {
+            Producto producto = productoService.obtenerPorId(id);
+            if (producto == null) {
+                redirectAttributes.addFlashAttribute("error", "Producto no encontrado");
+                return "redirect:/producto";
+            }
+            model.addAttribute("producto", producto);
+            return "producto/editar";
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Error al cargar el producto");
+            return "redirect:/producto";
+        }
     }
 
     @PostMapping("/editar/{id}")
     public String actualizar(@PathVariable Integer id,
-                             @ModelAttribute Producto productoActualizado,
-                             @RequestParam("imagenFile") MultipartFile imagenFile) {
-        Producto producto = productoRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("ID de producto no válido: " + id));
+                             @Valid @ModelAttribute Producto productoActualizado,
+                             BindingResult result,
+                             @RequestParam("imagenFile") MultipartFile imagenFile,
+                             RedirectAttributes redirectAttributes,
+                             Model model) {
 
-        producto.setNombre(productoActualizado.getNombre());
-        producto.setPrecio(productoActualizado.getPrecio());
-
-        if (!imagenFile.isEmpty()) {
-            try {
-                producto.setImg(imagenFile.getBytes());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        if (result.hasErrors()) {
+            model.addAttribute("producto", productoActualizado);
+            return "producto/editar";
         }
 
-        productoRepository.save(producto);
+        try {
+            Producto producto = productoService.obtenerPorId(id);
+            if (producto == null) {
+                redirectAttributes.addFlashAttribute("error", "Producto no encontrado");
+                return "redirect:/producto";
+            }
+
+            producto.setNombre(productoActualizado.getNombre());
+            producto.setPrecio(productoActualizado.getPrecio());
+
+            if (!imagenFile.isEmpty()) {
+                // Validar tipo de archivo
+                String contentType = imagenFile.getContentType();
+                if (contentType == null || (!contentType.startsWith("image/"))) {
+                    redirectAttributes.addFlashAttribute("error", "Solo se permiten archivos de imagen");
+                    return "redirect:/producto/editar/" + id;
+                }
+
+                // Validar tamaño
+                if (imagenFile.getSize() > 5 * 1024 * 1024) {
+                    redirectAttributes.addFlashAttribute("error", "La imagen no puede ser mayor a 5MB");
+                    return "redirect:/producto/editar/" + id;
+                }
+
+                producto.setImg(imagenFile.getBytes());
+            }
+
+            productoService.crearOEditar(producto);
+            redirectAttributes.addFlashAttribute("success", "Producto actualizado exitosamente");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Error al procesar la imagen");
+            return "redirect:/producto/editar/" + id;
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Error al actualizar el producto");
+            return "redirect:/producto/editar/" + id;
+        }
+
         return "redirect:/producto";
     }
 
     // --- VER DETALLES ---
     @GetMapping("/detalles/{id}")
-    public String verDetalles(@PathVariable Integer id, Model model) {
-        Producto producto = productoRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("ID de producto no válido: " + id));
-        model.addAttribute("producto", producto);
-        return "producto/detalles";
+    public String verDetalles(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
+        try {
+            Producto producto = productoService.obtenerPorId(id);
+            if (producto == null) {
+                redirectAttributes.addFlashAttribute("error", "Producto no encontrado");
+                return "redirect:/producto";
+            }
+            model.addAttribute("producto", producto);
+            return "producto/detalles";
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Error al cargar los detalles del producto");
+            return "redirect:/producto";
+        }
     }
 
     // --- ELIMINAR PRODUCTO ---
     @GetMapping("/eliminar/{id}")
-    public String confirmarEliminar(@PathVariable Integer id, Model model) {
-        Producto producto = productoRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("ID de producto no válido: " + id));
-        model.addAttribute("producto", producto);
-        return "producto/eliminar";
+    public String confirmarEliminar(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
+        try {
+            Producto producto = productoService.obtenerPorId(id);
+            if (producto == null) {
+                redirectAttributes.addFlashAttribute("error", "Producto no encontrado");
+                return "redirect:/producto";
+            }
+            model.addAttribute("producto", producto);
+            return "producto/eliminar";
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Error al cargar el producto");
+            return "redirect:/producto";
+        }
     }
 
     @PostMapping("/eliminar/{id}")
-    public String eliminar(@PathVariable Integer id) {
-        Producto producto = productoRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("ID de producto no válido: " + id));
-        productoRepository.delete(producto);
+    public String eliminar(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+        try {
+            Producto producto = productoService.obtenerPorId(id);
+            if (producto == null) {
+                redirectAttributes.addFlashAttribute("error", "Producto no encontrado");
+                return "redirect:/producto";
+            }
+
+            productoService.eliminarPorId(id);
+            redirectAttributes.addFlashAttribute("success", "Producto eliminado exitosamente");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Error al eliminar el producto");
+        }
+
         return "redirect:/producto";
     }
-
 }

@@ -1,4 +1,4 @@
-<!-- src/main/resources/templates/producto/editar.html -->
+<!DOCTYPE html>
 <html lang="es"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
@@ -7,34 +7,219 @@
 <div layout:fragment="content">
 
   <div class="container my-4">
-    <h1 class="mb-4 text-center text-warning fw-bold">Editar Producto</h1>
 
-    <form th:action="@{/producto/editar/{id}(id=${producto.id})}" method="post" enctype="multipart/form-data" class="p-4 rounded-3 shadow-sm" style="background-color: #f8f9fa;">
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-6">
 
-      <div class="mb-3">
-        <label for="nombre" class="form-label">Nombre</label>
-        <input type="text" class="form-control" id="nombre" name="nombre" th:value="${producto.nombre}" required>
+        <div class="card border-warning shadow">
+          <div class="card-header bg-warning text-dark">
+            <h4 class="mb-0">
+              <i class="bi bi-pencil-square me-2"></i>Editar Producto
+            </h4>
+          </div>
+
+          <div class="card-body">
+
+            <!-- MENSAJES DE ERROR -->
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              <span th:text="${error}">Error</span>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <!-- INFORMACIÓN DEL PRODUCTO -->
+            <div class="alert alert-info">
+              <i class="bi bi-info-circle me-2"></i>
+              <strong>Editando:</strong> <span th:text="${producto.nombre}">Producto</span>
+              <br><small>ID: <span th:text="${producto.id}">1</span></small>
+            </div>
+
+            <!-- FORMULARIO -->
+            <form th:action="@{/producto/editar/{id}(id=${producto.id})}" th:object="${producto}" method="post"
+                  enctype="multipart/form-data" novalidate>
+
+              <!-- NOMBRE -->
+              <div class="mb-3">
+                <label for="nombre" class="form-label fw-bold">
+                  <i class="bi bi-tag me-1"></i>Nombre del Producto <span class="text-danger">*</span>
+                </label>
+                <input type="text"
+                       class="form-control"
+                       th:class="${#fields.hasErrors('nombre')} ? 'form-control is-invalid' : 'form-control'"
+                       id="nombre"
+                       th:field="*{nombre}"
+                       placeholder="Ingrese el nombre del producto"
+                       maxlength="100">
+
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('nombre')}">
+                  <ul class="mb-0 ps-0" style="list-style: none;">
+                    <li th:each="error : ${#fields.errors('nombre')}" th:text="${error}">Error de validación</li>
+                  </ul>
+                </div>
+                <div class="form-text">Máximo 100 caracteres</div>
+              </div>
+
+              <!-- PRECIO -->
+              <div class="mb-3">
+                <label for="precio" class="form-label fw-bold">
+                  <i class="bi bi-currency-dollar me-1"></i>Precio <span class="text-danger">*</span>
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text">$</span>
+                  <input type="number"
+                         class="form-control"
+                         th:class="${#fields.hasErrors('precio')} ? 'form-control is-invalid' : 'form-control'"
+                         id="precio"
+                         th:field="*{precio}"
+                         placeholder="0.00"
+                         step="0.01"
+                         min="0">
+
+                  <div class="invalid-feedback" th:if="${#fields.hasErrors('precio')}">
+                    <ul class="mb-0 ps-0" style="list-style: none;">
+                      <li th:each="error : ${#fields.errors('precio')}" th:text="${error}">Error de validación</li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="form-text">Ingrese el precio en formato decimal (ejemplo: 19.99)</div>
+              </div>
+
+              <!-- IMAGEN ACTUAL -->
+              <div class="mb-3" th:if="${producto.img != null}">
+                <label class="form-label fw-bold">
+                  <i class="bi bi-image me-1"></i>Imagen Actual
+                </label>
+                <div class="border rounded p-3 bg-light">
+                  <img th:src="@{'/producto/imagen/' + ${producto.id}}"
+                       th:alt="${producto.nombre}"
+                       class="img-thumbnail"
+                       style="max-width: 200px; max-height: 200px;">
+                  <p class="text-muted small mt-2 mb-0">Esta imagen se mantendrá si no selecciona una nueva</p>
+                </div>
+              </div>
+
+              <!-- NUEVA IMAGEN -->
+              <div class="mb-4">
+                <label for="imagenFile" class="form-label fw-bold">
+                  <i class="bi bi-upload me-1"></i>
+                  <span th:text="${producto.img != null} ? 'Cambiar Imagen' : 'Agregar Imagen'">Nueva Imagen</span>
+                </label>
+                <input type="file"
+                       class="form-control"
+                       id="imagenFile"
+                       name="imagenFile"
+                       accept="image/*"
+                       onchange="previewImage(this)">
+                <div class="form-text">
+                  <span th:if="${producto.img != null}">Deje vacío si desea mantener la imagen actual. </span>
+                  Formatos permitidos: JPG, JPEG, PNG, GIF. Tamaño máximo: 5MB
+                </div>
+
+                <!-- PREVIEW DE LA NUEVA IMAGEN -->
+                <div id="imagePreview" class="mt-3" style="display: none;">
+                  <p class="fw-bold text-muted mb-2">Nueva imagen seleccionada:</p>
+                  <img id="preview" src="#" alt="Preview" class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
+                </div>
+              </div>
+
+              <!-- INFORMACIÓN ADICIONAL -->
+              <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <strong>Nota:</strong> Los campos marcados con <span class="text-danger">*</span> son obligatorios.
+                Los cambios se guardarán permanentemente.
+              </div>
+
+              <!-- BOTONES -->
+              <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a th:href="@{/producto}" class="btn btn-outline-secondary me-md-2">
+                  <i class="bi bi-arrow-left me-1"></i>Cancelar
+                </a>
+                <a th:href="@{/producto/detalles/{id}(id=${producto.id})}" class="btn btn-outline-info me-md-2">
+                  <i class="bi bi-eye me-1"></i>Ver Detalles
+                </a>
+                <button type="submit" class="btn btn-warning text-dark">
+                  <i class="bi bi-check-circle me-1"></i>Actualizar Producto
+                </button>
+              </div>
+
+            </form>
+          </div>
+        </div>
+
+        <!-- INFORMACIÓN ADICIONAL -->
+        <div class="card border-info mt-4">
+          <div class="card-header bg-info text-white">
+            <h6 class="mb-0"><i class="bi bi-lightbulb me-1"></i>Consejos para Edición</h6>
+          </div>
+          <div class="card-body">
+            <ul class="mb-0">
+              <li>Verifique que el nombre siga siendo único y descriptivo</li>
+              <li>Asegúrese de que el precio refleje el valor actual del producto</li>
+              <li>Solo cambie la imagen si es necesario para mantener el rendimiento</li>
+              <li>Revise todos los cambios antes de actualizar</li>
+            </ul>
+          </div>
+        </div>
+
       </div>
-
-      <div class="mb-3">
-        <label for="precio" class="form-label">Precio</label>
-        <input type="number" step="0.01" class="form-control" id="precio" name="precio" th:value="${producto.precio}" required>
-      </div>
-
-      <div class="mb-3">
-        <label for="imagenFile" class="form-label">Cambiar Imagen</label>
-        <input type="file" class="form-control" id="imagenFile" name="imagenFile" accept="image/*">
-      </div>
-
-      <div th:if="${producto.img != null}" class="mb-3">
-        <label class="form-label">Imagen Actual</label><br>
-        <img th:src="@{'data:image/jpeg;base64,' + ${#strings.encodeBase64(producto.img)}}" class="img-fluid mb-2" alt="Imagen producto">
-      </div>
-
-      <button type="submit" class="btn btn-warning"><i class="bi bi-save"></i> Actualizar</button>
-      <a th:href="@{/producto}" class="btn btn-secondary">Cancelar</a>
-    </form>
+    </div>
   </div>
+
+  <!-- SCRIPT PARA PREVIEW DE IMAGEN -->
+  <script>
+    function previewImage(input) {
+      const preview = document.getElementById('preview');
+      const previewContainer = document.getElementById('imagePreview');
+
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+          preview.src = e.target.result;
+          previewContainer.style.display = 'block';
+        }
+
+        reader.readAsDataURL(input.files[0]);
+      } else {
+        previewContainer.style.display = 'none';
+      }
+    }
+
+    // Validación adicional del lado del cliente
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.querySelector('form');
+      const imagenFile = document.getElementById('imagenFile');
+
+      imagenFile.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+          // Validar tamaño (5MB)
+          if (file.size > 5 * 1024 * 1024) {
+            alert('La imagen no puede ser mayor a 5MB');
+            this.value = '';
+            document.getElementById('imagePreview').style.display = 'none';
+            return;
+          }
+
+          // Validar tipo
+          const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+          if (!allowedTypes.includes(file.type)) {
+            alert('Solo se permiten archivos de imagen (JPG, PNG, GIF)');
+            this.value = '';
+            document.getElementById('imagePreview').style.display = 'none';
+            return;
+          }
+        }
+      });
+
+      // Confirmación antes de enviar
+      form.addEventListener('submit', function(e) {
+        if (!confirm('¿Está seguro de que desea actualizar este producto?')) {
+          e.preventDefault();
+        }
+      });
+    });
+  </script>
 
 </div>
 </html>
