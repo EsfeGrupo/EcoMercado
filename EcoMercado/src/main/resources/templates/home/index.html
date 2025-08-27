@@ -3,10 +3,123 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="/layouts/_mainLayout" xmlns:sec="http://www.w3.org/1999/xhtml">
 
+<title>Inicio - Tienda Local</title>
+</head>
+<body>
 <div layout:fragment="content">
+    <div class="mt-4">
+        <h1 class="mb-4">¡Bienvenido a Tienda Local!</h1>
 
-    <h1 class="text-center">Bienvenidos a Ecomercado</h1>
-    <div sec:authorize="isAnonymous()" class="alert alert-danger text-center" role="alert">
-        Debes iniciar sesión para poder utilizar la aplicación de EcoMercado.
+        <!-- Contenido para usuarios no autenticados -->
+        <div th:if="${session.usuarioSession == null}">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Tu tienda local de confianza</h5>
+                            <p class="card-text">
+                                Encuentra todo lo que necesitas en nuestra tienda.
+                                Productos de calidad, precios justos y el mejor servicio.
+                            </p>
+                            <p class="card-text">
+                                Para acceder a todas nuestras funciones y realizar compras,
+                                por favor inicia sesión o regístrate.
+                            </p>
+                            <a th:href="@{/login}" class="btn btn-primary me-2">
+                                <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                            </a>
+                            <a href="#" class="btn btn-outline-primary">
+                                <i class="fas fa-user-plus"></i> Registrarse
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">¿Por qué elegirnos?</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Productos de calidad
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Precios competitivos
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Entrega rápida
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Atención personalizada
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenido para usuarios autenticados -->
+        <div th:if="${session.usuarioSession != null}">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                Bienvenido, <span th:text="${session.nombreUsuario}">Usuario</span>
+                            </h5>
+                            <p class="card-text">
+                                Tienes el rol de:
+                                <span class="badge bg-primary text-capitalize" th:text="${session.rolUsuario}">Rol</span>
+                            </p>
+                            <p class="text-muted">
+                                Utiliza el menú lateral para navegar por las opciones disponibles para tu perfil.
+                            </p>
+
+                            <!-- Accesos rápidos según el rol -->
+                            <div th:if="${session.rolUsuario == 'admin'}" class="mt-3">
+                                <h6>Accesos rápidos:</h6>
+                                <a th:href="@{/usuarios}" class="btn btn-sm btn-outline-primary me-2">
+                                    <i class="fas fa-users"></i> Gestionar Usuarios
+                                </a>
+                                <a th:href="@{/productos}" class="btn btn-sm btn-outline-success me-2">
+                                    <i class="fas fa-box"></i> Gestionar Productos
+                                </a>
+                                <a th:href="@{/ventas}" class="btn btn-sm btn-outline-info">
+                                    <i class="fas fa-shopping-cart"></i> Ver Ventas
+                                </a>
+                            </div>
+
+                            <div th:if="${session.rolUsuario == 'vendedor'}" class="mt-3">
+                                <h6>Accesos rápidos:</h6>
+                                <a th:href="@{/vendedor/productos}" class="btn btn-sm btn-outline-primary me-2">
+                                    <i class="fas fa-box"></i> Mis Productos
+                                </a>
+                                <a th:href="@{/vendedor/ventas}" class="btn btn-sm btn-outline-success">
+                                    <i class="fas fa-cash-register"></i> Mis Ventas
+                                </a>
+                            </div>
+
+                            <div th:if="${session.rolUsuario == 'usuario'}" class="mt-3">
+                                <h6>Accesos rápidos:</h6>
+                                <a th:href="@{/carrito}" class="btn btn-sm btn-outline-primary me-2">
+                                    <i class="fas fa-shopping-basket"></i> Mi Carrito
+                                </a>
+                                <a th:href="@{/mis-compras}" class="btn btn-sm btn-outline-success">
+                                    <i class="fas fa-receipt"></i> Mis Compras
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+</body>
+</html>

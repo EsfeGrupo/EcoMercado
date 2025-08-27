@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/layouts/_mainLayout">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Detalles del Usuario</title>
+</head>
+
+<body>
+<section layout:fragment="content">
+  <div class="container mt-4">
+    <h2>Detalles del Usuario</h2>
+
+    <ul class="list-group">
+      <li class="list-group-item"><strong>ID:</strong> <span th:text="${usuario.id}"></span></li>
+      <li class="list-group-item"><strong>Nombre:</strong> <span th:text="${usuario.nombre}"></span></li>
+      <li class="list-group-item"><strong>Correo:</strong> <span th:text="${usuario.correo}"></span></li>
+    </ul>
+
+    <div class="mt-3">
+      <a th:href="@{/usuarios}" class="btn btn-secondary">Volver</a>
+      <a class="btn btn-warning" th:href="@{/usuarios/editar/{id}(id=${usuario.id})}">Editar</a>
+      <a class="btn btn-danger" th:href="@{/usuarios/eliminar/{id}(id=${usuario.id})}">Eliminar</a>
+    </div>
+  </div>
+</section>
+</body>
+</html>

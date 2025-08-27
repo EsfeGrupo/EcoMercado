@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/layouts/_authLayout">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Registro - Tienda Local</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .register-container { max-width: 450px; width: 90%; }
+
+        .register-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .register-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .register-header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 20px;
+            background: white;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .register-body { padding: 2rem; padding-top: 1rem; }
+
+        .store-icon { font-size: 3rem; margin-bottom: 1rem; color: white; }
+
+        .form-floating { margin-bottom: 1rem; }
+
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .btn-register {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+
+        .error-alert {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .error-alert i { margin-right: 0.5rem; }
+
+        .login-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .login-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-link a:hover { color: #764ba2; text-decoration: underline; }
+
+        .loading-overlay {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 1000;
+            border-radius: 20px;
+        }
+
+        .spinner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+    </style>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="register-container">
+        <div class="card register-card">
+            <div class="loading-overlay" id="loadingOverlay">
+                <div class="spinner">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="register-header">
+                <i class="fas fa-store store-icon"></i>
+                <h2 class="mb-0">Tienda Local</h2>
+                <p class="mb-0 opacity-75">Crea tu cuenta</p>
+            </div>
+
+            <div class="register-body">
+                <div th:if="${error}" class="error-alert">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span th:text="${error}">Error message</span>
+                </div>
+
+                <form th:action="@{/registro}" method="post" id="registerForm">
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Nombre completo" required>
+                        <label for="nombre"><i class="fas fa-user me-2"></i>Nombre Completo</label>
+                    </div>
+
+                    <div class="form-floating">
+                        <input type="email" class="form-control" id="correo" name="correo" placeholder="tu@email.com" required>
+                        <label for="correo"><i class="fas fa-envelope me-2"></i>Correo Electrónico</label>
+                    </div>
+
+                    <div class="form-floating">
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Contraseña" required>
+                        <label for="password"><i class="fas fa-lock me-2"></i>Contraseña</label>
+                    </div>
+
+                    <div class="form-floating">
+                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Confirmar contraseña" required>
+                        <label for="confirmPassword"><i class="fas fa-lock me-2"></i>Confirmar Contraseña</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-register">
+                        <i class="fas fa-user-plus me-2"></i>Registrarse
+                    </button>
+                </form>
+
+                <div class="login-link">
+                    <p class="mb-0">¿Ya tienes una cuenta? <a th:href="@{/login}">Inicia sesión aquí</a></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-3">
+            <a th:href="@{/}" class="btn btn-outline-light btn-sm">
+                <i class="fas fa-home me-2"></i>Volver al Inicio
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const submitBtn = this.querySelector('button[type="submit"]');
+        loadingOverlay.style.display = 'block';
+        submitBtn.disabled = true;
+
+        const nombre = document.getElementById('nombre').value.trim();
+        const correo = document.getElementById('correo').value.trim();
+        const password = document.getElementById('password').value.trim();
+        const confirmPassword = document.getElementById('confirmPassword').value.trim();
+
+        if (!nombre || !correo || !password || !confirmPassword) {
+            e.preventDefault();
+            loadingOverlay.style.display = 'none';
+            submitBtn.disabled = false;
+            Swal.fire({icon: 'warning', title: 'Campos requeridos', text: 'Completa todos los campos.', confirmButtonColor: '#667eea'});
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            e.preventDefault();
+            loadingOverlay.style.display = 'none';
+            submitBtn.disabled = false;
+            Swal.fire({icon: 'error', title: 'Error', text: 'Las contraseñas no coinciden.', confirmButtonColor: '#667eea'});
+            return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(correo)) {
+            e.preventDefault();
+            loadingOverlay.style.display = 'none';
+            submitBtn.disabled = false;
+            Swal.fire({icon: 'warning', title: 'Email inválido', text: 'Ingresa un email válido.', confirmButtonColor: '#667eea'});
+            return;
+        }
+    });
+
+    window.addEventListener('load', function() {
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const submitBtn = document.querySelector('button[type="submit"]');
+        loadingOverlay.style.display = 'none';
+        if (submitBtn) submitBtn.disabled = false;
+    });
+
+    document.querySelectorAll('.form-control').forEach(input => {
+        input.addEventListener('focus', function() { this.parentElement.style.transform = 'scale(1.02)'; });
+        input.addEventListener('blur', function() { this.parentElement.style.transform = 'scale(1)'; });
+    });
+</script>
+</body>
+</html>

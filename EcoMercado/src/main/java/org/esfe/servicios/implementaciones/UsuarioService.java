@@ -56,4 +56,8 @@ public class UsuarioService implements IUsuarioService {
     public void eliminarPorId(Integer id) {
         usuarioRepository.deleteById(id);
     }
+
+    public Usuario guardar(Usuario usuario) {
+        return usuarioRepository.save(usuario); // JPA lo guarda en la BD
+    }
 }

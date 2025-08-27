@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es"
       xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
     <meta charset="utf-8" />
@@ -14,7 +15,7 @@
 </head>
 <body>
 <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
-    <a class="navbar-brand ps-3" href="#">Tienda Local</a>
+    <a class="navbar-brand ps-3" href="#" th:href="@{/}">Tienda Local</a>
     <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle"><i class="fas fa-bars"></i></button>
 
     <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
@@ -23,13 +24,15 @@
                 <i class="fas fa-user fa-fw"></i>
             </a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                <div sec:authorize="isAnonymous()">
-                    <li><a class="dropdown-item" th:href="@{/login}">Iniciar Sesión</a></li>
-                </div>
+                <!-- Solo mostrar login si no está autenticado -->
+                <li th:if="${session.usuarioSession == null}">
+                    <a class="dropdown-item" th:href="@{/login}">Iniciar Sesión</a>
+                </li>
                 <li><hr class="dropdown-divider" /></li>
-                <div sec:authorize="isAuthenticated()">
-                    <li><a class="dropdown-item" th:href="@{/logout}">Cerrar Sesión</a></li>
-                </div>
+                <!-- Solo mostrar logout si está autenticado -->
+                <li th:if="${session.usuarioSession != null}">
+                    <a class="dropdown-item" th:href="@{/logout}">Cerrar Sesión</a>
+                </li>
             </ul>
         </li>
     </ul>
@@ -42,27 +45,19 @@
                 <div class="nav">
                     <div class="sb-sidenav-menu-heading">Gestión</div>
 
-                    <!------------------------------- ADMIN ---------------------------->
-                    <div sec:authorize="hasAuthority('admin')">
+                    <!-- Mostrar solo si es admin -->
+                    <div th:if="${session.rolUsuario == 'admin'}">
                         <a class="nav-link" th:href="@{/roles}">
                             <div class="sb-nav-link-icon"><i class="fas fa-receipt"></i></div>
-                            roles
+                            Roles
                         </a>
                         <a class="nav-link" th:href="@{/usuarios}">
                             <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
                             Usuarios
                         </a>
-                        <a class="nav-link" th:href="@{/producto}">
+                        <a class="nav-link" th:href="@{/productos}">
                             <div class="sb-nav-link-icon"><i class="fas fa-box"></i></div>
                             Productos
-                        </a>
-                        <a class="nav-link" th:href="@{/categorias}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
-                            Categorías
-                        </a>
-                        <a class="nav-link" th:href="@{/marcas}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-trademark"></i></div>
-                            Marcas
                         </a>
                         <a class="nav-link" th:href="@{/ventas}">
                             <div class="sb-nav-link-icon"><i class="fas fa-shopping-cart"></i></div>
@@ -74,16 +69,20 @@
                         </a>
                     </div>
 
-                    <!-------------------------------------- VENDEDOR-------------------------------------->
-                    <div sec:authorize="hasAuthority('vendedor')">
-                        <a class="nav-link" th:href="@{/productos}">
+                    <!-- Mostrar solo si es vendedor -->
+                    <div th:if="${session.rolUsuario == 'vendedor'}">
+                        <a class="nav-link" th:href="@{/vendedor/productos}">
                             <div class="sb-nav-link-icon"><i class="fas fa-box"></i></div>
                             Mis Productos
                         </a>
+                        <a class="nav-link" th:href="@{/vendedor/ventas}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-cash-register"></i></div>
+                            Mis Ventas
+                        </a>
                     </div>
-                    <!-----------------------------------USUARIO (CLIENTE) ----------------------------->
-                    <div sec:authorize="hasAuthority('usuario')">
 
+                    <!-- Mostrar solo si es usuario/cliente -->
+                    <div th:if="${session.rolUsuario == 'usuario'}">
                         <a class="nav-link" th:href="@{/carrito}">
                             <div class="sb-nav-link-icon"><i class="fas fa-shopping-basket"></i></div>
                             Carrito
@@ -102,13 +101,27 @@
                         </a>
                     </div>
 
+                    <!-- Mostrar si no está autenticado -->
+                    <div th:if="${session.usuarioSession == null}">
+                        <a class="nav-link" th:href="@{/}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-home"></i></div>
+                            Inicio
+                        </a>
+                        <a class="nav-link" th:href="@{/login}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-sign-in-alt"></i></div>
+                            Iniciar Sesión
+                        </a>
+                    </div>
+
                 </div>
             </div>
             <div class="sb-sidenav-footer">
-                <div sec:authorize="isAuthenticated()" class="small">
-                    Has iniciado como: <span class="text-light" sec:authentication="name"></span>
+                <div th:if="${session.usuarioSession != null}" class="small">
+                    Has iniciado como: <span class="text-light" th:text="${session.nombreUsuario}">Usuario</span>
                 </div>
-                Tienda Local
+                <div th:if="${session.usuarioSession == null}" class="small">
+                    Tienda Local - Inicia Sesión
+                </div>
             </div>
         </nav>
     </div>
@@ -116,9 +129,51 @@
     <div id="layoutSidenav_content">
         <main>
             <div class="container-fluid px-4">
+                <!-- Mensajes de éxito/error -->
+                <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                    <span th:text="${mensajeExito}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <div th:if="${mensajeError}" class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+                    <span th:text="${mensajeError}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <div th:if="${mensajeInfo}" class="alert alert-info alert-dismissible fade show mt-3" role="alert">
+                    <span th:text="${mensajeInfo}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
                 <!-- Aquí se inyectan las vistas -->
                 <div layout:fragment="content">
-                    <p>Contenido de la tienda...</p>
+                    <div class="mt-4">
+                        <h1>Bienvenido a Tienda Local</h1>
+
+                        <!-- Mostrar contenido según el estado de autenticación -->
+                        <div th:if="${session.usuarioSession != null}">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Panel de Control</h5>
+                                    <p class="card-text">
+                                        Bienvenido, <strong th:text="${session.nombreUsuario}">Usuario</strong>.
+                                        Tu rol es: <span class="badge bg-primary" th:text="${session.rolUsuario}">Rol</span>
+                                    </p>
+                                    <p class="text-muted">Usa el menú lateral para navegar por las opciones disponibles.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div th:if="${session.usuarioSession == null}">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">¡Bienvenido!</h5>
+                                    <p class="card-text">Para acceder a todas las funciones, por favor inicia sesión.</p>
+                                    <a th:href="@{/login}" class="btn btn-primary">Iniciar Sesión</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>

@@ -20,5 +20,7 @@ public interface IUsuarioService {
     void eliminarPorId(Integer id);
 
     Usuario login(String correo, String password);
+    // 🔹 agrega este
+    Usuario guardar(Usuario usuario);
 
 }

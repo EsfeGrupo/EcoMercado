@@ -1,6 +1,46 @@
-<html lang="en"
+<!DOCTYPE html>
+<html lang="es"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="/layouts/_mainLayout">
 
+<head>
+  <meta charset="UTF-8">
+  <title>Lista de Usuarios</title>
+</head>
 
+<body>
+<section layout:fragment="content">
+  <div class="container mt-4">
+    <h2 class="mb-3">Lista de Usuarios</h2>
+
+    <!-- Botón para crear -->
+    <a class="btn btn-primary mb-3" th:href="@{/usuarios/crear}">Nuevo Usuario</a>
+
+    <!-- Tabla -->
+    <table class="table table-bordered table-striped">
+      <thead class="table-dark">
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Correo</th>
+        <th>Acciones</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="usuario : ${usuarios}">
+        <td th:text="${usuario.id}">1</td>
+        <td th:text="${usuario.nombre}">Nombre</td>
+        <td th:text="${usuario.correo}">correo@ejemplo.com</td>
+        <td>
+          <a class="btn btn-info btn-sm" th:href="@{/usuarios/detalles/{id}(id=${usuario.id})}">Detalles</a>
+          <a class="btn btn-warning btn-sm" th:href="@{/usuarios/editar/{id}(id=${usuario.id})}">Editar</a>
+          <a class="btn btn-danger btn-sm" th:href="@{/usuarios/eliminar/{id}(id=${usuario.id})}">Eliminar</a>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+</body>
+</html>

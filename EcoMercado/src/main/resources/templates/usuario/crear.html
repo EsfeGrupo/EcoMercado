@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/layouts/_mainLayout">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Crear Usuario</title>
+</head>
+
+<body>
+<section layout:fragment="content">
+    <div class="container mt-4">
+        <h2>Crear Usuario</h2>
+
+        <form th:action="@{/usuarios/crear}" th:object="${usuario}" method="post">
+            <div class="mb-3">
+                <label class="form-label">Nombre</label>
+                <input type="text" class="form-control" th:field="*{nombre}" required />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Correo</label>
+                <input type="email" class="form-control" th:field="*{correo}" required />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Contraseña</label>
+                <input type="password" class="form-control" th:field="*{password}" required />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Estado</label>
+                <select class="form-control" th:field="*{estado}">
+                    <option value="1">Activo</option>
+                    <option value="0">Inactivo</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Rol</label>
+                <select class="form-control" th:field="*{rol.id}">
+                    <option th:each="rol : ${roles}"
+                            th:value="${rol.id}"
+                            th:text="${rol.nombre}">
+                    </option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-success">Guardar</button>
+            <a th:href="@{/usuarios}" class="btn btn-secondary">Cancelar</a>
+        </form>
+
+    </div>
+</section>
+</body>
+</html>

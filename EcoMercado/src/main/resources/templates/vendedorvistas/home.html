@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/layouts/_mainLayout">
+
+<head>
+    <title th:text="${titulo}">Panel Vendedor</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <h1>Bienvenido, <span th:text="${usuario.nombre}">Vendedor</span></h1>
+    <p>Este es tu panel de vendedor.</p>
+
+    <ul>
+        <li><a th:href="@{/vendedor/productos}">Mis Productos</a></li>
+        <li><a th:href="@{/vendedor/ventas}">Mis Ventas</a></li>
+        <li><a th:href="@{/usuario/carrito}">Carrito</a></li>
+        <li><a th:href="@{/usuario/perfil}">Perfil</a></li>
+    </ul>
+</div>
+</body>
+</html>
