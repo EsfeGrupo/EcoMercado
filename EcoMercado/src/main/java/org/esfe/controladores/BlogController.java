@@ -6,6 +6,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import jakarta.servlet.http.HttpSession;
 import org.esfe.modelos.Blog;
 import org.esfe.servicios.interfaces.IBlogService;
 
@@ -51,14 +52,21 @@ public class BlogController {
     }
 
     @GetMapping("/create")
-    public String create(Blog blog, Model model) {
-        // Aquí deberías cargar los usuarios para el select
+    public String create(Blog blog, Model model, HttpSession session) {
+        String rolUsuario = (String) session.getAttribute("rolUsuario");
+        if (!"admin".equals(rolUsuario)) {
+            return "redirect:/blog";
+        }
         model.addAttribute("usuarios", usuarioService.obtenerTodos());
         return "Blog/create";
     }
 
     @PostMapping("/save")
-    public String save(Blog blog, BindingResult result, Model model, RedirectAttributes attributes) {
+    public String save(Blog blog, BindingResult result, Model model, RedirectAttributes attributes, HttpSession session) {
+        String rolUsuario = (String) session.getAttribute("rolUsuario");
+        if (!"admin".equals(rolUsuario)) {
+            return "redirect:/blog";
+        }
         if (result.hasErrors()) {
             model.addAttribute(blog);
             model.addAttribute("usuarios", usuarioService.obtenerTodos()); // Volver a cargar los usuarios
@@ -79,7 +87,11 @@ public class BlogController {
     }
 
     @GetMapping("/edit/{id}")
-    public String edit(@PathVariable("id") Integer id, Model model) {
+    public String edit(@PathVariable("id") Integer id, Model model, HttpSession session) {
+        String rolUsuario = (String) session.getAttribute("rolUsuario");
+        if (!"admin".equals(rolUsuario)) {
+            return "redirect:/blog";
+        }
         Blog blog = blogService.obtenerPorId(id).orElse(null);
         model.addAttribute("blog", blog);
         model.addAttribute("usuarios", usuarioService.obtenerTodos());
@@ -87,14 +99,22 @@ public class BlogController {
     }
 
     @GetMapping("/remove/{id}")
-    public String remove(@PathVariable("id") Integer id, Model model) {
+    public String remove(@PathVariable("id") Integer id, Model model, HttpSession session) {
+        String rolUsuario = (String) session.getAttribute("rolUsuario");
+        if (!"admin".equals(rolUsuario)) {
+            return "redirect:/blog";
+        }
         Blog blog = blogService.obtenerPorId(id).orElse(null);
         model.addAttribute("blog", blog);
         return "Blog/remove";
     }
 
     @PostMapping("/remove")
-    public String delete(@RequestParam("id") Integer id, RedirectAttributes attributes) {
+    public String delete(@RequestParam("id") Integer id, RedirectAttributes attributes, HttpSession session) {
+    String rolUsuario = (String) session.getAttribute("rolUsuario");
+    if (!"admin".equals(rolUsuario)) {
+        return "redirect:/blog";
+    }
     try {
         blogService.eliminarPorId(id);
         attributes.addFlashAttribute("msg", "Blog eliminado correctamente");

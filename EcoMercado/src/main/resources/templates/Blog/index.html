@@ -42,7 +42,7 @@
           </div>
           <div class="d-flex gap-2">
             <button type="submit" class="btn btn-outline-primary btn-lg"><i class="bi bi-search"></i> Buscar</button>
-            <a th:href="@{/blog/create}" class="btn btn-outline-success btn-lg"><i class="bi bi-plus-circle"></i> Nuevo</a>
+            <a th:if="${session.rolUsuario == 'admin'}" th:href="@{/blog/create}" class="btn btn-outline-success btn-lg"><i class="bi bi-plus-circle"></i> Nuevo</a>
             </div>
         </form>
       </div>
@@ -56,11 +56,10 @@
               <p class="card-text">Autor: <span th:text="${item.autor}"></span></p>
               <p class="card-text">Fecha: <span th:text="${#temporals.format(item.fechaPublicacion, 'dd/MM/yyyy HH:mm')}"></span></p>
               <p class="card-text">Descripción: <span th:text="${item.descripcion}"></span></p>
-              <p class="card-text">Usuario: <span th:text="${item.usuario.nombre}"></span></p>
               <div class="mt-auto d-grid gap-2">
                 <a th:href="@{/blog/details/{id}(id=${item.id})}" class="btn btn-outline-secondary"><i class="bi bi-eye"></i> Detalles</a>
-                <a th:href="@{/blog/edit/{id}(id=${item.id})}" class="btn btn-outline-warning text-dark"><i class="bi bi-pencil-square"></i> Editar</a>
-                <a th:href="@{/blog/remove/{id}(id=${item.id})}" class="btn btn-outline-danger"><i class="bi bi-trash"></i> Eliminar</a>
+                <a th:if="${session.rolUsuario == 'admin'}" th:href="@{/blog/edit/{id}(id=${item.id})}" class="btn btn-outline-warning text-dark"><i class="bi bi-pencil-square"></i> Editar</a>
+                <a th:if="${session.rolUsuario == 'admin'}" th:href="@{/blog/remove/{id}(id=${item.id})}" class="btn btn-outline-danger"><i class="bi bi-trash"></i> Eliminar</a>
               </div>
             </div>
           </div>
