@@ -15,4 +15,6 @@ public interface IUsuarioRepository extends JpaRepository<Usuario, Integer> {
     // Método para búsquedas con paginación
     Page<Usuario> findByNombreContainingIgnoreCaseAndCorreoContainingIgnoreCaseAndRol_IdOrderByIdDesc(
             String nombre, String correo, Integer idRol, Pageable pageable);
+
+    Usuario findByCorreo(String correo);
 }

@@ -23,4 +23,5 @@ public interface IUsuarioService {
     // 🔹 agrega este
     Usuario guardar(Usuario usuario);
 
+    Usuario obtenerPorCorreo(String correo);
 }

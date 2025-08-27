@@ -24,6 +24,7 @@ public class UsuarioService implements IUsuarioService {
                 .orElse(null);
     }
 
+
     @Override
     public Page<Usuario> obtenerTodosPaginados(Pageable pageable) {
         return usuarioRepository.findAll(pageable);
@@ -59,5 +60,11 @@ public class UsuarioService implements IUsuarioService {
 
     public Usuario guardar(Usuario usuario) {
         return usuarioRepository.save(usuario); // JPA lo guarda en la BD
+    }
+
+    @Override
+    public Usuario obtenerPorCorreo(String correo) {
+        return usuarioRepository.findByCorreo(correo);
+
     }
 }
