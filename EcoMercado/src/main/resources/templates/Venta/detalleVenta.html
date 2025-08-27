@@ -1,0 +1,117 @@
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/layouts/_mainLayout">
+<!--<head>
+    <meta charset="UTF-8">
+    <title>Detalle de Venta</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+</head>-->
+
+<div layout:fragment="content">
+  <div class="container my-4">
+    <div class="row">
+      <h2 class="mb-4 text-center text-success fw-bold">Detalle de Venta</h2>
+      <div class="col-12 mb-4 p-4 rounded-3 shadow-sm" style="background-color: #f8f9fa;">
+        <div th:if="${error}" style="color:red;">[[${error}]]</div>
+        <div th:if="${msg}" style="color:green;">[[${msg}]]</div>
+        <form th:action="@{/ventas/carrito/add}" method="post" class="d-flex align-items-center gap-3 flex-wrap">
+          <div th:if="${venta != null}">
+            <input type="hidden" name="ventaId" th:value="${venta.id}" />
+          </div>
+          <div class="flex-grow-1">
+            <label>Producto:</label>
+            <select name="idProducto" required class="form-select">
+              <option value="" disabled selected>Seleccione un producto</option>
+              <option th:each="prod : ${productos}" th:value="${prod.id}" th:text="${prod.nombre + ' (Stock: ' + prod.stock + ')'}"></option>
+            </select>
+          </div>
+          <div class="flex-grow-1">
+            <label>Cantidad:</label>
+            <input type="number" name="cantidad" min="1" required class="form-control" />
+          </div>
+          <div class="flex-grow-1">
+            <label>Precio Unitario:</label>
+            <input type="number" name="precioUnitario" step="0.01" min="0" required class="form-control" />
+          </div>
+          <button type="submit" class="btn btn-success">Añadir Producto</button>
+        </form>
+      </div>
+    </div>
+    <hr/>
+    <h3 class="mb-3">Productos añadidos</h3>
+    <div class="row">
+      <div class="col">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Precio Unitario</th>
+              <th>Subtotal</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="detalle : ${detalles}">
+              <td th:text="${#lists.find(productos, p -> p.id == detalle.idProducto)?.nombre}"></td>
+              <td>
+                <div th:if="${venta != null}">
+                  <form th:action="@{/ventas/carrito/updateCantidad}" method="post" style="display:inline;">
+                    <input type="hidden" name="detalleId" th:value="${detalle.id}" />
+                    <input type="hidden" name="ventaId" th:value="${venta.id}" />
+                    <button type="submit" name="accion" value="decrementar" class="btn btn-outline-secondary btn-sm">-</button>
+                  </form>
+                  <span th:text="${detalle.cantidad}"></span>
+                  <form th:action="@{/ventas/carrito/updateCantidad}" method="post" style="display:inline;">
+                    <input type="hidden" name="detalleId" th:value="${detalle.id}" />
+                    <input type="hidden" name="ventaId" th:value="${venta.id}" />
+                    <button type="submit" name="accion" value="incrementar" class="btn btn-outline-secondary btn-sm">+</button>
+                  </form>
+                </div>
+                <div th:if="${venta == null}">
+                  <span th:text="${detalle.cantidad}"></span>
+                </div>
+              </td>
+              <td th:text="${detalle.precioUnitario}"></td>
+              <td th:text="${detalle.cantidad * detalle.precioUnitario}"></td>
+              <td>
+                <div th:if="${venta != null}">
+                  <form th:action="@{/ventas/carrito/delete}" method="post" style="display:inline;">
+                    <input type="hidden" name="detalleId" th:value="${detalle.id}" />
+                    <input type="hidden" name="ventaId" th:value="${venta.id}" />
+                    <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <h4 class="mt-4">Total: <span th:text="${total}"></span></h4>
+    <div th:if="${venta != null}">
+      <form th:action="@{/ventas/carrito/guardar}" method="post">
+        <input type="hidden" name="ventaId" th:value="${venta.id}" />
+        <button type="submit" class="btn btn-primary">Guardar Venta</button>
+      </form>
+    </div>
+    <br>
+    <a th:href="@{/ventas}" class="btn btn-link">Volver a ventas</a>
+  </div>
+</div>
+<script>
+    // Autocompletar precio unitario al seleccionar producto
+    document.addEventListener('DOMContentLoaded', function() {
+        const productos = /*[[${productos}]]*/ [];
+        const select = document.querySelector('select[name="idProducto"]');
+        const precioInput = document.querySelector('input[name="precioUnitario"]');
+        select.addEventListener('change', function() {
+            const prodId = parseInt(this.value);
+            const prod = productos.find(p => p.id === prodId);
+            if (prod) {
+                precioInput.value = prod.precio;
+            }
+        });
+    });
+</script>

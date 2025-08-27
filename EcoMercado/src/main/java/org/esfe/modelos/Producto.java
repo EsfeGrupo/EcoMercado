@@ -1,6 +1,7 @@
 package org.esfe.modelos;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -17,7 +18,12 @@ public class Producto {
     private String nombre;
 
     @NotNull(message = "El precio del producto es requerido")
+    @Min(value = 0, message = "El precio no puede ser negativo")
     private Double precio;
+
+    @NotNull(message = "El stock del producto es requerido")
+    @Min(value = 0, message = "El stock no puede ser negativo")
+    private Integer stock;
 
     @ManyToMany(mappedBy = "productos")
     private Set<Tipo> tipos = new HashSet<>();
@@ -77,5 +83,13 @@ public class Producto {
 
     public void setPrecio(Double precio) {
         this.precio = precio;
+    }
+
+    public Integer getStock() {
+        return stock;
+    }
+
+    public void setStock(Integer stock) {
+        this.stock = stock;
     }
 }

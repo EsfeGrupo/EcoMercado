@@ -10,6 +10,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.validation.BindingResult;
+import jakarta.validation.Valid;
 
 import java.io.IOException;
 import java.util.List;
@@ -75,8 +77,14 @@ public class ProductoController {
     }
 
     @PostMapping("/crear")
-    public String guardar(@ModelAttribute Producto producto,
-                          @RequestParam("imagenFile") MultipartFile imagenFile) {
+    public String guardar(@Valid @ModelAttribute Producto producto,
+                          BindingResult bindingResult,
+                          @RequestParam("imagenFile") MultipartFile imagenFile,
+                          Model model) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("producto", producto);
+            return "producto/crear";
+        }
         if (!imagenFile.isEmpty()) {
             try {
                 producto.setImg(imagenFile.getBytes());

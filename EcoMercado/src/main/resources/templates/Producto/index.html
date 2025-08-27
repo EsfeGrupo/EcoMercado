@@ -30,6 +30,12 @@
               <a th:href="@{/producto/detalles/{id}(id=${producto.id})}" class="btn btn-outline-secondary"><i class="bi bi-eye"></i> Detalles</a>
               <a th:href="@{/producto/editar/{id}(id=${producto.id})}" class="btn btn-outline-warning text-dark"><i class="bi bi-pencil-square"></i> Editar</a>
               <a th:href="@{/producto/eliminar/{id}(id=${producto.id})}" class="btn btn-outline-danger"><i class="bi bi-trash"></i> Eliminar</a>
+              <form th:action="@{/ventas/detalleVenta/add}" method="post" style="margin-top: 5px;">
+                <input type="hidden" name="idProducto" th:value="${producto.id}" />
+                <input type="hidden" name="ventaId" th:value="${ventaId}" />
+                <input type="number" name="cantidad" min="1" value="1" class="form-control mb-1" style="width: 80px; display: inline-block;" />
+                <button type="submit" class="btn btn-success btn-sm">Añadir al carrito</button>
+              </form>
             </div>
           </div>
         </div>

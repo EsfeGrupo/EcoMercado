@@ -20,7 +20,7 @@ public class LoginController {
     // Mostrar formulario de login
     @GetMapping("/login")
     public String loginForm() {
-        return "login"; // nombre del html: login.html
+        return "login/login"; // nombre del html: login.html
     }
 
     // Procesar login

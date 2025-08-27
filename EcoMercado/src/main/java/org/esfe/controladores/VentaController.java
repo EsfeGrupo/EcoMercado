@@ -1,5 +1,6 @@
 package org.esfe.controladores;
 
+import org.esfe.modelos.Producto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -182,37 +183,8 @@ public class VentaController {
         attributes.addFlashAttribute("msg", "Venta y detalles eliminados correctamente");
         return "redirect:/ventas";
     }
-        @PostMapping("/addDetalle")
-        public String addDetalle(@ModelAttribute DetalleVenta detalleNuevo, @RequestParam("ventaId") Integer ventaId, RedirectAttributes attributes){
-            Venta venta = ventaService.obtenerPorId(ventaId).get();
-            detalleNuevo.setVenta(venta);
-            detalleVentaService.crearOEditar(detalleNuevo);
-            attributes.addFlashAttribute("msg", "Detalle agregado correctamente");
-            return "redirect:/ventas/details/" + ventaId;
-        }
 
-            @GetMapping("/editDetalle/{id}")
-            public String editDetalle(@PathVariable("id") Integer id, Model model){
-                DetalleVenta detalle = detalleVentaService.obtenerPorId(id);
-                model.addAttribute("detalle", detalle);
-                return "venta/editDetalle";
-            }
-
-            @PostMapping("/updateDetalle")
-            public String updateDetalle(@ModelAttribute DetalleVenta detalle, RedirectAttributes attributes){
-                detalleVentaService.crearOEditar(detalle);
-                attributes.addFlashAttribute("msg", "Detalle actualizado correctamente");
-                return "redirect:/ventas/details/" + detalle.getVenta().getId();
-            }
-
-                @PostMapping("/deleteDetalle")
-                public String deleteDetalle(@RequestParam("detalleId") Integer detalleId, @RequestParam("ventaId") Integer ventaId, RedirectAttributes attributes){
-                    detalleVentaService.eliminarPorId(detalleId);
-                    attributes.addFlashAttribute("msg", "Detalle eliminado correctamente");
-                    return "redirect:/ventas/details/" + ventaId;
-                }
-
-                @GetMapping("/reportegeneral/{visualizacion}")
+    @GetMapping("/reportegeneral/{visualizacion}")
     public ResponseEntity<byte[]> reporteGeneralVentas(@PathVariable("visualizacion") String visualizacion) {
         try {
             List<Venta> ventas = ventaService.obtenerTodos();
@@ -244,4 +216,15 @@ public class VentaController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    }
+    // Redirigir /carrito a la vista de detalleVenta (ahora llamada carrito)
+    // @GetMapping("/ventas/detalleVenta")
+    // public String verCarrito(...) {...}
+    // @PostMapping("/carrito/add")
+    // public String addDetalleCarrito(...) {...}
+    // @PostMapping("/carrito/updateCantidad")
+    // public String updateCantidadCarrito(...) {...}
+    // @PostMapping("/carrito/delete")
+    // public String deleteDetalleCarrito(...) {...}
+    // @PostMapping("/carrito/guardar")
+    // public String guardarCarrito(...) {...}
+}
