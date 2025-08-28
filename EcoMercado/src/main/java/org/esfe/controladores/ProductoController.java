@@ -192,6 +192,8 @@ public class ProductoController {
 
             producto.setNombre(productoActualizado.getNombre());
             producto.setPrecio(productoActualizado.getPrecio());
+            producto.setDescripcion(productoActualizado.getDescripcion()); // NUEVA LÍNEA
+            producto.setStock(productoActualizado.getStock()); // NUEVA LÍNEA
 
             if (!imagenFile.isEmpty()) {
                 // Validar tipo de archivo

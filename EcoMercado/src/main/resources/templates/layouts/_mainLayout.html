@@ -7,31 +7,74 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <title>Tienda Local</title>
+    <title>EcoMercado - Tienda Local</title>
     <link th:href="@{/css/styles.css}" rel="stylesheet" />
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 </head>
 <body>
-<nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
-    <a class="navbar-brand ps-3" href="#" th:href="@{/}">Tienda Local</a>
-    <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+<nav class="sb-topnav navbar navbar-expand navbar-dark bg-success">
+    <a class="navbar-brand ps-3" href="#" th:href="@{/}">
+        <i class="fas fa-leaf me-2"></i>EcoMercado
+    </a>
+    <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Carrito en la navbar (solo para usuarios y vendedores) -->
+    <ul class="navbar-nav me-auto" th:if="${session.rolUsuario == 'usuario' or session.rolUsuario == 'vendedor'}">
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/carrito}">
+                <i class="fas fa-shopping-cart me-1"></i>
+                <span class="badge bg-warning text-dark" id="carritoCount">0</span>
+            </a>
+        </li>
+    </ul>
 
     <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
         <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fas fa-user fa-fw"></i>
+                <i class="fas fa-user fa-fw me-1"></i>
+                <span th:if="${session.usuarioSession != null}" th:text="${session.nombreUsuario}">Usuario</span>
+                <span th:if="${session.usuarioSession == null}">Invitado</span>
             </a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                <!-- Solo mostrar login si no está autenticado -->
-                <li th:if="${session.usuarioSession == null}">
-                    <a class="dropdown-item" th:href="@{/login}">Iniciar Sesión</a>
-                </li>
-                <li><hr class="dropdown-divider" /></li>
-                <!-- Solo mostrar logout si está autenticado -->
+                <!-- Mostrar información del usuario si está logueado -->
                 <li th:if="${session.usuarioSession != null}">
-                    <a class="dropdown-item" th:href="@{/logout}">Cerrar Sesión</a>
+                    <h6 class="dropdown-header">
+                        <i class="fas fa-id-badge me-1"></i>
+                        Rol: <span class="badge bg-primary text-capitalize" th:text="${session.rolUsuario}">Rol</span>
+                    </h6>
+                </li>
+                <li th:if="${session.usuarioSession != null}"><hr class="dropdown-divider" /></li>
+
+                <!-- Perfil (para usuarios logueados) -->
+                <li th:if="${session.usuarioSession != null}">
+                    <a class="dropdown-item" href="#" onclick="Swal.fire('Perfil', 'Funcionalidad en desarrollo', 'info')">
+                        <i class="fas fa-user-cog me-2"></i>Mi Perfil
+                    </a>
+                </li>
+
+                <!-- Login para usuarios no logueados -->
+                <li th:if="${session.usuarioSession == null}">
+                    <a class="dropdown-item" th:href="@{/login}">
+                        <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                    </a>
+                </li>
+                <li th:if="${session.usuarioSession == null}">
+                    <a class="dropdown-item" th:href="@{/registro}">
+                        <i class="fas fa-user-plus me-2"></i>Registrarse
+                    </a>
+                </li>
+                <li th:if="${session.usuarioSession == null}"><hr class="dropdown-divider" /></li>
+
+                <!-- Logout para usuarios logueados -->
+                <li th:if="${session.usuarioSession != null}">
+                    <a class="dropdown-item" th:href="@{/logout}"
+                       onclick="return confirm('¿Estás seguro de que deseas cerrar sesión?')">
+                        <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                    </a>
                 </li>
             </ul>
         </li>
@@ -43,112 +86,120 @@
         <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
             <div class="sb-sidenav-menu">
                 <div class="nav">
-                    <div class="sb-sidenav-menu-heading">Gestión</div>
 
-                    <!-- Mostrar solo si es admin -->
-                    <div th:if="${session.rolUsuario == 'admin'}">
-                        <a class="nav-link" th:href="@{/roles}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-receipt"></i></div>
-                            Roles
-                        </a>
-                        <a class="nav-link" th:href="@{/usuarios}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
-                            Usuarios
-                        </a>
-                        <a class="nav-link" th:href="@{/producto}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-box"></i></div>
-                            Productos
-                        </a>
-                        <a class="nav-link" th:href="@{/ventas}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-shopping-cart"></i></div>
-                            Ventas
-                        </a>
-                        <a class="nav-link" th:href="@{/blog}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-blog"></i></div>
-                            Blog
-                        </a>
-                        <a class="nav-link" th:href="@{/carrito}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-shopping-basket"></i></div>
-                            Carrito
-                        </a>
-                        <a class="nav-link" th:href="@{/mis-compras}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-receipt"></i></div>
-                            Mis Compras
-                        </a>
-                        <a class="nav-link" th:href="@{/tipopagos}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-credit-card"></i></div>
-                            Tipos de Pago
-                        </a>
-                        <a class="nav-link" th:href="@{/tarjetaCredito}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-credit-card"></i></div>
-                            Tarjetas de Crédito
-                        </a>
-                        <a class="nav-link" th:href="@{/vendedor/productos}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-box"></i></div>
-                            Mis Productos
-                        </a>
-                        <a class="nav-link" th:href="@{/vendedor/ventas}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-cash-register"></i></div>
-                            Mis Ventas
-                        </a>
-                    </div>
+                    <!-- SECCIÓN PRINCIPAL -->
+                    <div class="sb-sidenav-menu-heading">Principal</div>
+                    <a class="nav-link" th:href="@{/}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-home"></i></div>
+                        Inicio
+                    </a>
 
-                    <!-- Mostrar solo si es vendedor -->
-                    <div th:if="${session.rolUsuario == 'vendedor'}">
-                        <a class="nav-link" th:href="@{/vendedor/productos}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-box"></i></div>
-                            Mis Productos
-                        </a>
-                        <a class="nav-link" th:href="@{/vendedor/ventas}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-cash-register"></i></div>
-                            Mis Ventas
-                        </a>
-                    </div>
+                    <!-- PRODUCTOS (para todos los roles, pero diferentes vistas) -->
+                    <!-- Admin ve gestión completa -->
+                    <a class="nav-link" th:if="${session.rolUsuario == 'admin'}" th:href="@{/producto}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-cogs"></i></div>
+                        Gestión de Productos
+                    </a>
 
-                    <!-- Mostrar solo si es usuario/cliente -->
-                    <div th:if="${session.rolUsuario == 'usuario'}">
-                        <a class="nav-link" th:href="@{/carrito}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-shopping-basket"></i></div>
-                            Carrito
-                        </a>
-                        <a class="nav-link" th:href="@{/mis-compras}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-receipt"></i></div>
-                            Mis Compras
-                        </a>
-                        <a class="nav-link" th:href="@{/tipopagos}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-credit-card"></i></div>
-                            Tipos de Pago
-                        </a>
-                        <a class="nav-link" th:href="@{/tarjetaCredito}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-credit-card"></i></div>
-                            Tarjetas de Crédito
-                        </a>
-                        <a class="nav-link" th:href="@{/blog}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-blog"></i></div>
-                            Blog
-                        </a>
-                    </div>
+                    <!-- Usuarios y vendedores ven catálogo -->
+                    <a class="nav-link" th:if="${session.rolUsuario == 'usuario' or session.rolUsuario == 'vendedor'}" th:href="@{/usuario/productos}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-store"></i></div>
+                        Productos
+                    </a>
 
-                    <!-- Mostrar si no está autenticado -->
-                    <div th:if="${session.usuarioSession == null}">
-                        <a class="nav-link" th:href="@{/}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-home"></i></div>
-                            Inicio
-                        </a>
-                        <a class="nav-link" th:href="@{/login}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-sign-in-alt"></i></div>
-                            Iniciar Sesión
-                        </a>
-                    </div>
+                    <!-- Para usuarios no logueados también mostrar productos -->
+                    <a class="nav-link" th:if="${session.usuarioSession == null}" th:href="@{/usuario/productos}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-store"></i></div>
+                        Productos
+                    </a>
+
+                    <!-- BLOG (para todos) -->
+                    <a class="nav-link" th:href="@{/blog}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-blog"></i></div>
+                        Blog
+                    </a>
+
+                    <!-- SECCIÓN ADMINISTRACIÓN (solo Admin) -->
+                    <div class="sb-sidenav-menu-heading" th:if="${session.rolUsuario == 'admin'}">Administración</div>
+
+                    <a class="nav-link" th:if="${session.rolUsuario == 'admin'}" th:href="@{/roles}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-user-shield"></i></div>
+                        Roles
+                    </a>
+                    <a class="nav-link" th:if="${session.rolUsuario == 'admin'}" th:href="@{/usuarios}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
+                        Usuarios
+                    </a>
+                    <a class="nav-link" th:if="${session.rolUsuario == 'admin'}" th:href="@{/ventas}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-chart-line"></i></div>
+                        Todas las Ventas
+                    </a>
+                    <a class="nav-link" th:if="${session.rolUsuario == 'admin'}" th:href="@{/tipopagos}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-credit-card"></i></div>
+                        Tipos de Pago
+                    </a>
+
+                    <!-- SECCIÓN COMPRAS (Usuario y Vendedor) -->
+                    <div class="sb-sidenav-menu-heading" th:if="${session.rolUsuario == 'usuario' or session.rolUsuario == 'vendedor'}">Mis Compras</div>
+
+                    <a class="nav-link" th:if="${session.rolUsuario == 'usuario' or session.rolUsuario == 'vendedor'}" th:href="@{/carrito}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-shopping-basket"></i></div>
+                        Carrito de Compras
+                    </a>
+                    <a class="nav-link" th:if="${session.rolUsuario == 'usuario' or session.rolUsuario == 'vendedor'}" th:href="@{/mis-compras}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-receipt"></i></div>
+                        Historial de Compras
+                    </a>
+                    <a class="nav-link" th:if="${session.rolUsuario == 'usuario' or session.rolUsuario == 'vendedor'}" th:href="@{/tarjetaCredito}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-credit-card"></i></div>
+                        Mis Tarjetas
+                    </a>
+
+                    <!-- SECCIÓN VENDEDOR (solo Vendedores) -->
+                    <div class="sb-sidenav-menu-heading" th:if="${session.rolUsuario == 'vendedor'}">Mi Negocio</div>
+
+                    <a class="nav-link" th:if="${session.rolUsuario == 'vendedor'}" th:href="@{/vendedor/productos}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-box-open"></i></div>
+                        Mis Productos
+                    </a>
+                    <a class="nav-link" th:if="${session.rolUsuario == 'vendedor'}" th:href="@{/vendedor/ventas}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-cash-register"></i></div>
+                        Mis Ventas
+                    </a>
+
+                    <!-- SECCIÓN ACCESO (para usuarios no logueados) -->
+                    <div class="sb-sidenav-menu-heading" th:if="${session.usuarioSession == null}">Acceso</div>
+
+                    <a class="nav-link" th:if="${session.usuarioSession == null}" th:href="@{/login}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-sign-in-alt"></i></div>
+                        Iniciar Sesión
+                    </a>
+                    <a class="nav-link" th:if="${session.usuarioSession == null}" th:href="@{/registro}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-user-plus"></i></div>
+                        Registrarse
+                    </a>
+                    <a class="nav-link" th:if="${session.usuarioSession == null}" th:href="@{/registro-vendedor}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-store"></i></div>
+                        Registrarse como Vendedor
+                    </a>
 
                 </div>
             </div>
+
+            <!-- FOOTER DEL SIDEBAR -->
             <div class="sb-sidenav-footer">
                 <div th:if="${session.usuarioSession != null}" class="small">
-                    Has iniciado como: <span class="text-light" th:text="${session.nombreUsuario}">Usuario</span>
+                    <div class="text-uppercase fw-bold">
+                        <i class="fas fa-user-circle me-1"></i>
+                        <span th:text="${session.rolUsuario}">Rol</span>
+                    </div>
+                    <div class="text-muted">
+                        <span th:text="${session.nombreUsuario}">Usuario</span>
+                    </div>
                 </div>
-                <div th:if="${session.usuarioSession == null}" class="small">
-                    Tienda Local - Inicia Sesión
+                <div th:if="${session.usuarioSession == null}" class="small text-center">
+                    <div class="text-muted">EcoMercado</div>
+                    <div class="small">¡Inicia sesión!</div>
                 </div>
             </div>
         </nav>
@@ -157,47 +208,222 @@
     <div id="layoutSidenav_content">
         <main>
             <div class="container-fluid px-4">
-                <!-- Mensajes de éxito/error -->
+
+                <!-- MENSAJES DE NOTIFICACIÓN -->
                 <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
                     <span th:text="${mensajeExito}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
 
                 <div th:if="${mensajeError}" class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
                     <span th:text="${mensajeError}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
 
                 <div th:if="${mensajeInfo}" class="alert alert-info alert-dismissible fade show mt-3" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
                     <span th:text="${mensajeInfo}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
 
-                <!-- Aquí se inyectan las vistas -->
-                <div layout:fragment="content">
-                    <div class="mt-4">
-                        <h1>Bienvenido a Tienda Local</h1>
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span th:text="${success}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
 
-                        <!-- Mostrar contenido según el estado de autenticación -->
-                        <div th:if="${session.usuarioSession != null}">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h5 class="card-title">Panel de Control</h5>
-                                    <p class="card-text">
-                                        Bienvenido, <strong th:text="${session.nombreUsuario}">Usuario</strong>.
-                                        Tu rol es: <span class="badge bg-primary" th:text="${session.rolUsuario}">Rol</span>
-                                    </p>
-                                    <p class="text-muted">Usa el menú lateral para navegar por las opciones disponibles.</p>
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <!-- CONTENIDO PRINCIPAL -->
+                <div layout:fragment="content">
+                    <!-- Página de bienvenida por defecto -->
+                    <div class="mt-4">
+                        <!-- Header según el rol -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="card border-success shadow-sm">
+                                    <div class="card-body bg-light">
+                                        <!-- Admin -->
+                                        <div th:if="${session.rolUsuario == 'admin'}">
+                                            <h1 class="text-success mb-2">
+                                                <i class="fas fa-user-shield me-2"></i>Panel de Administración
+                                            </h1>
+                                            <p class="text-muted mb-0">
+                                                Gestiona todo el sistema EcoMercado desde aquí
+                                            </p>
+                                        </div>
+
+                                        <!-- Vendedor -->
+                                        <div th:if="${session.rolUsuario == 'vendedor'}">
+                                            <h1 class="text-success mb-2">
+                                                <i class="fas fa-store me-2"></i>Mi Negocio - EcoMercado
+                                            </h1>
+                                            <p class="text-muted mb-0">
+                                                Gestiona tus productos y ventas, y compra de otros vendedores
+                                            </p>
+                                        </div>
+
+                                        <!-- Usuario -->
+                                        <div th:if="${session.rolUsuario == 'usuario'}">
+                                            <h1 class="text-success mb-2">
+                                                <i class="fas fa-leaf me-2"></i>¡Bienvenido a EcoMercado!
+                                            </h1>
+                                            <p class="text-muted mb-0">
+                                                Descubre productos increíbles de vendedores locales
+                                            </p>
+                                        </div>
+
+                                        <!-- Invitado -->
+                                        <div th:if="${session.usuarioSession == null}">
+                                            <h1 class="text-success mb-2">
+                                                <i class="fas fa-leaf me-2"></i>¡Bienvenido a EcoMercado!
+                                            </h1>
+                                            <p class="text-muted mb-0">
+                                                Tu marketplace local para productos sostenibles
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
+                        <!-- Contenido según el usuario -->
+                        <div th:if="${session.usuarioSession != null}">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">
+                                                <i class="fas fa-user-circle me-2"></i>
+                                                Hola, <span th:text="${session.nombreUsuario}">Usuario</span>
+                                            </h5>
+                                            <p class="card-text mb-2">
+                                                Rol actual:
+                                                <span class="badge bg-success text-uppercase" th:text="${session.rolUsuario}">Rol</span>
+                                            </p>
+                                            <p class="text-muted">
+                                                Utiliza el menú lateral para acceder a todas las funciones disponibles para tu perfil.
+                                            </p>
+
+                                            <!-- Accesos rápidos según el rol -->
+                                            <div class="mt-3">
+                                                <h6 class="fw-bold">Accesos rápidos:</h6>
+
+                                                <!-- Admin -->
+                                                <div th:if="${session.rolUsuario == 'admin'}" class="btn-group flex-wrap" role="group">
+                                                    <a th:href="@{/usuarios}" class="btn btn-outline-primary btn-sm me-1 mb-1">
+                                                        <i class="fas fa-users me-1"></i>Usuarios
+                                                    </a>
+                                                    <a th:href="@{/producto}" class="btn btn-outline-success btn-sm me-1 mb-1">
+                                                        <i class="fas fa-cogs me-1"></i>Gestión Productos
+                                                    </a>
+                                                    <a th:href="@{/ventas}" class="btn btn-outline-info btn-sm me-1 mb-1">
+                                                        <i class="fas fa-chart-line me-1"></i>Ver Ventas
+                                                    </a>
+                                                </div>
+
+                                                <!-- Vendedor -->
+                                                <div th:if="${session.rolUsuario == 'vendedor'}" class="btn-group flex-wrap" role="group">
+                                                    <a th:href="@{/vendedor/productos}" class="btn btn-outline-primary btn-sm me-1 mb-1">
+                                                        <i class="fas fa-box-open me-1"></i>Mis Productos
+                                                    </a>
+                                                    <a th:href="@{/vendedor/ventas}" class="btn btn-outline-success btn-sm me-1 mb-1">
+                                                        <i class="fas fa-cash-register me-1"></i>Mis Ventas
+                                                    </a>
+                                                    <a th:href="@{/usuario/productos}" class="btn btn-outline-info btn-sm me-1 mb-1">
+                                                        <i class="fas fa-store me-1"></i>Comprar Productos
+                                                    </a>
+                                                    <a th:href="@{/carrito}" class="btn btn-outline-warning btn-sm me-1 mb-1">
+                                                        <i class="fas fa-shopping-basket me-1"></i>Mi Carrito
+                                                    </a>
+                                                </div>
+
+                                                <!-- Usuario -->
+                                                <div th:if="${session.rolUsuario == 'usuario'}" class="btn-group flex-wrap" role="group">
+                                                    <a th:href="@{/usuario/productos}" class="btn btn-outline-primary btn-sm me-1 mb-1">
+                                                        <i class="fas fa-store me-1"></i>Ver Productos
+                                                    </a>
+                                                    <a th:href="@{/carrito}" class="btn btn-outline-success btn-sm me-1 mb-1">
+                                                        <i class="fas fa-shopping-basket me-1"></i>Mi Carrito
+                                                    </a>
+                                                    <a th:href="@{/mis-compras}" class="btn btn-outline-info btn-sm me-1 mb-1">
+                                                        <i class="fas fa-receipt me-1"></i>Mis Compras
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contenido para usuarios no logueados -->
                         <div th:if="${session.usuarioSession == null}">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h5 class="card-title">¡Bienvenido!</h5>
-                                    <p class="card-text">Para acceder a todas las funciones, por favor inicia sesión.</p>
-                                    <a th:href="@{/login}" class="btn btn-primary">Iniciar Sesión</a>
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Tu marketplace local sostenible</h5>
+                                            <p class="card-text">
+                                                En EcoMercado conectamos a vendedores locales con consumidores conscientes.
+                                                Encuentra productos únicos, apoya a pequeños negocios y contribuye a una economía más sostenible.
+                                            </p>
+                                            <p class="card-text">
+                                                Para acceder a todas nuestras funciones y realizar compras,
+                                                por favor crea una cuenta o inicia sesión.
+                                            </p>
+                                            <div class="d-flex gap-2 flex-wrap">
+                                                <a th:href="@{/login}" class="btn btn-success">
+                                                    <i class="fas fa-sign-in-alt me-1"></i>Iniciar Sesión
+                                                </a>
+                                                <a th:href="@{/registro}" class="btn btn-outline-success">
+                                                    <i class="fas fa-user-plus me-1"></i>Registrarse como Cliente
+                                                </a>
+                                                <a th:href="@{/registro-vendedor}" class="btn btn-outline-primary">
+                                                    <i class="fas fa-store me-1"></i>Registrarse como Vendedor
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header bg-success text-white">
+                                            <h6 class="mb-0">
+                                                <i class="fas fa-star me-1"></i>¿Por qué EcoMercado?
+                                            </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <ul class="list-unstyled">
+                                                <li class="mb-2">
+                                                    <i class="fas fa-leaf text-success me-2"></i>
+                                                    Productos sostenibles
+                                                </li>
+                                                <li class="mb-2">
+                                                    <i class="fas fa-handshake text-success me-2"></i>
+                                                    Apoyo a vendedores locales
+                                                </li>
+                                                <li class="mb-2">
+                                                    <i class="fas fa-shipping-fast text-success me-2"></i>
+                                                    Entrega rápida
+                                                </li>
+                                                <li class="mb-2">
+                                                    <i class="fas fa-shield-alt text-success me-2"></i>
+                                                    Compras seguras
+                                                </li>
+                                                <li class="mb-0">
+                                                    <i class="fas fa-heart text-success me-2"></i>
+                                                    Atención personalizada
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -205,14 +431,21 @@
                 </div>
             </div>
         </main>
+
+        <!-- FOOTER -->
         <footer class="py-4 bg-light mt-auto">
             <div class="container-fluid px-4">
                 <div class="d-flex align-items-center justify-content-between small">
-                    <div class="text-muted">© Tienda Local 2025</div>
+                    <div class="text-muted">
+                        <i class="fas fa-leaf text-success me-1"></i>
+                        © EcoMercado 2025 - Marketplace Sostenible
+                    </div>
                     <div>
-                        <a href="#">Política de Privacidad</a>
+                        <a href="#" class="text-decoration-none">Política de Privacidad</a>
                         &middot;
-                        <a href="#">Términos y Condiciones</a>
+                        <a href="#" class="text-decoration-none">Términos y Condiciones</a>
+                        &middot;
+                        <a href="#" class="text-decoration-none">Contacto</a>
                     </div>
                 </div>
             </div>
@@ -222,5 +455,19 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 <script th:src="@{/js/scripts.js}"></script>
+
+<!-- Script para contador del carrito (opcional) -->
+<script>
+    // Función para actualizar contador del carrito (puedes implementarla más tarde)
+    document.addEventListener('DOMContentLoaded', function() {
+        // Aquí podrías hacer una llamada AJAX para obtener la cantidad de items en el carrito
+        // Por ahora dejamos el contador en 0
+        const carritoCount = document.getElementById('carritoCount');
+        if (carritoCount) {
+            // carritoCount.textContent = obtenerCantidadCarrito(); // Implementar después
+        }
+    });
+</script>
+
 </body>
 </html>

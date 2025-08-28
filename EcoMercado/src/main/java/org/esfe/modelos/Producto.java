@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
+import jakarta.validation.constraints.Size;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -21,6 +21,11 @@ public class Producto {
     @NotNull(message = "El precio del producto es requerido")
     @Min(value = 0, message = "El precio no puede ser negativo")
     private Double precio;
+
+    // NUEVO CAMPO DESCRIPCIÓN
+    @Size(max = 500, message = "La descripción no puede exceder 500 caracteres")
+    @Column(length = 500)
+    private String descripcion;
 
     // NUEVO CAMPO STOCK
     @NotNull(message = "El stock del producto es requerido")
@@ -95,5 +100,14 @@ public class Producto {
 
     public void setStock(Integer stock) {
         this.stock = stock;
+    }
+
+    // NUEVOS GETTERS Y SETTERS PARA DESCRIPCIÓN
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
     }
 }

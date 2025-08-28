@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/layouts/_mainLayout">
+
+<div layout:fragment="content">
+
+    <div class="container my-4">
+
+        <h1 class="text-center text-primary fw-bold mb-4">
+            <i class="bi bi-shop me-2"></i>Nuestros Productos
+        </h1>
+
+        <!-- FORMULARIO DE BÚSQUEDA -->
+        <div class="card mb-4 border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-search me-2"></i>Buscar Productos</h5>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/usuario/productos}" method="get" class="row g-3">
+                    <div class="col-md-5">
+                        <label for="nombre" class="form-label">Buscar por nombre:</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre"
+                               placeholder="¿Qué estás buscando?" th:value="${nombre}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="precio" class="form-label">Precio máximo:</label>
+                        <input type="number" step="0.01" class="form-control" id="precio" name="precio"
+                               placeholder="0.00" th:value="${precio}">
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search me-1"></i>Buscar
+                        </button>
+                        <a th:href="@{/usuario/productos}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Mostrar Todo
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- INFORMACIÓN DE RESULTADOS -->
+        <div class="row mb-3">
+            <div class="col">
+                <p class="text-muted mb-0">
+                    <strong th:text="${productos.totalElements}">0</strong> productos disponibles
+                    <span th:if="${nombre != null and !nombre.isEmpty()}" class="badge bg-info ms-2">
+            <i class="bi bi-search me-1"></i>"<span th:text="${nombre}"></span>"
+          </span>
+                    <span th:if="${precio != null}" class="badge bg-warning text-dark ms-2">
+            <i class="bi bi-currency-dollar me-1"></i>Hasta $<span th:text="${precio}"></span>
+          </span>
+                </p>
+            </div>
+        </div>
+
+        <!-- CATÁLOGO DE PRODUCTOS -->
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" th:if="${productos.totalElements > 0}">
+            <div class="col" th:each="producto : ${productos.content}">
+                <div class="card h-100 border-0 shadow-sm producto-card">
+                    <!-- IMAGEN DEL PRODUCTO -->
+                    <div class="position-relative" style="height: 250px; overflow: hidden;">
+                        <img th:if="${producto.img != null}"
+                             th:src="@{'/usuario/productos/imagen/' + ${producto.id}}"
+                             th:alt="${producto.nombre}"
+                             class="card-img-top w-100 h-100"
+                             style="object-fit: cover; transition: transform 0.3s ease;">
+
+                        <div th:if="${producto.img == null}"
+                             class="d-flex align-items-center justify-content-center h-100 bg-light">
+                            <i class="bi bi-image text-muted" style="font-size: 4rem;"></i>
+                        </div>
+
+                        <!-- BADGE DE STOCK -->
+                        <div class="position-absolute top-0 end-0 m-2">
+              <span th:if="${producto.stock > 0}" class="badge bg-success">
+                <i class="bi bi-check-circle me-1"></i>Disponible
+              </span>
+                            <span th:if="${producto.stock == 0}" class="badge bg-danger">
+                <i class="bi bi-x-circle me-1"></i>Agotado
+              </span>
+                        </div>
+                    </div>
+
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title fw-bold text-primary mb-2" th:text="${producto.nombre}">Nombre Producto</h5>
+
+                        <!-- DESCRIPCIÓN CORTA -->
+                        <p class="card-text text-muted mb-3" th:if="${producto.descripcion != null and !producto.descripcion.isEmpty()}">
+                            <span th:text="${#strings.abbreviate(producto.descripcion, 80)}">Descripción del producto...</span>
+                        </p>
+
+                        <!-- PRECIO -->
+                        <div class="mb-3">
+                            <h4 class="text-success fw-bold mb-0">
+                                <i class="bi bi-tag-fill me-1"></i>$<span th:text="${#numbers.formatDecimal(producto.precio, 1, 2)}">0.00</span>
+                            </h4>
+                            <small class="text-muted">
+                                <i class="bi bi-box me-1"></i>Stock: <span th:text="${producto.stock}">0</span> unidades
+                            </small>
+                        </div>
+
+                        <div class="mt-auto">
+                            <!-- BOTÓN VER DETALLES -->
+                            <a th:href="@{/usuario/productos/detalles/{id}(id=${producto.id})}"
+                               class="btn btn-primary w-100 mb-2">
+                                <i class="bi bi-eye me-1"></i>Ver Detalles
+                            </a>
+
+                            <!-- BOTÓN AÑADIR AL CARRITO -->
+                            <div th:if="${producto.stock > 0}">
+                                <form th:action="@{/carrito}" method="post" class="d-grid">
+                                    <input type="hidden" name="idProducto" th:value="${producto.id}" />
+                                    <input type="hidden" name="cantidad" value="1" />
+                                    <input type="hidden" name="precioUnitario" th:value="${producto.precio}" />
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="bi bi-cart-plus me-1"></i>Añadir al Carrito
+                                    </button>
+                                </form>
+                            </div>
+                            <div th:if="${producto.stock == 0}">
+                                <button class="btn btn-secondary w-100" disabled>
+                                    <i class="bi bi-exclamation-triangle me-1"></i>Sin Stock
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MENSAJE CUANDO NO HAY PRODUCTOS -->
+        <div th:if="${productos.totalElements == 0}" class="text-center py-5">
+            <div class="mb-4">
+                <i class="bi bi-emoji-frown text-muted" style="font-size: 5rem;"></i>
+            </div>
+            <h3 class="text-muted mb-3">No encontramos productos</h3>
+            <p class="text-muted mb-4">
+        <span th:if="${nombre != null and !nombre.isEmpty() or precio != null}">
+          No hay productos que coincidan con tu búsqueda. Intenta con otros términos.
+        </span>
+                <span th:if="${nombre == null or nombre.isEmpty() and precio == null}">
+          Actualmente no hay productos disponibles.
+        </span>
+            </p>
+            <a th:href="@{/usuario/productos}" class="btn btn-primary">
+                <i class="bi bi-arrow-clockwise me-1"></i>Ver Todos los Productos
+            </a>
+        </div>
+
+        <!-- PAGINACIÓN -->
+        <nav aria-label="Navegación de productos" class="d-flex justify-content-center mt-5"
+             th:if="${productos.totalPages > 1}">
+            <ul class="pagination pagination-lg">
+                <!-- Página anterior -->
+                <li class="page-item" th:class="${productos.first} ? 'page-item disabled' : 'page-item'">
+                    <a class="page-link"
+                       th:href="${productos.first} ? '#' : @{|/usuario/productos?page=${productos.number}&nombre=${nombre}&precio=${precio}|}"
+                       aria-label="Anterior">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+
+                <!-- Números de página -->
+                <li class="page-item" th:each="i : ${pageNumbers}"
+                    th:class="${i == productos.number + 1} ? 'page-item active' : 'page-item'">
+                    <a class="page-link"
+                       th:href="@{|/usuario/productos?page=${i}&nombre=${nombre}&precio=${precio}|}"
+                       th:text="${i}">1</a>
+                </li>
+
+                <!-- Página siguiente -->
+                <li class="page-item" th:class="${productos.last} ? 'page-item disabled' : 'page-item'">
+                    <a class="page-link"
+                       th:href="${productos.last} ? '#' : @{|/usuario/productos?page=${productos.number + 2}&nombre=${nombre}&precio=${precio}|}"
+                       aria-label="Siguiente">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- INFORMACIÓN DE PAGINACIÓN -->
+        <div class="text-center mt-3" th:if="${productos.totalElements > 0}">
+            <small class="text-muted">
+                Mostrando <span th:text="${productos.numberOfElements}">0</span> de
+                <span th:text="${productos.totalElements}">0</span> productos
+                (Página <span th:text="${productos.number + 1}">1</span> de <span th:text="${productos.totalPages}">1</span>)
+            </small>
+        </div>
+
+    </div>
+
+    <!-- ESTILOS ADICIONALES -->
+    <style>
+        .producto-card {
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .producto-card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 8px 25px rgba(0,123,255,0.15) !important;
+        }
+
+        .producto-card:hover img {
+          transform: scale(1.05);
+        }
+
+        .badge {
+          font-size: 0.75em;
+        }
+    </style>
+
+</div>
+</html>

@@ -59,6 +59,27 @@
                 <div class="form-text">Máximo 100 caracteres</div>
               </div>
 
+              <!-- DESCRIPCIÓN -->
+              <div class="mb-3">
+                <label for="descripcion" class="form-label fw-bold">
+                  <i class="bi bi-card-text me-1"></i>Descripción
+                </label>
+                <textarea class="form-control"
+                          th:class="${#fields.hasErrors('descripcion')} ? 'form-control is-invalid' : 'form-control'"
+                          id="descripcion"
+                          th:field="*{descripcion}"
+                          rows="4"
+                          placeholder="Describe las características y beneficios del producto..."
+                          maxlength="500"></textarea>
+
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('descripcion')}">
+                  <ul class="mb-0 ps-0" style="list-style: none;">
+                    <li th:each="error : ${#fields.errors('descripcion')}" th:text="${error}">Error de validación</li>
+                  </ul>
+                </div>
+                <div class="form-text">Máximo 500 caracteres. <span id="charCount">0/500</span></div>
+              </div>
+
               <!-- PRECIO -->
               <div class="mb-3">
                 <label for="precio" class="form-label fw-bold">
@@ -82,6 +103,26 @@
                   </div>
                 </div>
                 <div class="form-text">Ingrese el precio en formato decimal (ejemplo: 19.99)</div>
+              </div>
+
+              <!-- STOCK -->
+              <div class="mb-3">
+                <label for="stock" class="form-label fw-bold">
+                  <i class="bi bi-box me-1"></i>Stock <span class="text-danger">*</span>
+                </label>
+                <input type="number"
+                       class="form-control"
+                       th:class="${#fields.hasErrors('stock')} ? 'form-control is-invalid' : 'form-control'"
+                       id="stock"
+                       th:field="*{stock}"
+                       min="0"
+                       placeholder="0">
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('stock')}">
+                  <ul class="mb-0 ps-0" style="list-style: none;">
+                    <li th:each="error : ${#fields.errors('stock')}" th:text="${error}">Error de validación</li>
+                  </ul>
+                </div>
+                <div class="form-text">Cantidad disponible en inventario</div>
               </div>
 
               <!-- IMAGEN ACTUAL -->
@@ -154,9 +195,10 @@
           <div class="card-body">
             <ul class="mb-0">
               <li>Verifique que el nombre siga siendo único y descriptivo</li>
+              <li>Actualice la descripción si hay cambios en las características</li>
               <li>Asegúrese de que el precio refleje el valor actual del producto</li>
+              <li>Mantenga el stock actualizado para evitar sobreventa</li>
               <li>Solo cambie la imagen si es necesario para mantener el rendimiento</li>
-              <li>Revise todos los cambios antes de actualizar</li>
             </ul>
           </div>
         </div>
@@ -165,7 +207,7 @@
     </div>
   </div>
 
-  <!-- SCRIPT PARA PREVIEW DE IMAGEN -->
+  <!-- SCRIPT PARA PREVIEW DE IMAGEN Y CONTADOR -->
   <script>
     function previewImage(input) {
       const preview = document.getElementById('preview');
@@ -189,6 +231,31 @@
     document.addEventListener('DOMContentLoaded', function() {
       const form = document.querySelector('form');
       const imagenFile = document.getElementById('imagenFile');
+      const descripcionTextarea = document.getElementById('descripcion');
+      const charCount = document.getElementById('charCount');
+
+      // Contador de caracteres para descripción
+      if (descripcionTextarea && charCount) {
+        // Actualizar contador al cargar la página
+        const updateCharCount = () => {
+          const currentLength = descripcionTextarea.value.length;
+          charCount.textContent = currentLength + '/500';
+
+          charCount.classList.remove('text-warning', 'text-danger');
+          if (currentLength > 450) {
+            charCount.classList.add('text-warning');
+          }
+          if (currentLength >= 500) {
+            charCount.classList.add('text-danger');
+          }
+        };
+
+        // Actualizar al cargar
+        updateCharCount();
+
+        // Actualizar al escribir
+        descripcionTextarea.addEventListener('input', updateCharCount);
+      }
 
       imagenFile.addEventListener('change', function() {
         const file = this.files[0];

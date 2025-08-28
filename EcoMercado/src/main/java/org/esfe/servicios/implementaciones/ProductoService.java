@@ -54,4 +54,6 @@ public class ProductoService implements IProductoService {
     public void eliminarPorId(Integer id) {
         productoRepository.deleteById(id);
     }
+
+
 }

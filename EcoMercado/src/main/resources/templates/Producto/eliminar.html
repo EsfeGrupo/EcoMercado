@@ -72,12 +72,31 @@
                       </td>
                       <td class="fw-bold" th:text="${producto.nombre}">Producto</td>
                     </tr>
+                    <tr th:if="${producto.descripcion != null and !producto.descripcion.isEmpty()}">
+                      <td class="fw-bold text-muted ps-0">
+                        <i class="bi bi-card-text me-2"></i>Descripción:
+                      </td>
+                      <td>
+                        <small th:text="${#strings.abbreviate(producto.descripcion, 100)}">Descripción...</small>
+                      </td>
+                    </tr>
                     <tr>
                       <td class="fw-bold text-muted ps-0">
                         <i class="bi bi-currency-dollar me-2"></i>Precio:
                       </td>
                       <td class="fw-bold text-success">
                         $<span th:text="${#numbers.formatDecimal(producto.precio, 1, 2)}">0.00</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="fw-bold text-muted ps-0">
+                        <i class="bi bi-box me-2"></i>Stock:
+                      </td>
+                      <td>
+                        <span th:text="${producto.stock}">0</span> unidades
+                        <span th:if="${producto.stock > 10}" class="badge bg-success ms-2">Bien Surtido</span>
+                        <span th:if="${producto.stock > 0 and producto.stock <= 10}" class="badge bg-warning text-dark ms-2">Stock Bajo</span>
+                        <span th:if="${producto.stock == 0}" class="badge bg-danger ms-2">Agotado</span>
                       </td>
                     </tr>
                     <tr>
@@ -99,6 +118,22 @@
               </div>
             </div>
 
+            <!-- DESCRIPCIÓN COMPLETA SI EXISTE -->
+            <div th:if="${producto.descripcion != null and !producto.descripcion.isEmpty()}" class="mb-4">
+              <div class="card bg-light border-warning">
+                <div class="card-header bg-warning text-dark">
+                  <h6 class="mb-0">
+                    <i class="bi bi-card-text me-1"></i>Descripción Completa
+                  </h6>
+                </div>
+                <div class="card-body">
+                  <p class="mb-0 text-dark" th:text="${producto.descripcion}">
+                    Descripción completa del producto que será eliminada...
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <!-- MENSAJE DE ADVERTENCIA -->
             <div class="alert alert-warning border-warning">
               <div class="d-flex align-items-start">
@@ -109,8 +144,27 @@
                     <li><i class="bi bi-x-circle text-danger me-2"></i>Esta acción es <strong>irreversible</strong></li>
                     <li><i class="bi bi-x-circle text-danger me-2"></i>Se perderán todos los datos del producto</li>
                     <li><i class="bi bi-x-circle text-danger me-2"></i>La imagen asociada también será eliminada</li>
+                    <li><i class="bi bi-x-circle text-danger me-2"></i>La descripción y configuración de stock se perderán</li>
                     <li><i class="bi bi-x-circle text-danger me-2"></i>No podrá recuperar esta información</li>
                   </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- ADVERTENCIA ESPECIAL PARA PRODUCTOS CON STOCK -->
+            <div th:if="${producto.stock > 0}" class="alert alert-info border-info">
+              <div class="d-flex align-items-start">
+                <i class="bi bi-info-circle-fill me-3 text-info" style="font-size: 1.5rem; margin-top: 2px;"></i>
+                <div>
+                  <h6 class="fw-bold mb-2">¡Atención! Este producto tiene stock disponible</h6>
+                  <p class="mb-2">
+                    Actualmente hay <strong th:text="${producto.stock}">0</strong> unidades en inventario.
+                    Al eliminar este producto, también se perderá el control de este stock.
+                  </p>
+                  <p class="mb-0 small">
+                    <strong>Recomendación:</strong> Considere reducir el stock a 0 y mantener el producto desactivado
+                    en lugar de eliminarlo completamente.
+                  </p>
                 </div>
               </div>
             </div>
@@ -122,7 +176,7 @@
               <div class="form-check mb-4">
                 <input class="form-check-input" type="checkbox" id="confirmDelete" required>
                 <label class="form-check-label fw-bold text-danger" for="confirmDelete">
-                  Confirmo que deseo eliminar permanentemente este producto
+                  Confirmo que deseo eliminar permanentemente este producto y toda su información
                 </label>
               </div>
 
@@ -147,11 +201,11 @@
         <div class="card border-secondary mt-4">
           <div class="card-header bg-secondary text-white">
             <h6 class="mb-0">
-              <i class="bi bi-info-circle me-1"></i>Alternativas
+              <i class="bi bi-info-circle me-1"></i>Alternativas Recomendadas
             </h6>
           </div>
           <div class="card-body">
-            <p class="mb-3">Si no está seguro de eliminar el producto, considere estas opciones:</p>
+            <p class="mb-3">Si no está completamente seguro de eliminar el producto, considere estas opciones:</p>
             <div class="row">
               <div class="col-md-6">
                 <ul class="list-unstyled">
@@ -160,28 +214,30 @@
                     <a th:href="@{/producto/editar/{id}(id=${producto.id})}" class="text-decoration-none">
                       Editar el producto
                     </a>
+                    <br><small class="text-muted">Actualizar información, precio o stock</small>
                   </li>
                   <li class="mb-2">
                     <i class="bi bi-eye text-info me-2"></i>
                     <a th:href="@{/producto/detalles/{id}(id=${producto.id})}" class="text-decoration-none">
                       Revisar los detalles
                     </a>
+                    <br><small class="text-muted">Ver toda la información antes de decidir</small>
                   </li>
                 </ul>
               </div>
               <div class="col-md-6">
                 <ul class="list-unstyled">
                   <li class="mb-2">
-                    <i class="bi bi-arrow-left text-secondary me-2"></i>
-                    <a th:href="@{/producto}" class="text-decoration-none">
-                      Volver al listado
-                    </a>
+                    <i class="bi bi-box text-secondary me-2"></i>
+                    <span class="text-muted">Reducir stock a 0</span>
+                    <br><small class="text-muted">Mantener el producto pero marcarlo como no disponible</small>
                   </li>
                   <li class="mb-2">
                     <i class="bi bi-plus-circle text-success me-2"></i>
                     <a th:href="@{/producto/crear}" class="text-decoration-none">
-                      Crear un nuevo producto
+                      Crear un producto similar
                     </a>
+                    <br><small class="text-muted">Usar este como referencia para uno nuevo</small>
                   </li>
                 </ul>
               </div>
@@ -207,6 +263,11 @@
         if (this.checked) {
           deleteBtn.classList.remove('btn-danger');
           deleteBtn.classList.add('btn-danger');
+          deleteBtn.innerHTML = '<i class="bi bi-trash me-2"></i>¡Eliminar Ahora!';
+          deleteBtn.classList.add('shadow');
+        } else {
+          deleteBtn.innerHTML = '<i class="bi bi-trash me-2"></i>Eliminar Definitivamente';
+          deleteBtn.classList.remove('shadow');
         }
       });
 
@@ -219,21 +280,16 @@
         }
 
         const productName = /*[[${producto.nombre}]]*/ 'este producto';
-        const confirmMessage = `¿Está completamente seguro de que desea eliminar "${productName}"?\n\nEsta acción NO se puede deshacer.`;
+        const stock = /*[[${producto.stock}]]*/ 0;
+
+        let confirmMessage = `¿Está completamente seguro de que desea eliminar "${productName}"?\n\nEsta acción NO se puede deshacer.`;
+
+        if (stock > 0) {
+          confirmMessage += `\n\n⚠️ ADVERTENCIA: Este producto tiene ${stock} unidades en stock que también se perderán.`;
+        }
 
         if (!confirm(confirmMessage)) {
           e.preventDefault();
-        }
-      });
-
-      // Efecto visual en el botón cuando está habilitado
-      confirmCheckbox.addEventListener('change', function() {
-        if (this.checked) {
-          deleteBtn.classList.add('shadow');
-          deleteBtn.innerHTML = '<i class="bi bi-trash me-2"></i>¡Eliminar Ahora!';
-        } else {
-          deleteBtn.classList.remove('shadow');
-          deleteBtn.innerHTML = '<i class="bi bi-trash me-2"></i>Eliminar Definitivamente';
         }
       });
     });

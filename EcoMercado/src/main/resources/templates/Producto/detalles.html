@@ -70,6 +70,16 @@
                       Nombre del Producto
                     </h2>
 
+                    <!-- DESCRIPCIÓN -->
+                    <div class="mb-4" th:if="${producto.descripcion != null and !producto.descripcion.isEmpty()}">
+                      <h5 class="text-muted mb-2">
+                        <i class="bi bi-card-text me-2"></i>Descripción
+                      </h5>
+                      <p class="text-dark border-start border-primary border-3 ps-3" th:text="${producto.descripcion}">
+                        Descripción del producto...
+                      </p>
+                    </div>
+
                     <!-- PRECIO -->
                     <div class="mb-4">
                       <h5 class="text-muted mb-2">
@@ -80,49 +90,99 @@
                       </h3>
                     </div>
 
-                    <!-- INFORMACIÓN ADICIONAL -->
-                    <div class="row">
-                      <div class="col-12">
-                        <table class="table table-borderless">
-                          <tbody>
-                          <tr>
-                            <td class="fw-bold text-muted ps-0">
-                              <i class="bi bi-hash me-2"></i>ID del Producto:
-                            </td>
-                            <td th:text="${producto.id}">1</td>
-                          </tr>
-                          <tr>
-                            <td class="fw-bold text-muted ps-0">
-                              <i class="bi bi-tag me-2"></i>Nombre:
-                            </td>
-                            <td th:text="${producto.nombre}">Producto</td>
-                          </tr>
-                          <tr>
-                            <td class="fw-bold text-muted ps-0">
-                              <i class="bi bi-currency-dollar me-2"></i>Precio:
-                            </td>
-                            <td class="fw-bold text-success">
-                              $<span th:text="${#numbers.formatDecimal(producto.precio, 1, 2)}">0.00</span>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td class="fw-bold text-muted ps-0">
-                              <i class="bi bi-image me-2"></i>Imagen:
-                            </td>
-                            <td>
-                                <span th:if="${producto.img != null}" class="badge bg-success">
-                                  <i class="bi bi-check-circle me-1"></i>Disponible
-                                </span>
-                              <span th:if="${producto.img == null}" class="badge bg-secondary">
-                                  <i class="bi bi-x-circle me-1"></i>No disponible
-                                </span>
-                            </td>
-                          </tr>
-                          </tbody>
-                        </table>
+                    <!-- STOCK -->
+                    <div class="mb-4">
+                      <h5 class="text-muted mb-2">
+                        <i class="bi bi-box me-2"></i>Stock Disponible
+                      </h5>
+                      <div class="d-flex align-items-center">
+                        <h4 class="mb-0 me-3"
+                            th:class="${producto.stock > 0} ? 'text-success' : 'text-danger'"
+                            th:text="${producto.stock}">0</h4>
+                        <span th:if="${producto.stock > 10}" class="badge bg-success">
+                          <i class="bi bi-check-circle me-1"></i>Bien Surtido
+                        </span>
+                        <span th:if="${producto.stock > 0 and producto.stock <= 10}" class="badge bg-warning text-dark">
+                          <i class="bi bi-exclamation-triangle me-1"></i>Stock Bajo
+                        </span>
+                        <span th:if="${producto.stock == 0}" class="badge bg-danger">
+                          <i class="bi bi-x-circle me-1"></i>Agotado
+                        </span>
                       </div>
+                      <small class="text-muted">unidades disponibles</small>
                     </div>
 
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- INFORMACIÓN DETALLADA EN TABLA -->
+            <div class="row mt-4">
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">
+                      <i class="bi bi-list-ul me-2"></i>Información Completa
+                    </h5>
+                  </div>
+                  <div class="card-body">
+                    <div class="table-responsive">
+                      <table class="table table-hover">
+                        <tbody>
+                        <tr>
+                          <td class="fw-bold text-muted" style="width: 25%;">
+                            <i class="bi bi-hash me-2"></i>ID del Producto:
+                          </td>
+                          <td th:text="${producto.id}">1</td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold text-muted">
+                            <i class="bi bi-tag me-2"></i>Nombre:
+                          </td>
+                          <td class="fw-bold" th:text="${producto.nombre}">Producto</td>
+                        </tr>
+                        <tr th:if="${producto.descripcion != null and !producto.descripcion.isEmpty()}">
+                          <td class="fw-bold text-muted">
+                            <i class="bi bi-card-text me-2"></i>Descripción:
+                          </td>
+                          <td th:text="${producto.descripcion}">Descripción del producto</td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold text-muted">
+                            <i class="bi bi-currency-dollar me-2"></i>Precio:
+                          </td>
+                          <td class="fw-bold text-success">
+                            $<span th:text="${#numbers.formatDecimal(producto.precio, 1, 2)}">0.00</span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold text-muted">
+                            <i class="bi bi-box me-2"></i>Stock:
+                          </td>
+                          <td>
+                            <span th:text="${producto.stock}">0</span> unidades
+                            <span th:if="${producto.stock > 10}" class="badge bg-success ms-2">Bien Surtido</span>
+                            <span th:if="${producto.stock > 0 and producto.stock <= 10}" class="badge bg-warning text-dark ms-2">Stock Bajo</span>
+                            <span th:if="${producto.stock == 0}" class="badge bg-danger ms-2">Agotado</span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold text-muted">
+                            <i class="bi bi-image me-2"></i>Imagen:
+                          </td>
+                          <td>
+                              <span th:if="${producto.img != null}" class="badge bg-success">
+                                <i class="bi bi-check-circle me-1"></i>Disponible
+                              </span>
+                            <span th:if="${producto.img == null}" class="badge bg-secondary">
+                                <i class="bi bi-x-circle me-1"></i>No disponible
+                              </span>
+                          </td>
+                        </tr>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -148,7 +208,7 @@
           </div>
         </div>
 
-        <!-- INFORMACIÓN ADICIONAL -->
+        <!-- INFORMACIÓN DEL SISTEMA -->
         <div class="card border-secondary">
           <div class="card-header bg-secondary text-white">
             <h6 class="mb-0">
@@ -172,8 +232,16 @@
                     <span class="badge bg-success me-2">Activo</span>
                     El producto está disponible en el sistema
                   </li>
+                  <li th:if="${producto.stock > 0}">
+                    <span class="badge bg-info me-2">Con Stock</span>
+                    <span th:text="${producto.stock}">0</span> unidades disponibles
+                  </li>
+                  <li th:if="${producto.stock == 0}">
+                    <span class="badge bg-warning text-dark me-2">Sin Stock</span>
+                    Necesita reabastecimiento
+                  </li>
                   <li th:if="${producto.img != null}">
-                    <span class="badge bg-info me-2">Con Imagen</span>
+                    <span class="badge bg-success me-2">Con Imagen</span>
                     Tiene imagen asociada
                   </li>
                   <li th:if="${producto.img == null}">
