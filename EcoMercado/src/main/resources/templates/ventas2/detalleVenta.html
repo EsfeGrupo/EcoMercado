@@ -1,0 +1,92 @@
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="/layouts/_mainLayout">
+
+<div layout:fragment="content">
+    <div class="container my-4">
+        <h2 class="mb-4 text-center text-success fw-bold">Detalle de Venta</h2>
+
+        <!-- Formulario añadir producto -->
+        <form th:action="@{/carrito}" method="post" class="d-flex gap-3 flex-wrap mb-4">
+            <div class="flex-grow-1">
+                <label>Producto:</label>
+                <select name="idProducto" required class="form-select">
+                    <option value="" disabled selected>Seleccione un producto</option>
+                    <option th:each="prod : ${productos}" th:value="${prod.id}"
+                            th:text="${prod.nombre + ' (Stock: ' + prod.stock + ')'}"></option>
+                </select>
+            </div>
+            <div class="flex-grow-1">
+                <label>Cantidad:</label>
+                <input type="number" name="cantidad" min="1" required class="form-control" />
+            </div>
+            <div class="flex-grow-1">
+                <label>Precio Unitario:</label>
+                <input type="number" name="precioUnitario" step="0.01" min="0" required class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-success">Añadir Producto</button>
+        </form>
+
+        <!-- Tabla de productos -->
+        <table class="table table-bordered">
+            <thead class="table-dark">
+            <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio Unitario</th>
+                <th>Subtotal</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="detalle : ${detalles}">
+                <td>
+                    <span th:each="p : ${productos}" th:if="${p.id} == ${detalle.idProducto}" th:text="${p.nombre}"></span>
+                </td>
+                <td th:text="${detalle.cantidad}"></td>
+                <td th:text="${#numbers.formatDecimal(detalle.precioUnitario, 1, 2)}"></td>
+                <td th:text="${#numbers.formatDecimal(detalle.cantidad * detalle.precioUnitario, 1, 2)}"></td>
+                <td>
+                    <form th:action="@{/carrito/delete}" method="post" style="display:inline;">
+                        <input type="hidden" name="detalleId" th:value="${detalle.idProducto}" />
+                        <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!-- Total -->
+        <h4 class="text-primary">Total: $<span th:text="${#numbers.formatDecimal(total, 1, 2)}"></span></h4>
+
+        <!-- Finalizar compra -->
+        <form th:action="@{/carrito/guardar}" method="post" th:if="${!detalles.isEmpty()}" class="mt-4">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label>Usuario *</label>
+                    <select name="idUsuario" class="form-select" readonly>
+                        <option th:value="${usuarioActual.id}" th:text="${usuarioActual.nombre}" selected></option>
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Método de Pago *</label>
+                    <select name="idTipoPago" class="form-select" required>
+                        <option value="" disabled selected>Seleccione método</option>
+                        <option th:each="tipoPago : ${tiposPago}" th:value="${tipoPago.id}" th:text="${tipoPago.metodoPago}"></option>
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Tarjeta de Crédito (Opcional)</label>
+                    <select name="idTarjetaCredito" class="form-select">
+                        <option value="">No usar tarjeta</option>
+                        <option th:each="tarjeta : ${tarjetasCredito}" th:value="${tarjeta.id}"
+                                th:text="${tarjeta.banco + ' - ' + tarjeta.nombreTitular + ' (' + tarjeta.numero + ')'}"></option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-success btn-lg mt-3">Procesar Venta</button>
+        </form>
+    </div>
+</div>
+</html>

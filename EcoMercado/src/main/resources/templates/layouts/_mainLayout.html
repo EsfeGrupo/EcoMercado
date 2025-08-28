@@ -163,10 +163,11 @@
                         Mis Productos
                     </a>
 
-                    <a class="nav-link" th:if="${session.rolUsuario == 'vendedor'}" th:href="@{/venta/index}">
+                    <a class="nav-link" th:if="${session.rolUsuario == 'vendedor'}" th:href="@{/ventas2}">
                         <div class="sb-nav-link-icon"><i class="fas fa-cash-register"></i></div>
                         Mis Ventas
                     </a>
+
 
                     <!-- SECCIÓN ACCESO (para usuarios no logueados) -->
                     <div class="sb-sidenav-menu-heading" th:if="${session.usuarioSession == null}">Acceso</div>
