@@ -96,7 +96,7 @@
             </div>
         </div>
 
-        <!-- Formulario de finalización de compra SIMPLIFICADO -->
+        <!-- Formulario de finalización de compra MEJORADO -->
         <div class="row mt-4" th:if="${!detalles.isEmpty()}">
             <div class="col-12">
                 <div class="card">
@@ -106,13 +106,15 @@
                     <div class="card-body">
                         <form th:action="@{/carrito/guardar}" method="post">
                             <div class="row">
-                                <!-- Usuario -->
+                                <!-- Usuario (Pre-seleccionado y deshabilitado) -->
                                 <div class="col-md-4 mb-3">
                                     <label for="idUsuario" class="form-label">Usuario *</label>
-                                    <select name="idUsuario" id="idUsuario" required class="form-select">
-                                        <option value="" disabled selected>Seleccione un usuario</option>
-                                        <option th:each="usuario : ${usuarios}" th:value="${usuario.id}" th:text="${usuario.nombre}"></option>
+                                    <select name="idUsuario" id="idUsuario" required class="form-select" readonly>
+                                        <option th:value="${usuarioActual.id}"
+                                                th:text="${usuarioActual.nombre}"
+                                                selected></option>
                                     </select>
+                                    <div class="form-text">Usuario logueado actualmente</div>
                                 </div>
 
                                 <!-- Tipo de Pago -->
@@ -124,15 +126,23 @@
                                     </select>
                                 </div>
 
-                                <!-- Tarjeta de Crédito (SIEMPRE VISIBLE, OPCIONAL) -->
+                                <!-- Tarjeta de Crédito (Solo tarjetas del usuario logueado) -->
                                 <div class="col-md-4 mb-3">
                                     <label for="idTarjetaCredito" class="form-label">Tarjeta de Crédito (Opcional)</label>
                                     <select name="idTarjetaCredito" id="idTarjetaCredito" class="form-select">
                                         <option value="">No usar tarjeta</option>
                                         <option th:each="tarjeta : ${tarjetasCredito}" th:value="${tarjeta.id}"
-                                                th:text="${tarjeta.banco + ' - ' + tarjeta.nombreTitular}"></option>
+                                                th:text="${tarjeta.banco + ' - ' + tarjeta.nombreTitular + ' (' + tarjeta.numero + ')'}"></option>
                                     </select>
-                                    <div class="form-text">Solo llenar si el pago es con tarjeta</div>
+                                    <div class="form-text">
+                                        <span th:if="${tarjetasCredito.isEmpty()}" class="text-warning">
+                                            <i class="fas fa-exclamation-triangle"></i> No tienes tarjetas registradas.
+                                            <a th:href="@{/tarjetaCredito/create}" target="_blank">Añadir tarjeta</a>
+                                        </span>
+                                        <span th:unless="${tarjetasCredito.isEmpty()}" class="text-muted">
+                                            Solo se muestran tus tarjetas registradas
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -151,21 +161,39 @@
         </div>
     </div>
 </div>
-        <!-- JavaScript SOLO para autocompletar precio -->
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const productos = /*[[${productos}]]*/ [];
-                const select = document.querySelector('select[name="idProducto"]');
-                const precioInput = document.querySelector('input[name="precioUnitario"]');
 
-                if (select && precioInput) {
-                    select.addEventListener('change', function() {
-                        const prodId = parseInt(this.value);
-                        const prod = productos.find(p => p.id === prodId);
-                        if (prod) {
-                            precioInput.value = prod.precio;
-                        }
-                    });
+<!-- JavaScript para autocompletar precio y manejar el formulario -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const productos = /*[[${productos}]]*/ [];
+        const select = document.querySelector('select[name="idProducto"]');
+        const precioInput = document.querySelector('input[name="precioUnitario"]');
+        const usuarioSelect = document.getElementById('idUsuario');
+
+        // Autocompletar precio del producto
+        if (select && precioInput) {
+            select.addEventListener('change', function() {
+                const prodId = parseInt(this.value);
+                const prod = productos.find(p => p.id === prodId);
+                if (prod) {
+                    precioInput.value = prod.precio;
                 }
             });
-        </script>
+        }
+
+        // Hacer que el select de usuario sea readonly visualmente
+        if (usuarioSelect) {
+            usuarioSelect.style.backgroundColor = '#e9ecef';
+            usuarioSelect.style.cursor = 'not-allowed';
+
+            // Prevenir cambios en el usuario
+            usuarioSelect.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+            });
+            usuarioSelect.addEventListener('keydown', function(e) {
+                e.preventDefault();
+            });
+        }
+    });
+</script>
+</html>

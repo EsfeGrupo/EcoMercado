@@ -20,6 +20,7 @@ import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.servlet.http.HttpSession;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -53,15 +54,33 @@ public class DetalleVentaController {
     }
 
     @GetMapping
-    public String verCarrito(Model model, @ModelAttribute("carritoTemporal") List<DetalleVenta> carrito) {
+    public String verCarrito(Model model, @ModelAttribute("carritoTemporal") List<DetalleVenta> carrito,
+                             HttpSession session) {
+        // Obtener el usuario de la sesión
+        Usuario usuarioActual = (Usuario) session.getAttribute("usuarioSession");
+        if (usuarioActual == null) {
+            return "redirect:/login";
+        }
+
         model.addAttribute("productos", productoRepository.findAll());
         model.addAttribute("detalles", carrito);
         model.addAttribute("venta", null); // No hay venta aún
 
         // Agregar datos para el formulario de finalización de compra
-        model.addAttribute("usuarios", usuarioRepository.findAll());
+        model.addAttribute("usuarioActual", usuarioActual); // Usuario logueado
         model.addAttribute("tiposPago", tipoPagoRepository.findAll());
-        model.addAttribute("tarjetasCredito", tarjetaCreditoRepository.findAll());
+
+        // Filtrar tarjetas solo del usuario logueado
+        List<TarjetaCredito> tarjetasUsuario = tarjetaCreditoRepository.findByUsuarioId(usuarioActual.getId());
+
+        // Enmascarar números de tarjeta para mostrar
+        tarjetasUsuario.forEach(tarjeta -> {
+            if (tarjeta.getNumeroEncriptado() != null && tarjeta.getNumeroEncriptado().length() >= 4) {
+                tarjeta.setNumero("**** **** **** " + tarjeta.getNumeroEncriptado().substring(tarjeta.getNumeroEncriptado().length() - 4));
+            }
+        });
+
+        model.addAttribute("tarjetasCredito", tarjetasUsuario);
 
         double total = carrito.stream().mapToDouble(d -> d.getPrecioUnitario() * d.getCantidad()).sum();
         model.addAttribute("total", total);
@@ -74,7 +93,14 @@ public class DetalleVentaController {
             @RequestParam("cantidad") Integer cantidad,
             @RequestParam("precioUnitario") Float precioUnitario,
             @ModelAttribute("carritoTemporal") List<DetalleVenta> carrito,
-            RedirectAttributes attributes) {
+            RedirectAttributes attributes,
+            HttpSession session) {
+
+        // Verificar sesión
+        Usuario usuarioActual = (Usuario) session.getAttribute("usuarioSession");
+        if (usuarioActual == null) {
+            return "redirect:/login";
+        }
 
         Producto producto = productoRepository.findById(idProducto).orElse(null);
         if (producto == null) {
@@ -118,10 +144,23 @@ public class DetalleVentaController {
             @RequestParam(value = "idTarjetaCredito", required = false) Integer idTarjetaCredito,
             @ModelAttribute("carritoTemporal") List<DetalleVenta> carrito,
             RedirectAttributes attributes,
-            SessionStatus sessionStatus) {
+            SessionStatus sessionStatus,
+            HttpSession session) {
+
+        // Verificar sesión
+        Usuario usuarioActual = (Usuario) session.getAttribute("usuarioSession");
+        if (usuarioActual == null) {
+            return "redirect:/login";
+        }
 
         if (carrito.isEmpty()) {
             attributes.addFlashAttribute("error", "El carrito está vacío");
+            return "redirect:/carrito";
+        }
+
+        // Verificar que el usuario seleccionado sea el usuario logueado
+        if (!idUsuario.equals(usuarioActual.getId())) {
+            attributes.addFlashAttribute("error", "No puede realizar compras para otros usuarios");
             return "redirect:/carrito";
         }
 
@@ -147,12 +186,18 @@ public class DetalleVentaController {
                 return "redirect:/carrito";
             }
 
-            // Validar tarjeta (opcional - acepta null o tarjeta válida)
+            // Validar tarjeta (opcional - acepta null o tarjeta válida del usuario)
             TarjetaCredito tarjetaCredito = null;
             if (idTarjetaCredito != null && idTarjetaCredito > 0) {
                 tarjetaCredito = tarjetaCreditoRepository.findById(idTarjetaCredito).orElse(null);
                 if (tarjetaCredito == null) {
                     attributes.addFlashAttribute("error", "Tarjeta de crédito no encontrada");
+                    return "redirect:/carrito";
+                }
+
+                // Verificar que la tarjeta pertenezca al usuario logueado
+                if (!tarjetaCredito.getUsuario().getId().equals(usuarioActual.getId())) {
+                    attributes.addFlashAttribute("error", "No puede usar tarjetas de otros usuarios");
                     return "redirect:/carrito";
                 }
             }
@@ -225,7 +270,14 @@ public class DetalleVentaController {
     @PostMapping("/delete")
     public String eliminarProductoDelCarrito(@RequestParam("detalleId") Integer detalleId,
                                              @ModelAttribute("carritoTemporal") List<DetalleVenta> carrito,
-                                             RedirectAttributes attributes) {
+                                             RedirectAttributes attributes,
+                                             HttpSession session) {
+        // Verificar sesión
+        Usuario usuarioActual = (Usuario) session.getAttribute("usuarioSession");
+        if (usuarioActual == null) {
+            return "redirect:/login";
+        }
+
         carrito.removeIf(d -> d.getIdProducto().equals(detalleId));
         attributes.addFlashAttribute("msg", "Producto eliminado del carrito");
         return "redirect:/carrito";
@@ -235,7 +287,14 @@ public class DetalleVentaController {
     public String actualizarCantidad(@RequestParam("detalleId") Integer detalleId,
                                      @RequestParam("accion") String accion,
                                      @ModelAttribute("carritoTemporal") List<DetalleVenta> carrito,
-                                     RedirectAttributes attributes) {
+                                     RedirectAttributes attributes,
+                                     HttpSession session) {
+        // Verificar sesión
+        Usuario usuarioActual = (Usuario) session.getAttribute("usuarioSession");
+        if (usuarioActual == null) {
+            return "redirect:/login";
+        }
+
         for (DetalleVenta d : carrito) {
             if (d.getIdProducto().equals(detalleId)) {
                 if ("incrementar".equals(accion)) {
