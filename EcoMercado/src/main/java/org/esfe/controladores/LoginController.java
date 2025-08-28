@@ -93,7 +93,7 @@ public class LoginController {
     @GetMapping("/registro-vendedor")
     public String registerVendedorForm(Model model) {
         Usuario usuario = new Usuario();
-        Rol rolVendedor = rolService.obtenerPorId(3); // ID 2 = Vendedor
+        Rol rolVendedor = rolService.obtenerPorId(2); // ID 2 = Vendedor
         usuario.setRol(rolVendedor);
         model.addAttribute("usuario", usuario);
         return "auth/registro-vendedor";
@@ -103,7 +103,7 @@ public class LoginController {
     public String processRegisterVendedor(Usuario usuario, RedirectAttributes redirectAttributes) {
         try {
             usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
-            Rol rolVendedor = rolService.obtenerPorId(3);
+            Rol rolVendedor = rolService.obtenerPorId(2);
             usuario.setRol(rolVendedor);
             usuarioService.guardar(usuario);
             redirectAttributes.addFlashAttribute("mensajeExito", "¡Registro de vendedor exitoso! Ahora puedes iniciar sesión.");

@@ -162,4 +162,5 @@ public class Ventas2Controller {
         return "redirect:/ventas2/detalle/" + venta.getId();
     }
 
+
 }

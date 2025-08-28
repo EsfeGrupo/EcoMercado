@@ -254,10 +254,18 @@ public class DetalleVentaController {
 
             // Limpiar carrito
             sessionStatus.setComplete();
+            attributes.addFlashAttribute("success", "Venta procesada exitosamente. Correlativo: " + correlativo);
 
-            attributes.addFlashAttribute("success",
-                    "Venta procesada exitosamente. Correlativo: " + correlativo);
-            return "redirect:/ventas";
+            // Redirección según rol
+            String rol = usuarioActual.getRol().getNombre();
+            if ("ADMIN".equalsIgnoreCase(rol)) {
+                return "redirect:/ventas";      // admin
+            } else if ("VENDEDOR".equalsIgnoreCase(rol)) {
+                return "redirect:/ventas2";     // vendedor
+            } else {
+                return "redirect:/login";       // cualquier otro caso
+            }
+
 
         } catch (Exception e) {
             System.err.println("ERROR en guardarCarrito: " + e.getMessage());
