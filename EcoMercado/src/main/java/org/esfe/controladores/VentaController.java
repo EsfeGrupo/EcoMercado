@@ -19,6 +19,7 @@ import org.esfe.servicios.interfaces.IVentaService;
 import org.esfe.servicios.interfaces.IDetalleVentaService;
 import org.esfe.repositorios.IProductoRepository;
 
+import java.math.BigDecimal;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -141,18 +142,83 @@ public class VentaController {
         if(result.hasErrors()){
             model.addAttribute("venta", venta);
             model.addAttribute("detalles", venta.getDetalleventas());
+            // Agregar las listas necesarias para los selects en caso de error
+            model.addAttribute("usuarios", usuarioRepository.findAll());
+            model.addAttribute("tiposPago", tipoPagoRepository.findAll());
+            model.addAttribute("tarjetasCredito", tarjetaCreditoRepository.findAll());
+            model.addAttribute("productos", productoRepository.findAll());
             attributes.addFlashAttribute("error", "No se pudo guardar la venta debido a un error.");
-            return "venta/create";
+            return venta.getId() != null ? "venta/edit" : "venta/create";
         }
-        //venta.setEstado("Pendiente"); // Estado pendiente por defecto
-        Venta ventaGuardada = ventaService.crearOEditar(venta);
-        if(venta.getDetalleventas() != null){
-            for(DetalleVenta detalle : venta.getDetalleventas()){
-                detalle.setVenta(ventaGuardada);
-                detalleVentaService.crearOEditar(detalle);
+
+        try {
+            boolean isUpdate = venta.getId() != null;
+            Venta ventaGuardada;
+
+            if (isUpdate) {
+                // Para actualizaciones, obtener la venta existente y actualizar solo campos específicos
+                Optional<Venta> ventaExistenteOpt = ventaService.obtenerPorId(venta.getId());
+                if (ventaExistenteOpt.isEmpty()) {
+                    attributes.addFlashAttribute("error", "La venta no existe o fue eliminada");
+                    return "redirect:/ventas";
+                }
+
+                Venta ventaExistente = ventaExistenteOpt.get();
+
+                // Actualizar solo los campos editables desde la vista
+                ventaExistente.setEstado(venta.getEstado());
+                ventaExistente.setUsuario(venta.getUsuario());
+                ventaExistente.setTipoPago(venta.getTipoPago());
+                ventaExistente.setTarjetaCredito(venta.getTarjetaCredito());
+
+                // Recalcular el total basado en los detalles existentes en la BD
+                List<DetalleVenta> detallesExistentes = detalleVentaService.obtenerPorVentaId(venta.getId());
+                BigDecimal totalCalculado = BigDecimal.ZERO;
+                for(DetalleVenta detalle : detallesExistentes){
+                    if(detalle.getCantidad() != null && detalle.getPrecioUnitario() != null) {
+                        BigDecimal cantidad = BigDecimal.valueOf(detalle.getCantidad());
+                        BigDecimal precio = BigDecimal.valueOf(detalle.getPrecioUnitario());
+                        totalCalculado = totalCalculado.add(cantidad.multiply(precio));
+                    }
+                }
+                ventaExistente.setTotal(totalCalculado);
+
+                // Guardar la venta actualizada
+                ventaGuardada = ventaService.crearOEditar(ventaExistente);
+
+            } else {
+                // Para nuevas ventas, procesar todo normalmente
+                if(venta.getDetalleventas() != null && !venta.getDetalleventas().isEmpty()){
+                    BigDecimal totalCalculado = BigDecimal.ZERO;
+                    for(DetalleVenta detalle : venta.getDetalleventas()){
+                        if(detalle.getCantidad() != null && detalle.getPrecioUnitario() != null) {
+                            BigDecimal cantidad = BigDecimal.valueOf(detalle.getCantidad());
+                            BigDecimal precio = BigDecimal.valueOf(detalle.getPrecioUnitario());
+                            totalCalculado = totalCalculado.add(cantidad.multiply(precio));
+                        }
+                    }
+                    venta.setTotal(totalCalculado);
+                }
+
+                ventaGuardada = ventaService.crearOEditar(venta);
+
+                // Procesar los detalles para nuevas ventas
+                if(venta.getDetalleventas() != null && !venta.getDetalleventas().isEmpty()){
+                    for(DetalleVenta detalle : venta.getDetalleventas()){
+                        detalle.setVenta(ventaGuardada);
+                        detalleVentaService.crearOEditar(detalle);
+                    }
+                }
             }
+
+            String mensaje = isUpdate ? "Venta actualizada correctamente" : "Venta creada correctamente";
+            attributes.addFlashAttribute("msg", mensaje);
+
+        } catch (Exception e) {
+            attributes.addFlashAttribute("error", "Error al guardar la venta: " + e.getMessage());
+            e.printStackTrace(); // Para debugging
         }
-        attributes.addFlashAttribute("msg", "Venta y detalles creados correctamente");
+
         return "redirect:/ventas";
     }
 

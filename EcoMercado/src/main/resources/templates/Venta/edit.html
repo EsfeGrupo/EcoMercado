@@ -139,22 +139,23 @@
                                             <tbody>
                                             <tr th:each="detalle, iterStat : ${detalles}">
                                                 <td>
-                                                    <input type="hidden" th:name="'detalleventas[' + ${iterStat.index} + '].id'" th:value="${detalle.id}">
-                                                    <input type="hidden" th:name="'detalleventas[' + ${iterStat.index} + '].idProducto'" th:value="${detalle.idProducto}">
+                                                    <!-- REMOVER CAMPOS HIDDEN PROBLEMÁTICOS - Solo mostrar productos sin enviar datos -->
+                                                    <input type="hidden" th:value="${detalle.id}">
+                                                    <input type="hidden" th:value="${detalle.idProducto}">
+                                                    <input type="hidden" th:value="${venta.id}">
+
                                                     <span th:each="p : ${productos}" th:if="${p.id} == ${detalle.idProducto}">
-                                                            <input type="text" class="form-control bg-light" readonly th:value="${p.nombre}">
-                                                        </span>
+                            <input type="text" class="form-control bg-light" readonly th:value="${p.nombre}">
+                        </span>
                                                 </td>
                                                 <td>
                                                     <input type="number" class="form-control text-center bg-light" readonly
-                                                           th:name="'detalleventas[' + ${iterStat.index} + '].cantidad'"
                                                            th:value="${detalle.cantidad}">
                                                 </td>
                                                 <td>
                                                     <div class="input-group">
                                                         <span class="input-group-text">$</span>
                                                         <input type="number" class="form-control text-end bg-light" readonly
-                                                               th:name="'detalleventas[' + ${iterStat.index} + '].precioUnitario'"
                                                                th:value="${detalle.precioUnitario}" step="0.01">
                                                     </div>
                                                 </td>
