@@ -57,9 +57,6 @@
                 <div class="col" th:each="tarjeta : ${tarjetas}">
                     <div class="card h-100 border-success shadow-lg">
                         <div class="card-body d-flex flex-column">
-                            <h6 class="card-subtitle mb-2 text-primary fw-bold">
-                                Usuario: <span th:text="${tarjeta.usuario.nombre}"></span>
-                            </h6>
                             <h5 class="card-title fw-bold text-success" th:text="${tarjeta.nombreTitular}"></h5>
                             <h6 class="card-subtitle mb-2 text-muted">Número: <span th:text="${tarjeta.numero}"></span></h6>
                             <h6 class="card-subtitle mb-2 text-muted">Banco: <span th:text="${tarjeta.banco}"></span></h6>

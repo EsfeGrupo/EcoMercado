@@ -31,9 +31,6 @@
               <dt class="col-sm-3 fw-bold text-success">Banco</dt>
               <dd class="col-sm-9" th:text="${tarjetaCredito.banco}"></dd>
               
-              <dt class="col-sm-3 fw-bold text-success">Usuario</dt>
-              <dd class="col-sm-9" th:text="${tarjetaCredito.usuario.nombre}"></dd>
-              
               <!-- Mostrar alerta si la tarjeta está expirada -->
               <div th:if="${tarjetaCredito.fechaExpiracion.isBefore(T(java.time.LocalDate).now())}" 
                    class="col-12 mt-3">

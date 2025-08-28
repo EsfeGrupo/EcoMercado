@@ -12,7 +12,10 @@ public interface ITarjetaCreditoService {
 
     List<TarjetaCredito> obtenerTodos();
 
-    Page<TarjetaCredito> findByNombreTitularContainingIgnoreCaseAndBancoContainingIgnoreCaseOrderByIdDesc(String nombreTitular, String banco, Pageable pageable);
+    Page<TarjetaCredito> findByUsuarioId(Integer usuarioId, Pageable pageable);
+    
+    Page<TarjetaCredito> findByUsuarioIdAndNombreTitularContainingIgnoreCaseAndBancoContainingIgnoreCaseOrderByIdDesc(
+        Integer usuarioId, String nombreTitular, String banco, Pageable pageable);
 
     TarjetaCredito obtenerPorId(Integer id);
 

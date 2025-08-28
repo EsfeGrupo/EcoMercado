@@ -54,17 +54,6 @@
                 <input type="text" class="form-control" th:field="*{banco}" id="banco" placeholder="Escriba el banco de la tarjeta" required>
               </div>
              
-              <!-- Campo: Usuario -->
-              <div class="mb-3">
-                <label for="usuario" class="form-label fw-bold">Usuario</label>
-                <select class="form-control" th:field="*{usuario}" id="usuario" required>
-                  <option th:each="usuario : ${usuarios}"
-                        th:value="${usuario.id}"
-                        th:text="${usuario.nombre}">
-                  </option>
-                </select>
-              </div>
-             
               <hr class="my-4">
              
               <div class="d-flex justify-content-end gap-2">

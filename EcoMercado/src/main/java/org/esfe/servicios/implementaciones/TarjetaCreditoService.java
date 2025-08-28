@@ -36,10 +36,16 @@ public class TarjetaCreditoService implements ITarjetaCreditoService {
 
 
     @Override
-    public Page<TarjetaCredito> findByNombreTitularContainingIgnoreCaseAndBancoContainingIgnoreCaseOrderByIdDesc(String nombreTitular, String banco, Pageable pageable) {
-        return tarjetaCreditoRepository.findByNombreTitularContainingIgnoreCaseAndBancoContainingIgnoreCaseOrderByIdDesc(nombreTitular, banco, pageable);
+    public Page<TarjetaCredito> findByUsuarioId(Integer usuarioId, Pageable pageable) {
+        return tarjetaCreditoRepository.findByUsuarioId(usuarioId, pageable);
     }
 
+    @Override
+    public Page<TarjetaCredito> findByUsuarioIdAndNombreTitularContainingIgnoreCaseAndBancoContainingIgnoreCaseOrderByIdDesc(
+            Integer usuarioId, String nombreTitular, String banco, Pageable pageable) {
+        return tarjetaCreditoRepository.findByUsuarioIdAndNombreTitularContainingIgnoreCaseAndBancoContainingIgnoreCaseOrderByIdDesc(
+            usuarioId, nombreTitular, banco, pageable);
+    }
 
     @Override
     public TarjetaCredito obtenerPorId(Integer id) {

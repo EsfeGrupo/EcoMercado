@@ -6,8 +6,9 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import org.esfe.modelos.Usuario;
 
 import org.esfe.modelos.TarjetaCredito;
 import org.esfe.servicios.interfaces.ITarjetaCreditoService;
@@ -38,7 +39,18 @@ public class TarjetaCreditoController {
     private IUsuarioService usuarioService;
 
     @GetMapping
-    public String index(Model model, @RequestParam("page") Optional<Integer> page, @RequestParam("size") Optional<Integer> size, @RequestParam("nombreTitular") Optional<String> nombreTitular, @RequestParam("banco") Optional<String> banco) {
+    public String index(Model model, HttpSession session,
+                       @RequestParam("page") Optional<Integer> page,
+                       @RequestParam("size") Optional<Integer> size,
+                       @RequestParam("nombreTitular") Optional<String> nombreTitular,
+                       @RequestParam("banco") Optional<String> banco) {
+                           
+        // Obtener el usuario de la sesión
+        Usuario usuarioActual = (Usuario) session.getAttribute("usuarioSession");
+        if (usuarioActual == null) {
+            return "redirect:/login";
+        }
+
         int currentPage = page.orElse(1) - 1;
         int pageSize = size.orElse(5);
         Sort sortByIdDesc = Sort.by(Sort.Direction.DESC, "id");
@@ -46,9 +58,9 @@ public class TarjetaCreditoController {
         String nombreTitularSearch = nombreTitular.orElse("");
         String bancoSearch = banco.orElse("");
 
-        // Note: The search will now be based on the encrypted number in the database.
-        // A better approach would be to only search on non-sensitive data, but for this example, we'll continue searching on the number.
-        Page<TarjetaCredito> tarjetas = tarjetaCreditoService.findByNombreTitularContainingIgnoreCaseAndBancoContainingIgnoreCaseOrderByIdDesc(nombreTitularSearch, bancoSearch, pageable);
+        // Buscar solo las tarjetas del usuario actual
+        Page<TarjetaCredito> tarjetas = tarjetaCreditoService.findByUsuarioIdAndNombreTitularContainingIgnoreCaseAndBancoContainingIgnoreCaseOrderByIdDesc(
+            usuarioActual.getId(), nombreTitularSearch, bancoSearch, pageable);
 
         // Mask the credit card number for display
         tarjetas.getContent().forEach(tarjeta -> {
@@ -70,19 +82,34 @@ public class TarjetaCreditoController {
     }
 
     @GetMapping("/create")
-    public String create(Model model) {
-        model.addAttribute("usuarios", usuarioService.obtenerTodos());
-        model.addAttribute("tarjetaCredito", new TarjetaCredito());
+    public String create(Model model, HttpSession session) {
+        Usuario usuarioActual = (Usuario) session.getAttribute("usuarioSession");
+        if (usuarioActual == null) {
+            return "redirect:/login";
+        }
+
+        TarjetaCredito tarjetaCredito = new TarjetaCredito();
+        tarjetaCredito.setUsuario(usuarioActual);
+        model.addAttribute("tarjetaCredito", tarjetaCredito);
         return "tarjetaCredito/create";
     }
 
     @PostMapping("/save")
-    public String save(@Valid TarjetaCredito tarjetaCredito, BindingResult result, Model model, RedirectAttributes attributes) {
+    public String save(@Valid TarjetaCredito tarjetaCredito, BindingResult result, 
+                      Model model, RedirectAttributes attributes, HttpSession session) {
+        Usuario usuarioActual = (Usuario) session.getAttribute("usuarioSession");
+        if (usuarioActual == null) {
+            return "redirect:/login";
+        }
+
         if (result.hasErrors()) {
-        model.addAttribute("tarjetaCredito", tarjetaCredito);
-        attributes.addFlashAttribute("error", "No se pudo guardar debido a un error.");
-        return "tarjetaCredito/create";
-    }
+            model.addAttribute("tarjetaCredito", tarjetaCredito);
+            attributes.addFlashAttribute("error", "No se pudo guardar debido a un error.");
+            return "tarjetaCredito/create";
+        }
+
+        // Asignar el usuario actual a la tarjeta
+        tarjetaCredito.setUsuario(usuarioActual);
 
     // Lógica para encriptar
     if (tarjetaCredito.getNumero() != null && !tarjetaCredito.getNumero().isEmpty()) {
@@ -99,37 +126,80 @@ public class TarjetaCreditoController {
     }
 
     @GetMapping("/details/{id}")
-    public String details(@PathVariable("id") Integer id, Model model) {
-    TarjetaCredito tarjetaCredito = tarjetaCreditoService.obtenerPorId(id);
-    
-    // Mask the credit card number for display
-    if (tarjetaCredito.getNumeroEncriptado() != null && tarjetaCredito.getNumeroEncriptado().length() >= 4) {
-        tarjetaCredito.setNumero("**** **** **** " + 
-            tarjetaCredito.getNumeroEncriptado().substring(tarjetaCredito.getNumeroEncriptado().length() - 4));
-    }
-    
-    model.addAttribute("tarjetaCredito", tarjetaCredito);
-    return "tarjetaCredito/details";
+    public String details(@PathVariable("id") Integer id, Model model, HttpSession session) {
+        Usuario usuarioActual = (Usuario) session.getAttribute("usuarioSession");
+        if (usuarioActual == null) {
+            return "redirect:/login";
+        }
+
+        TarjetaCredito tarjetaCredito = tarjetaCreditoService.obtenerPorId(id);
+        
+        // Verificar que la tarjeta pertenezca al usuario actual
+        if (tarjetaCredito == null || !tarjetaCredito.getUsuario().getId().equals(usuarioActual.getId())) {
+            return "redirect:/tarjetaCredito";
+        }
+        
+        // Mask the credit card number for display
+        if (tarjetaCredito.getNumeroEncriptado() != null && tarjetaCredito.getNumeroEncriptado().length() >= 4) {
+            tarjetaCredito.setNumero("**** **** **** " + 
+                tarjetaCredito.getNumeroEncriptado().substring(tarjetaCredito.getNumeroEncriptado().length() - 4));
+        }
+        
+        model.addAttribute("tarjetaCredito", tarjetaCredito);
+        return "tarjetaCredito/details";
 }
 
     @GetMapping("/edit/{id}")
-    public String edit(@PathVariable("id") Integer id, Model model) {
+    public String edit(@PathVariable("id") Integer id, Model model, HttpSession session) {
+        Usuario usuarioActual = (Usuario) session.getAttribute("usuarioSession");
+        if (usuarioActual == null) {
+            return "redirect:/login";
+        }
+
         TarjetaCredito tarjetaCredito = tarjetaCreditoService.obtenerPorId(id);
-        model.addAttribute("usuarios", usuarioService.obtenerTodos());
+        
+        // Verificar que la tarjeta pertenezca al usuario actual
+        if (tarjetaCredito == null || !tarjetaCredito.getUsuario().getId().equals(usuarioActual.getId())) {
+            return "redirect:/tarjetaCredito";
+        }
+        
         model.addAttribute("tarjetaCredito", tarjetaCredito);
         return "tarjetaCredito/edit";
     }
 
     @GetMapping("/remove/{id}")
-    public String remove(@PathVariable("id") Integer id, Model model) {
+    public String remove(@PathVariable("id") Integer id, Model model, HttpSession session) {
+        Usuario usuarioActual = (Usuario) session.getAttribute("usuarioSession");
+        if (usuarioActual == null) {
+            return "redirect:/login";
+        }
+
         TarjetaCredito tarjetaCredito = tarjetaCreditoService.obtenerPorId(id);
+        
+        // Verificar que la tarjeta pertenezca al usuario actual
+        if (tarjetaCredito == null || !tarjetaCredito.getUsuario().getId().equals(usuarioActual.getId())) {
+            return "redirect:/tarjetaCredito";
+        }
+        
         model.addAttribute("tarjetaCredito", tarjetaCredito);
         return "tarjetaCredito/delete";
     }
 
     @PostMapping("/delete")
-    public String delete(TarjetaCredito tarjetaCredito, RedirectAttributes attributes) {
+    public String delete(TarjetaCredito tarjetaCredito, RedirectAttributes attributes, HttpSession session) {
+        Usuario usuarioActual = (Usuario) session.getAttribute("usuarioSession");
+        if (usuarioActual == null) {
+            return "redirect:/login";
+        }
+
         try {
+            // Verificar que la tarjeta pertenezca al usuario actual antes de eliminar
+            TarjetaCredito tarjetaExistente = tarjetaCreditoService.obtenerPorId(tarjetaCredito.getId());
+            if (tarjetaExistente == null || !tarjetaExistente.getUsuario().getId().equals(usuarioActual.getId())) {
+                attributes.addFlashAttribute("error", "No tiene permisos para eliminar esta tarjeta.");
+                return "redirect:/tarjetaCredito";
+            }
+
             tarjetaCreditoService.eliminarPorId(tarjetaCredito.getId());
             attributes.addFlashAttribute("msg", "Tarjeta de crédito eliminada correctamente");
         } catch (Exception e) {
