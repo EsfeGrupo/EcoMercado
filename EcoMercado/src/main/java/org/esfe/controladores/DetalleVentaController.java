@@ -147,7 +147,7 @@ public class DetalleVentaController {
                 return "redirect:/carrito";
             }
 
-            // Validar tarjeta (solo si se proporcionó un ID válido)
+            // Validar tarjeta (opcional - acepta null o tarjeta válida)
             TarjetaCredito tarjetaCredito = null;
             if (idTarjetaCredito != null && idTarjetaCredito > 0) {
                 tarjetaCredito = tarjetaCreditoRepository.findById(idTarjetaCredito).orElse(null);

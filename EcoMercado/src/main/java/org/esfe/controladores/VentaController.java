@@ -1,6 +1,7 @@
 package org.esfe.controladores;
 
 import org.esfe.modelos.Producto;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -157,21 +158,27 @@ public class VentaController {
 
     @GetMapping("/details/{id}")
     public String details(@PathVariable("id") Integer id, Model model){
-    Venta venta = ventaService.obtenerPorId(id).get();
-    List<DetalleVenta> detalles = detalleVentaService.obtenerPorVentaId(id);
-    model.addAttribute("venta", venta);
-    model.addAttribute("detalles", detalles);
-    model.addAttribute("detalleNuevo", new DetalleVenta());
-    return "venta/details";
+        Venta venta = ventaService.obtenerPorId(id).get();
+        List<DetalleVenta> detalles = detalleVentaService.obtenerPorVentaId(id);
+        List<Producto> productos = productoRepository.findAll(); // ← LÍNEA AÑADIDA
+
+        model.addAttribute("venta", venta);
+        model.addAttribute("detalles", detalles);
+        model.addAttribute("productos", productos); // ← LÍNEA AÑADIDA
+        model.addAttribute("detalleNuevo", new DetalleVenta());
+        return "venta/details";
     }
 
+    // 2. MÉTODO edit - MODIFICADO
     @GetMapping("/edit/{id}")
     public String edit(@PathVariable("id") Integer id, Model model){
         Venta venta = ventaService.obtenerPorId(id).get();
         List<DetalleVenta> detalles = detalleVentaService.obtenerPorVentaId(id);
+        List<Producto> productos = productoRepository.findAll(); // ← LÍNEA AÑADIDA
 
         model.addAttribute("venta", venta);
         model.addAttribute("detalles", detalles);
+        model.addAttribute("productos", productos); // ← LÍNEA AÑADIDA
         model.addAttribute("detalleNuevo", new DetalleVenta());
 
         // Agregar las listas necesarias para los selects
@@ -181,21 +188,51 @@ public class VentaController {
 
         return "venta/edit";
     }
-    @GetMapping("/remove/{id}")
-    public String remove(@PathVariable("id") Integer id, Model model){
-        Venta venta = ventaService.obtenerPorId(id).get();
-        model.addAttribute("venta", venta);
-        return "venta/delete";
+    @GetMapping("/delete/{id}")
+    public String delete(@PathVariable("id") Integer id, Model model, RedirectAttributes attributes){
+        try {
+            Optional<Venta> ventaOpt = ventaService.obtenerPorId(id);
+            if (ventaOpt.isEmpty()) {
+                attributes.addFlashAttribute("error", "La venta no existe o no fue encontrada");
+                return "redirect:/ventas";
+            }
+
+            Venta venta = ventaOpt.get();
+            model.addAttribute("venta", venta);
+            return "venta/delete";
+
+        } catch (Exception e) {
+            attributes.addFlashAttribute("error", "Error al buscar la venta: " + e.getMessage());
+            return "redirect:/ventas";
+        }
     }
 
+    // POST: Realizar la eliminación
     @PostMapping("/delete")
+    @Transactional
     public String delete(Venta venta, RedirectAttributes attributes){
-        List<DetalleVenta> detalles = detalleVentaService.obtenerPorVentaId(venta.getId());
-        for(DetalleVenta detalle : detalles){
-            detalleVentaService.eliminarPorId(detalle.getId());
+        try {
+            // Verificar que la venta existe
+            Optional<Venta> ventaExistente = ventaService.obtenerPorId(venta.getId());
+            if (ventaExistente.isEmpty()) {
+                attributes.addFlashAttribute("error", "La venta no existe o ya fue eliminada");
+                return "redirect:/ventas";
+            }
+
+            // Eliminar todos los detalles de venta asociados de una vez (más eficiente)
+            detalleVentaService.eliminarPorVentaId(venta.getId());
+
+            // Eliminar la venta principal
+            ventaService.eliminarPorId(venta.getId());
+
+            attributes.addFlashAttribute("msg", "Venta y detalles eliminados correctamente");
+
+        } catch (Exception e) {
+            // En caso de error, la transacción se revierte automáticamente
+            attributes.addFlashAttribute("error", "Error al eliminar la venta: " + e.getMessage());
+            return "redirect:/ventas";
         }
-        ventaService.eliminarPorId(venta.getId());
-        attributes.addFlashAttribute("msg", "Venta y detalles eliminados correctamente");
+
         return "redirect:/ventas";
     }
 

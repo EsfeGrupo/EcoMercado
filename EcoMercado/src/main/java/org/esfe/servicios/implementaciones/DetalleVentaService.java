@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 
 import java.util.List;
 
@@ -49,7 +51,12 @@ public class DetalleVentaService implements IDetalleVentaService {
     
     @Override
     public List<DetalleVenta> obtenerPorVentaId(Integer idVenta) {
-        // Llama al método del repositorio
+        // Llama al metodo del repositorio
         return detalleVentaRepository.findByVenta_Id(idVenta);
+    }
+    @Override
+    @Transactional
+    public void eliminarPorVentaId(Integer ventaId) {
+        detalleVentaRepository.deleteByVentaId(ventaId);
     }
 }

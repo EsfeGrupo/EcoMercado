@@ -4,42 +4,168 @@
       layout:decorate="/layouts/_mainLayout">
 
 <div layout:fragment="content">
-  <div class="container py-5">
-    <div class="row justify-content-center">
-      <div class="col-md-8">
-        <div class="card shadow-lg border-success">
-          <div class="card-header bg-success text-white">
-            <h2 class="card-title mb-0 fw-bold">Detalles de la Venta</h2>
-          </div>
-          <div class="card-body">
-            <dl class="row">
-              <dt class="col-sm-3 fw-bold text-success">ID</dt>
-              <dd class="col-sm-9" th:text="${venta.id}"></dd>
-              <dt class="col-sm-3 fw-bold text-success">Correlativo</dt>
-              <dd class="col-sm-9" th:text="${venta.correlativo}"></dd>
-              <dt class="col-sm-3 fw-bold text-success">Estado</dt>
-              <dd class="col-sm-9" th:text="${venta.estado}"></dd>
-              <dt class="col-sm-3 fw-bold text-success">Usuario</dt>
-              <dd class="col-sm-9" th:text="${venta.usuario.nombre}"></dd>
-              <dt class="col-sm-3 fw-bold text-success">Tipo de Pago</dt>
-              <dd class="col-sm-9" th:text="${venta.tipoPago.metodoPago}"></dd>
-              <dt class="col-sm-3 fw-bold text-success">Tarjeta de Crédito</dt>
-              <dd class="col-sm-9" th:text="${venta.tarjetaCredito != null ? venta.tarjetaCredito.numero : 'N/A'}"></dd>
-            </dl>
-          </div>
-          <div class="card-footer d-flex justify-content-end gap-2">
-            <a th:href="@{/ventas/edit/{id}(id=${venta.id})}" class="btn btn-outline-primary btn-lg">
-              <i class="bi bi-pencil-square"></i> Editar
-            </a>
-            <a th:href="@{/ventas}" class="btn btn-outline-secondary btn-lg">
-              <i class="bi bi-arrow-left-circle"></i> Regresar
-            </a>
-            <a th:href="@{/index.html(ventaId=${venta.id})}" class="btn btn-success" target="_blank">
-              <i class="bi bi-credit-card"></i> Pagar
-            </a>
-          </div>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-lg border-success">
+                    <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #28a745, #20c997);">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h2 class="card-title mb-0 fw-bold">
+                                <i class="bi bi-file-text me-2"></i>Detalles de la Venta
+                            </h2>
+                            <span class="badge bg-light text-dark fs-6" th:text="'ID: ' + ${venta.id}">ID: #</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- Información actual de la venta -->
+                        <div class="alert alert-info mb-4" role="alert">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>Correlativo:</strong> <span th:text="${venta.correlativo}">-</span>
+                                </div>
+                                <div class="col-md-6" th:if="${venta.fecha != null}">
+                                    <strong>Fecha:</strong> <span th:text="${#temporals.format(venta.fecha, 'dd/MM/yyyy HH:mm')}">-</span>
+                                </div>
+                            </div>
+                            <div class="row mt-2" th:if="${venta.total != null}">
+                                <div class="col-md-6">
+                                    <strong>Total:</strong> <span class="text-success fw-bold" th:text="'$' + ${#numbers.formatDecimal(venta.total, 0, 2)}">$0.00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Información básica -->
+                        <div class="row mb-4">
+                            <h5 class="text-success mb-3">
+                                <i class="bi bi-info-circle me-2"></i>Información Básica
+                            </h5>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-hash text-primary me-1"></i>Correlativo
+                                </label>
+                                <div class="form-control form-control-lg bg-light" th:text="${venta.correlativo}"></div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-flag text-warning me-1"></i>Estado
+                                </label>
+                                <div class="form-control form-control-lg bg-light">
+                                    <span class="badge"
+                                          th:classappend="${venta.estado == 'PAGADO' ? 'bg-success' : 'bg-warning'}"
+                                          th:text="${venta.estado}"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Información de pago -->
+                        <div class="row mb-4">
+                            <h5 class="text-success mb-3">
+                                <i class="bi bi-credit-card me-2"></i>Información de Pago
+                            </h5>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-person text-info me-1"></i>Usuario
+                                </label>
+                                <div class="form-control form-control-lg bg-light" th:text="${venta.usuario.nombre}"></div>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-wallet text-success me-1"></i>Tipo de Pago
+                                </label>
+                                <div class="form-control form-control-lg bg-light" th:text="${venta.tipoPago.metodoPago}"></div>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="bi bi-credit-card-2-front text-primary me-1"></i>Tarjeta de Crédito
+                                </label>
+                                <div class="form-control form-control-lg bg-light"
+                                     th:text="${venta.tarjetaCredito != null ? venta.tarjetaCredito.banco : 'No aplica'}"></div>
+                                <div class="form-text">Información de la tarjeta utilizada</div>
+                            </div>
+                        </div>
+
+                        <!-- Productos de la venta -->
+                        <div class="row mb-4" th:if="${!detalles.isEmpty()}">
+                            <h5 class="text-success mb-3">
+                                <i class="bi bi-cart me-2"></i>Productos de la Venta
+                            </h5>
+                            <div class="col-12">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover">
+                                        <thead class="table-success">
+                                        <tr>
+                                            <th>Producto</th>
+                                            <th class="text-center">Cantidad</th>
+                                            <th class="text-end">Precio Unitario</th>
+                                            <th class="text-end">Subtotal</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:each="detalle : ${detalles}">
+                                            <td>
+                                                    <span th:each="p : ${productos}"
+                                                          th:if="${p.id} == ${detalle.idProducto}"
+                                                          th:text="${p.nombre}">Producto</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-primary" th:text="${detalle.cantidad}">0</span>
+                                            </td>
+                                            <td class="text-end">$<span th:text="${#numbers.formatDecimal(detalle.precioUnitario, 1, 2)}">0.00</span></td>
+                                            <td class="text-end fw-bold">$<span th:text="${#numbers.formatDecimal(detalle.cantidad * detalle.precioUnitario, 1, 2)}">0.00</span></td>
+                                        </tr>
+                                        </tbody>
+                                        <tfoot class="table-light">
+                                        <tr>
+                                            <td colspan="3" class="text-end fw-bold fs-5">Total de la Venta:</td>
+                                            <td class="text-end fw-bold fs-5 text-success">
+                                                $<span th:text="${venta.total != null ? #numbers.formatDecimal(venta.total, 1, 2) : '0.00'}">0.00</span>
+                                            </td>
+                                        </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mensaje si no hay productos -->
+                        <div class="row mb-4" th:if="${detalles.isEmpty()}">
+                            <div class="col-12">
+                                <div class="alert alert-warning text-center">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    Esta venta no tiene productos asociados.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botones de acción -->
+                        <hr class="my-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="text-muted">
+                                <small>
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Información completa de la venta
+                                </small>
+                            </div>
+                            <div class="d-flex gap-3">
+                                <a th:href="@{/ventas}" class="btn btn-outline-secondary btn-lg">
+                                    <i class="bi bi-arrow-left me-2"></i>Regresar
+                                </a>
+                                <a th:href="@{/ventas/edit/{id}(id=${venta.id})}" class="btn btn-outline-primary btn-lg">
+                                    <i class="bi bi-pencil-square me-2"></i>Editar
+                                </a>
+                                <a th:href="@{/index.html(ventaId=${venta.id})}" class="btn btn-success btn-lg shadow" target="_blank">
+                                    <i class="bi bi-credit-card me-2"></i>Pagar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 </div>

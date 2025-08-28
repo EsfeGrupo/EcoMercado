@@ -84,7 +84,7 @@
                             <div class="mt-auto d-grid gap-2">
                                 <a th:href="@{/ventas/details/{id}(id=${item.id})}" class="btn btn-outline-secondary"><i class="bi bi-eye"></i> Detalles</a>
                                 <a th:href="@{/ventas/edit/{id}(id=${item.id})}" class="btn btn-outline-warning text-dark"><i class="bi bi-pencil-square"></i> Editar</a>
-                                <a th:href="@{/ventas/remove/{id}(id=${item.id})}" class="btn btn-outline-danger"><i class="bi bi-trash"></i> Eliminar</a>
+                                <a th:href="@{/ventas/delete/{id}(id=${item.id})}" class="btn btn-outline-danger"><i class="bi bi-trash"></i> Eliminar</a>
                                 <a th:href="@{/ventas/reporte/{id}/attachment(id=${item.id})}" class="btn btn-outline-primary"><i class="bi bi-file-earmark-arrow-down"></i> PDF</a>
                                 <a th:href="@{/ventas/reporte/{id}/inline(id=${item.id})}" target="_blank" class="btn btn-outline-primary"><i class="bi bi-printer"></i> Imprimir PDF</a>
                             </div>

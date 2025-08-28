@@ -42,7 +42,7 @@ public class Venta {
     private String stripePaymentIntentId;
 
     @ManyToOne(fetch = FetchType.EAGER) // El rol se carga inmediatamente con el usuario
-    @JoinColumn(name = "idTarjeta", nullable = false)
+    @JoinColumn(name = "idTarjeta", nullable = true)
     private TarjetaCredito tarjetaCredito;
     // Getters y setters
     public void addDetalle(DetalleVenta detalle) {

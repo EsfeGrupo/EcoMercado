@@ -4,43 +4,76 @@
       layout:decorate="/layouts/_mainLayout">
 
 <div layout:fragment="content">
-  <div class="container py-5">
-    <div class="row justify-content-center">
-      <div class="col-md-8">
-        <div class="card shadow-lg border-danger">
-          <div class="card-header bg-danger text-white">
-            <h2 class="card-title mb-0 fw-bold">Eliminar Venta</h2>
-          </div>
-          <div class="card-body">
-            <h3 class="mb-4 text-center text-danger">¿Está seguro que desea eliminar este registro?</h3>
-            <dl class="row">
-              <dt class="col-sm-3 fw-bold">ID</dt>
-              <dd class="col-sm-9" th:text="${venta.id}"></dd>
-              <dt class="col-sm-3 fw-bold">Correlativo</dt>
-              <dd class="col-sm-9" th:text="${venta.correlativo}"></dd>
-              <dt class="col-sm-3 fw-bold">Estado</dt>
-              <dd class="col-sm-9" th:text="${venta.estado}"></dd>
-              <dt class="col-sm-3 fw-bold">Usuario</dt>
-              <dd class="col-sm-9" th:text="${venta.usuario.nombre}"></dd>
-              <dt class="col-sm-3 fw-bold">Tipo de Pago</dt>
-              <dd class="col-sm-9" th:text="${venta.tipoPago.nombre}"></dd>
-              <dt class="col-sm-3 fw-bold">Tarjeta de Crédito</dt>
-              <dd class="col-sm-9" th:text="${venta.tarjetaCredito != null ? venta.tarjetaCredito.numero : 'N/A'}"></dd>
-            </dl>
-          </div>
-          <div class="card-footer d-flex justify-content-end gap-2">
-            <form th:action="@{/ventas/delete}" method="post" class="d-flex gap-2">
-              <input type="hidden" name="id" th:value="${venta.id}">
-              <button type="submit" class="btn btn-danger btn-lg">
-                <i class="bi bi-trash"></i> Eliminar
-              </button>
-              <a th:href="@{/ventas}" class="btn btn-outline-secondary btn-lg">
-                <i class="bi bi-x-circle"></i> Regresar
-              </a>
-            </form>
-          </div>
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+
+                <!-- Mostrar mensajes de error si existen -->
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <div class="card shadow-lg border-danger">
+                    <div class="card-header bg-danger text-white">
+                        <h2 class="card-title mb-0 fw-bold">Eliminar Venta</h2>
+                    </div>
+                    <div class="card-body">
+                        <h3 class="mb-4 text-center text-danger">¿Está seguro que desea eliminar este registro?</h3>
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Esta acción eliminará la venta y todos sus detalles asociados. Esta operación no se puede deshacer.
+                        </div>
+
+                        <dl class="row">
+                            <dt class="col-sm-3 fw-bold">ID</dt>
+                            <dd class="col-sm-9" th:text="${venta.id}"></dd>
+
+                            <dt class="col-sm-3 fw-bold">Correlativo</dt>
+                            <dd class="col-sm-9" th:text="${venta.correlativo}"></dd>
+
+                            <dt class="col-sm-3 fw-bold">Estado</dt>
+                            <dd class="col-sm-9">
+                <span th:text="${venta.estado}"
+                      th:class="${venta.estado == 'Completada' ? 'badge bg-success' :
+                                venta.estado == 'Pendiente' ? 'badge bg-warning text-dark' :
+                                'badge bg-secondary'}"></span>
+                            </dd>
+
+                            <dt class="col-sm-3 fw-bold">Usuario</dt>
+                            <dd class="col-sm-9" th:text="${venta.usuario != null ? venta.usuario.nombre : 'N/A'}"></dd>
+
+                            <dt class="col-sm-3 fw-bold">Tipo de Pago</dt>
+                            <dd class="col-sm-9" th:text="${venta.tipoPago != null ? venta.tipoPago.metodoPago : 'N/A'}"></dd>
+
+                            <dt class="col-sm-3 fw-bold">Tarjeta de Crédito</dt>
+                            <dd class="col-sm-9" th:text="${venta.tarjetaCredito != null ? venta.tarjetaCredito.numero : 'N/A'}"></dd>
+
+                            <dt class="col-sm-3 fw-bold">Fecha</dt>
+                            <dd class="col-sm-9" th:text="${venta.fecha != null ? #temporals.format(venta.fecha, 'dd/MM/yyyy HH:mm') : 'N/A'}"></dd>
+
+                            <dt class="col-sm-3 fw-bold">Total</dt>
+                            <dd class="col-sm-9">
+                                <strong th:text="${'$' + #numbers.formatDecimal(venta.total, 0, 'COMMA', 2, 'POINT')}"
+                                        class="text-success"></strong>
+                            </dd>
+                        </dl>
+                    </div>
+                    <div class="card-footer d-flex justify-content-end gap-2">
+                        <form th:action="@{/ventas/delete}" method="post" class="d-flex gap-2"
+                              onsubmit="return confirm('¿Está completamente seguro de eliminar esta venta y todos sus detalles?');">
+                            <input type="hidden" name="id" th:value="${venta.id}">
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                <i class="bi bi-trash"></i> Confirmar Eliminación
+                            </button>
+                            <a th:href="@{/ventas}" class="btn btn-outline-secondary btn-lg">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </a>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 </div>

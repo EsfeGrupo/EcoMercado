@@ -22,4 +22,7 @@ public interface IDetalleVentaService {
     void eliminarPorId(Integer id);
 
     List<DetalleVenta> obtenerPorVentaId(Integer idVenta);
+
+    // Nuevo metodo para eliminar todos los detalles de una venta
+    void eliminarPorVentaId(Integer ventaId);
 }
