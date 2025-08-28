@@ -55,5 +55,11 @@ public class ProductoService implements IProductoService {
         productoRepository.deleteById(id);
     }
 
+    @Override
+    public Page<Producto> buscarPorVendedor(Integer vendedorId, Pageable pageable) {
+        return productoRepository.findByVendedores_Id(vendedorId, pageable);
+    }
+
+
 
 }

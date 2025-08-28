@@ -158,11 +158,12 @@
                     <!-- SECCIÓN VENDEDOR (solo Vendedores) -->
                     <div class="sb-sidenav-menu-heading" th:if="${session.rolUsuario == 'vendedor'}">Mi Negocio</div>
 
-                    <a class="nav-link" th:if="${session.rolUsuario == 'vendedor'}" th:href="@{/vendedor/productos}">
+                    <a class="nav-link" th:if="${session.rolUsuario == 'vendedor'}" th:href="@{/producto}">
                         <div class="sb-nav-link-icon"><i class="fas fa-box-open"></i></div>
                         Mis Productos
                     </a>
-                    <a class="nav-link" th:if="${session.rolUsuario == 'vendedor'}" th:href="@{/vendedor/ventas}">
+
+                    <a class="nav-link" th:if="${session.rolUsuario == 'vendedor'}" th:href="@{/venta/index}">
                         <div class="sb-nav-link-icon"><i class="fas fa-cash-register"></i></div>
                         Mis Ventas
                     </a>

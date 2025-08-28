@@ -10,6 +10,9 @@ public interface IProductoService {
 
     Page<Producto> obtenerTodosPaginados(Pageable pageable);
 
+    Page<Producto> buscarPorVendedor(Integer vendedorId, Pageable pageable);
+
+
     List<Producto> obtenerTodos();
 
     Page<Producto> findByNombreContainingIgnoreCaseAndPrecio(
@@ -26,4 +29,5 @@ public interface IProductoService {
     Producto crearOEditar(Producto producto);
 
     void eliminarPorId(Integer id);
+
 }

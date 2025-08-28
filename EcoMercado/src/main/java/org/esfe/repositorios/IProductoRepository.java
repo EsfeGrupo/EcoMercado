@@ -16,4 +16,7 @@ public interface IProductoRepository extends JpaRepository<Producto, Integer> {
 
     // Alternativa si quieres solo nombre y paginación:
     Page<Producto> findByNombreContainingIgnoreCase(String nombre, Pageable pageable);
+    Page<Producto> findByVendedores_Id(Integer vendedorId, Pageable pageable);
+
 }
+
